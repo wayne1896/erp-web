@@ -1,0 +1,26 @@
+<?php
+// routes/web.php
+
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Api\Mobile\SincronizacionController;
+// Redirección
+Route::redirect('/', '/dashboard');
+
+// Rutas autenticadas
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard principal
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // API para dashboard
+    Route::get('/api/dashboard/data', [DashboardController::class, 'getDashboardData']);
+    Route::get('/sincronizacion', [SincronizacionController::class, 'index']);
+    // Aquí irán el resto de tus rutas...
+    // Route::get('/ventas', ...);
+    // Route::get('/clientes', ...);
+    // etc.
+});
+
+// Rutas de autenticación (Breeze)
+require __DIR__.'/auth.php';
