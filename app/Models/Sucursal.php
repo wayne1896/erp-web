@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sucursal extends Model
 {
+    // Especificar el nombre de la tabla
+    protected $table = 'sucursales';
+    
     protected $fillable = [
         'codigo',
         'nombre',

@@ -17,7 +17,7 @@ Schema::create('sucursales', function (Blueprint $table) {
     $table->string('codigo', 10)->unique();
     $table->string('nombre');
     $table->string('rnc', 11)->nullable(); // RNC específico si aplica
-    $table->string('telefono', 10);
+    $table->string('telefono', 15);
     $table->string('direccion');
     $table->enum('provincia', [
         'Distrito Nacional', 'Santo Domingo', 'Santiago', 'La Vega', 'San Cristóbal',

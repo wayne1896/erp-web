@@ -1,190 +1,376 @@
+import React, { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Save, Package, Tag, Percent, DollarSign, AlertCircle } from 'lucide-react';
 
-export default function Create({ categorias, proveedores, tasas_itbis, unidades_medida }) {
-    const { data, setData, post, processing, errors } = useForm({
+export default function Create({ auth, categorias = [], tasas_itbis = [], unidades_medida = [], sucursales = [] }) {
+    // Valores por defecto seguros
+    const safeCategorias = Array.isArray(categorias) ? categorias : [];
+    const safeSucursales = Array.isArray(sucursales) ? sucursales : [];
+    const defaultTasasItbis = [
+        { value: 'ITBIS1', label: 'ITBIS General (18%)' },
+        { value: 'ITBIS2', label: 'ITBIS Reducido (16%)' },
+        { value: 'ITBIS3', label: 'ITBIS Mínimo (0%)' },
+        { value: 'EXENTO', label: 'Exento de ITBIS (0%)' }
+    ];
+    const safeTasasItbis = Array.isArray(tasas_itbis) && tasas_itbis.length > 0 ? tasas_itbis : defaultTasasItbis;
+    const defaultUnidadesMedida = ['UNIDAD', 'KILO', 'LITRO', 'METRO', 'CAJA', 'PAQUETE', 'SACO'];
+    const safeUnidadesMedida = Array.isArray(unidades_medida) && unidades_medida.length > 0 ? unidades_medida : defaultUnidadesMedida;
+
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         codigo: '',
         codigo_barras: '',
         nombre: '',
         descripcion: '',
-        categoria_id: '',
-        proveedor_id: '',
-        precio_compra: '',
-        precio_venta: '',
+        categoria_id: safeCategorias[0]?.id || '',
+        unidad_medida: safeUnidadesMedida[0] || 'UNIDAD',
+        precio_compra: 0,
+        precio_venta: 0,
         precio_mayor: '',
-        tasa_itbis: 'ITBIS1',
         itbis_porcentaje: 18,
         exento_itbis: false,
-        stock_minimo: 0,
-        stock_maximo: '',
+        tasa_itbis: 'ITBIS1',
         control_stock: true,
-        unidad_medida: 'UNIDAD',
+        stock_minimo: 0,
+        stock_inicial: 0,
+        costo_inicial: 0,
+        sucursal_id: safeSucursales[0]?.id || '',
         activo: true,
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('productos.store'));
+        console.log('Enviando datos:', data);
+        
+        // Asegurar que los valores numéricos sean números
+        const processedData = {
+            ...data,
+            precio_compra: parseFloat(data.precio_compra) || 0,
+            precio_venta: parseFloat(data.precio_venta) || 0,
+            precio_mayor: data.precio_mayor ? parseFloat(data.precio_mayor) : null,
+            itbis_porcentaje: parseFloat(data.itbis_porcentaje) || 0,
+            stock_minimo: parseFloat(data.stock_minimo) || 0,
+            stock_inicial: data.control_stock ? (parseFloat(data.stock_inicial) || 0) : 0,
+            costo_inicial: data.control_stock ? (parseFloat(data.costo_inicial) || data.precio_compra) : 0,
+            exento_itbis: Boolean(data.exento_itbis),
+            control_stock: Boolean(data.control_stock),
+            activo: Boolean(data.activo),
+        };
+
+        console.log('Datos procesados:', processedData);
+        
+        post(route('productos.store'), {
+            data: processedData,
+            preserveScroll: true,
+            onError: (errors) => {
+                console.log('Errores de validación:', errors);
+                window.scrollTo(0, 0);
+            },
+            onSuccess: () => {
+                console.log('Producto creado exitosamente');
+            }
+        });
     };
 
-    const handleItbisChange = (value) => {
+    const handleTasaItbisChange = (value) => {
         setData('tasa_itbis', value);
-        if (value === 'EXENTO') {
-            setData('exento_itbis', true);
-            setData('itbis_porcentaje', 0);
-        } else {
+        clearErrors('tasa_itbis');
+        clearErrors('itbis_porcentaje');
+        clearErrors('exento_itbis');
+        
+        if (value === 'ITBIS1') {
+            setData('itbis_porcentaje', 18);
             setData('exento_itbis', false);
-            if (value === 'ITBIS1') setData('itbis_porcentaje', 18);
-            if (value === 'ITBIS2') setData('itbis_porcentaje', 16);
-            if (value === 'ITBIS3') setData('itbis_porcentaje', 0);
+        } else if (value === 'ITBIS2') {
+            setData('itbis_porcentaje', 16);
+            setData('exento_itbis', false);
+        } else if (value === 'ITBIS3' || value === 'EXENTO') {
+            setData('itbis_porcentaje', 0);
+            setData('exento_itbis', value === 'EXENTO');
         }
     };
 
+    // Auto-calcular precio de venta si es menor que precio de compra
+    useEffect(() => {
+        if (parseFloat(data.precio_venta) < parseFloat(data.precio_compra) && data.precio_compra > 0) {
+            setData('precio_venta', parseFloat(data.precio_compra) * 1.3); // 30% de margen por defecto
+        }
+    }, [data.precio_compra]);
+
+    if (!auth || !auth.user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-gray-900">Error de autenticación</h1>
+                    <p className="text-gray-600 mt-2">No se pudo cargar la información del usuario</p>
+                    <Link href={route('login')} className="mt-4 inline-block text-blue-600 hover:text-blue-800">
+                        Ir al login
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <AuthenticatedLayout
+            user={auth.user}
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                        Crear Producto
-                    </h2>
+                    <div className="flex items-center">
+                        <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                            <Package className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                                Crear Nuevo Producto
+                            </h2>
+                            <p className="text-sm text-gray-600">Agregar nuevo producto al inventario</p>
+                        </div>
+                    </div>
                     <Link
                         href={route('productos.index')}
-                        className="text-gray-600 hover:text-gray-900"
+                        className="text-gray-600 hover:text-gray-900 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
                     >
-                        ← Volver
+                        <ArrowLeft className="w-4 h-4 mr-1" />
+                        Volver
                     </Link>
                 </div>
             }
         >
             <Head title="Crear Producto" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="py-8">
+                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
+                    {/* Alertas de error */}
+                    {Object.keys(errors).length > 0 && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="flex items-center">
+                                <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+                                <h3 className="text-sm font-medium text-red-800">
+                                    Hay errores en el formulario
+                                </h3>
+                            </div>
+                            <ul className="mt-2 text-sm text-red-700 space-y-1">
+                                {Object.entries(errors).map(([field, message]) => (
+                                    <li key={field}>• {message}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {safeCategorias.length === 0 && (
+                        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p className="text-yellow-800 font-medium">⚠️ Advertencia</p>
+                            <p className="text-yellow-700 text-sm mt-1">
+                                No hay categorías disponibles. Primero debes crear categorías antes de agregar productos.
+                            </p>
+                            <Link
+                                href={route('categorias.create')}
+                                className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-800"
+                            >
+                                Crear categoría
+                            </Link>
+                        </div>
+                    )}
+
+                    {safeSucursales.length === 0 && (
+                        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p className="text-yellow-800 font-medium">⚠️ Advertencia</p>
+                            <p className="text-yellow-700 text-sm mt-1">
+                                No hay sucursales disponibles. Primero debes crear sucursales antes de agregar productos con control de stock.
+                            </p>
+                            <Link
+                                href={route('sucursales.create')}
+                                className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-800"
+                            >
+                                Crear sucursal
+                            </Link>
+                        </div>
+                    )}
+
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={handleSubmit} className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-8">
                                 {/* Información Básica */}
-                                <div className="space-y-6">
-                                    <h3 className="text-lg font-medium text-gray-900">Información Básica</h3>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Código *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.codigo}
-                                            onChange={(e) => setData('codigo', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            required
-                                        />
-                                        {errors.codigo && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
-                                        )}
-                                    </div>
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <Package className="w-5 h-5 mr-2 text-gray-400" />
+                                        Información Básica
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Código *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.codigo}
+                                                onChange={(e) => {
+                                                    setData('codigo', e.target.value);
+                                                    clearErrors('codigo');
+                                                }}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                }`}
+                                                placeholder="PROD001"
+                                                required
+                                                disabled={processing}
+                                            />
+                                            {errors.codigo && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Código de Barras
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.codigo_barras}
-                                            onChange={(e) => setData('codigo_barras', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Código de Barras
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.codigo_barras}
+                                                onChange={(e) => {
+                                                    setData('codigo_barras', e.target.value);
+                                                    clearErrors('codigo_barras');
+                                                }}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                    errors.codigo_barras ? 'border-red-500' : 'border-gray-300'
+                                                }`}
+                                                placeholder="123456789012"
+                                                disabled={processing}
+                                            />
+                                            {errors.codigo_barras && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.codigo_barras}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Nombre *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.nombre}
-                                            onChange={(e) => setData('nombre', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            required
-                                        />
-                                        {errors.nombre && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
-                                        )}
-                                    </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Nombre *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.nombre}
+                                                onChange={(e) => {
+                                                    setData('nombre', e.target.value);
+                                                    clearErrors('nombre');
+                                                }}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                    errors.nombre ? 'border-red-500' : 'border-gray-300'
+                                                }`}
+                                                placeholder="Nombre del producto"
+                                                required
+                                                disabled={processing}
+                                            />
+                                            {errors.nombre && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Descripción
-                                        </label>
-                                        <textarea
-                                            value={data.descripcion}
-                                            onChange={(e) => setData('descripcion', e.target.value)}
-                                            rows="3"
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Descripción
+                                            </label>
+                                            <textarea
+                                                value={data.descripcion}
+                                                onChange={(e) => {
+                                                    setData('descripcion', e.target.value);
+                                                    clearErrors('descripcion');
+                                                }}
+                                                rows="3"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Descripción detallada del producto..."
+                                                disabled={processing}
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Categoría *
-                                        </label>
-                                        <select
-                                            value={data.categoria_id}
-                                            onChange={(e) => setData('categoria_id', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            required
-                                        >
-                                            <option value="">Seleccionar categoría</option>
-                                            {categorias.map((categoria) => (
-                                                <option key={categoria.id} value={categoria.id}>
-                                                    {categoria.nombre} ({categoria.codigo})
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {errors.categoria_id && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.categoria_id}</p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Categoría *
+                                            </label>
+                                            <select
+                                                value={data.categoria_id}
+                                                onChange={(e) => {
+                                                    setData('categoria_id', e.target.value);
+                                                    clearErrors('categoria_id');
+                                                }}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                    errors.categoria_id ? 'border-red-500' : 'border-gray-300'
+                                                } ${safeCategorias.length === 0 ? 'bg-gray-100' : ''}`}
+                                                required
+                                                disabled={processing || safeCategorias.length === 0}
+                                            >
+                                                <option value="">Seleccionar categoría</option>
+                                                {safeCategorias.map((categoria) => (
+                                                    <option key={categoria.id} value={categoria.id}>
+                                                        {categoria.nombre} {categoria.codigo ? `(${categoria.codigo})` : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {errors.categoria_id && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.categoria_id}</p>
+                                            )}
+                                            {safeCategorias.length === 0 && (
+                                                <p className="mt-1 text-sm text-red-600">
+                                                    No hay categorías disponibles
+                                                </p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Proveedor
-                                        </label>
-                                        <select
-                                            value={data.proveedor_id}
-                                            onChange={(e) => setData('proveedor_id', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        >
-                                            <option value="">Sin proveedor</option>
-                                            {proveedores.map((proveedor) => (
-                                                <option key={proveedor.id} value={proveedor.id}>
-                                                    {proveedor.nombre} ({proveedor.codigo})
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Unidad de Medida *
+                                            </label>
+                                            <select
+                                                value={data.unidad_medida}
+                                                onChange={(e) => {
+                                                    setData('unidad_medida', e.target.value);
+                                                    clearErrors('unidad_medida');
+                                                }}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                required
+                                                disabled={processing}
+                                            >
+                                                {safeUnidadesMedida.map((unidad) => (
+                                                    <option key={unidad} value={unidad}>
+                                                        {unidad}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Precios y Stock */}
-                                <div className="space-y-6">
-                                    <h3 className="text-lg font-medium text-gray-900">Precios y Stock</h3>
-                                    
-                                    <div className="grid grid-cols-2 gap-4">
+                                {/* Precios */}
+                                <div className="border-t border-gray-200 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <DollarSign className="w-5 h-5 mr-2 text-gray-400" />
+                                        Precios
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Precio Compra *
                                             </label>
-                                            <div className="mt-1 relative rounded-md shadow-sm">
+                                            <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span className="text-gray-500 sm:text-sm">$</span>
+                                                    <span className="text-gray-500">$</span>
                                                 </div>
                                                 <input
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     value={data.precio_compra}
-                                                    onChange={(e) => setData('precio_compra', e.target.value)}
-                                                    className="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.value) || 0;
+                                                        setData('precio_compra', value);
+                                                        clearErrors('precio_compra');
+                                                    }}
+                                                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                        errors.precio_compra ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
                                                     required
+                                                    disabled={processing}
                                                 />
                                             </div>
                                             {errors.precio_compra && (
@@ -193,178 +379,326 @@ export default function Create({ categorias, proveedores, tasas_itbis, unidades_
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Precio Venta *
                                             </label>
-                                            <div className="mt-1 relative rounded-md shadow-sm">
+                                            <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span className="text-gray-500 sm:text-sm">$</span>
+                                                    <span className="text-gray-500">$</span>
                                                 </div>
                                                 <input
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     value={data.precio_venta}
-                                                    onChange={(e) => setData('precio_venta', e.target.value)}
-                                                    className="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.value) || 0;
+                                                        setData('precio_venta', value);
+                                                        clearErrors('precio_venta');
+                                                    }}
+                                                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                        errors.precio_venta ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
                                                     required
+                                                    disabled={processing}
                                                 />
                                             </div>
                                             {errors.precio_venta && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.precio_venta}</p>
                                             )}
+                                            {data.precio_venta > 0 && data.precio_compra > 0 && (
+                                                <p className="mt-1 text-sm text-gray-600">
+                                                    Margen: {(((data.precio_venta - data.precio_compra) / data.precio_compra) * 100).toFixed(2)}%
+                                                </p>
+                                            )}
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Precio al por Mayor
-                                        </label>
-                                        <div className="mt-1 relative rounded-md shadow-sm">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-500 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                value={data.precio_mayor}
-                                                onChange={(e) => setData('precio_mayor', e.target.value)}
-                                                className="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Tasa ITBIS *
-                                        </label>
-                                        <select
-                                            value={data.tasa_itbis}
-                                            onChange={(e) => handleItbisChange(e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        >
-                                            {tasas_itbis.map((tasa) => (
-                                                <option key={tasa.value} value={tasa.value}>
-                                                    {tasa.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {!data.exento_itbis && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Precio Mayorista
+                                            </label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span className="text-gray-500">$</span>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={data.precio_mayor}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value ? parseFloat(e.target.value) : '';
+                                                        setData('precio_mayor', value);
+                                                        clearErrors('precio_mayor');
+                                                    }}
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    disabled={processing}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Impuestos */}
+                                <div className="border-t border-gray-200 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <Percent className="w-5 h-5 mr-2 text-gray-400" />
+                                        Impuestos
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Tasa ITBIS *
+                                            </label>
+                                            <select
+                                                value={data.tasa_itbis}
+                                                onChange={(e) => handleTasaItbisChange(e.target.value)}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                    errors.tasa_itbis ? 'border-red-500' : 'border-gray-300'
+                                                }`}
+                                                required
+                                                disabled={processing}
+                                            >
+                                                {safeTasasItbis.map((tasa) => (
+                                                    <option key={tasa.value} value={tasa.value}>
+                                                        {tasa.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {errors.tasa_itbis && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.tasa_itbis}</p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Porcentaje ITBIS *
                                             </label>
-                                            <div className="mt-1 relative rounded-md shadow-sm">
+                                            <div className="relative">
                                                 <input
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     max="100"
                                                     value={data.itbis_porcentaje}
-                                                    onChange={(e) => setData('itbis_porcentaje', e.target.value)}
-                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.value) || 0;
+                                                        setData('itbis_porcentaje', value);
+                                                        clearErrors('itbis_porcentaje');
+                                                    }}
+                                                    className={`w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                        errors.itbis_porcentaje ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
+                                                    required
+                                                    disabled={processing || data.exento_itbis}
                                                 />
                                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                                    <span className="text-gray-500">%</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Unidad de Medida *
-                                        </label>
-                                        <select
-                                            value={data.unidad_medida}
-                                            onChange={(e) => setData('unidad_medida', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        >
-                                            {unidades_medida.map((unidad) => (
-                                                <option key={unidad.value} value={unidad.value}>
-                                                    {unidad.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">
-                                                Stock Mínimo
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                value={data.stock_minimo}
-                                                onChange={(e) => setData('stock_minimo', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">
-                                                Stock Máximo
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                value={data.stock_maximo}
-                                                onChange={(e) => setData('stock_maximo', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                id="control_stock"
-                                                checked={data.control_stock}
-                                                onChange={(e) => setData('control_stock', e.target.checked)}
-                                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            />
-                                            <label htmlFor="control_stock" className="ml-2 block text-sm text-gray-900">
-                                                Controlar Stock
-                                            </label>
-                                        </div>
-
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                id="activo"
-                                                checked={data.activo}
-                                                onChange={(e) => setData('activo', e.target.checked)}
-                                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            />
-                                            <label htmlFor="activo" className="ml-2 block text-sm text-gray-900">
-                                                Producto Activo
-                                            </label>
+                                            {errors.itbis_porcentaje && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.itbis_porcentaje}</p>
+                                            )}
+                                            {data.exento_itbis && (
+                                                <p className="mt-1 text-sm text-green-600">✓ Producto exento de ITBIS</p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="mt-8 flex justify-end space-x-3">
-                                <Link
-                                    href={route('productos.index')}
-                                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                                >
-                                    Cancelar
-                                </Link>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
-                                >
-                                    {processing ? 'Guardando...' : 'Guardar Producto'}
-                                </button>
+                                {/* Stock */}
+                                <div className="border-t border-gray-200 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <Tag className="w-5 h-5 mr-2 text-gray-400" />
+                                        Control de Stock
+                                    </h3>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    id="control_stock"
+                                                    checked={data.control_stock}
+                                                    onChange={(e) => {
+                                                        setData('control_stock', e.target.checked);
+                                                        clearErrors('control_stock');
+                                                    }}
+                                                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    disabled={processing}
+                                                />
+                                                <label htmlFor="control_stock" className="ml-2 text-sm font-medium text-gray-700">
+                                                    Controlar Stock
+                                                </label>
+                                            </div>
+                                            
+                                            {data.control_stock && (
+                                                <div className="w-48">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Stock Mínimo
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        value={data.stock_minimo}
+                                                        onChange={(e) => {
+                                                            const value = parseFloat(e.target.value) || 0;
+                                                            setData('stock_minimo', value);
+                                                            clearErrors('stock_minimo');
+                                                        }}
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        disabled={processing}
+                                                    />
+                                                    {errors.stock_minimo && (
+                                                        <p className="mt-1 text-sm text-red-600">{errors.stock_minimo}</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {data.control_stock && (
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Stock Inicial
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        value={data.stock_inicial}
+                                                        onChange={(e) => {
+                                                            const value = parseFloat(e.target.value) || 0;
+                                                            setData('stock_inicial', value);
+                                                            clearErrors('stock_inicial');
+                                                        }}
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        disabled={processing}
+                                                    />
+                                                    {errors.stock_inicial && (
+                                                        <p className="mt-1 text-sm text-red-600">{errors.stock_inicial}</p>
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Costo Inicial (Unitario)
+                                                    </label>
+                                                    <div className="relative">
+                                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                            <span className="text-gray-500">$</span>
+                                                        </div>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            value={data.costo_inicial}
+                                                            onChange={(e) => {
+                                                                const value = parseFloat(e.target.value) || 0;
+                                                                setData('costo_inicial', value);
+                                                                clearErrors('costo_inicial');
+                                                            }}
+                                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                            disabled={processing}
+                                                        />
+                                                    </div>
+                                                    {errors.costo_inicial && (
+                                                        <p className="mt-1 text-sm text-red-600">{errors.costo_inicial}</p>
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Sucursal para Stock *
+                                                    </label>
+                                                    <select
+                                                        value={data.sucursal_id}
+                                                        onChange={(e) => {
+                                                            setData('sucursal_id', e.target.value);
+                                                            clearErrors('sucursal_id');
+                                                        }}
+                                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                            errors.sucursal_id ? 'border-red-500' : 'border-gray-300'
+                                                        } ${safeSucursales.length === 0 ? 'bg-gray-100' : ''}`}
+                                                        required={data.control_stock}
+                                                        disabled={processing || safeSucursales.length === 0}
+                                                    >
+                                                        <option value="">Seleccionar sucursal</option>
+                                                        {safeSucursales.map((sucursal) => (
+                                                            <option key={sucursal.id} value={sucursal.id}>
+                                                                {sucursal.nombre} {sucursal.principal ? '(Principal)' : ''}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {errors.sucursal_id && (
+                                                        <p className="mt-1 text-sm text-red-600">{errors.sucursal_id}</p>
+                                                    )}
+                                                    {safeSucursales.length === 0 && (
+                                                        <p className="mt-1 text-sm text-red-600">
+                                                            No hay sucursales disponibles
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Estado y Acciones */}
+                                <div className="border-t border-gray-200 pt-8">
+                                    <div className="flex items-center mb-6">
+                                        <input
+                                            type="checkbox"
+                                            id="activo"
+                                            checked={data.activo}
+                                            onChange={(e) => {
+                                                setData('activo', e.target.checked);
+                                                clearErrors('activo');
+                                            }}
+                                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            disabled={processing}
+                                        />
+                                        <label htmlFor="activo" className="ml-2 text-sm font-medium text-gray-900">
+                                            Producto Activo
+                                        </label>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-sm text-gray-500">
+                                            <p>Los campos marcados con * son obligatorios</p>
+                                        </div>
+                                        
+                                        <div className="flex space-x-3">
+                                            <Link
+                                                href={route('productos.index')}
+                                                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                disabled={processing}
+                                            >
+                                                Cancelar
+                                            </Link>
+                                            <button
+                                                type="submit"
+                                                disabled={processing || safeCategorias.length === 0 || (data.control_stock && safeSucursales.length === 0)}
+                                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+                                            >
+                                                {processing ? (
+                                                    <>
+                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        Creando...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Save className="w-4 h-4 mr-2" />
+                                                        Crear Producto
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>

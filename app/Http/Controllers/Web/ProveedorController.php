@@ -44,11 +44,14 @@ class ProveedorController extends Controller
      * Mostrar formulario para crear proveedor
      */
     public function create()
-    {
-        return Inertia::render('Proveedores/Create', [
-            'tipos_proveedor' => ['LOCAL', 'INTERNACIONAL'],
-        ]);
-    }
+{
+    return Inertia::render('Proveedores/Create', [
+        'tipos_proveedor' => [
+            ['value' => 'LOCAL', 'label' => 'Local'],
+            ['value' => 'INTERNACIONAL', 'label' => 'Internacional'],
+        ],
+    ]);
+}
 
     /**
      * Guardar nuevo proveedor
@@ -103,7 +106,10 @@ class ProveedorController extends Controller
     {
         return Inertia::render('Proveedores/Edit', [
             'proveedor' => $proveedor,
-            'tipos_proveedor' => ['LOCAL', 'INTERNACIONAL'],
+            'tipos_proveedor' => [
+                ['value' => 'LOCAL', 'label' => 'Local'],
+                ['value' => 'INTERNACIONAL', 'label' => 'Internacional'],
+            ],
         ]);
     }
 

@@ -6,16 +6,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Producto extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'codigo',
         'codigo_barras',
         'nombre',
         'descripcion',
         'categoria_id',
-        'proveedor_id',
+        'proveedor_id',  // Asegúrate de que esto esté en fillable
+        'unidad_medida',
         'precio_compra',
         'precio_venta',
         'precio_mayor',
@@ -23,9 +27,7 @@ class Producto extends Model
         'itbis_porcentaje',
         'exento_itbis',
         'stock_minimo',
-        'stock_maximo',
         'control_stock',
-        'unidad_medida',
         'activo'
     ];
     
@@ -36,9 +38,18 @@ class Producto extends Model
         'itbis_porcentaje' => 'decimal:2',
         'exento_itbis' => 'boolean',
         'stock_minimo' => 'decimal:2',
-        'stock_maximo' => 'decimal:2',
         'control_stock' => 'boolean',
         'activo' => 'boolean'
+    ];
+    
+    protected $appends = [
+        'precio_venta_con_itbis',
+        'margen_ganancia',
+        'descripcion_itbis',
+        'unidad_medida_texto',
+        'stock_total',
+        'stock_disponible_total',
+        'valor_inventario_total'
     ];
     
     /**
@@ -49,14 +60,14 @@ class Producto extends Model
         return $this->belongsTo(CategoriaProducto::class, 'categoria_id');
     }
     
-    public function proveedor(): BelongsTo
-    {
-        return $this->belongsTo(Proveedor::class, 'proveedor_id');
-    }
-    
     public function inventarios(): HasMany
     {
         return $this->hasMany(InventarioSucursal::class, 'producto_id');
+    }
+    
+    public function movimientos(): HasMany
+    {
+        return $this->hasMany(MovimientoInventario::class, 'producto_id');
     }
     
     /**
@@ -87,9 +98,9 @@ class Producto extends Model
     public function getPrecioVentaConItbisAttribute(): float
     {
         if ($this->exento_itbis) {
-            return $this->precio_venta;
+            return floatval($this->precio_venta);
         }
-        return $this->precio_venta * (1 + ($this->itbis_porcentaje / 100));
+        return floatval($this->precio_venta) * (1 + (floatval($this->itbis_porcentaje) / 100));
     }
     
     /**
@@ -97,8 +108,8 @@ class Producto extends Model
      */
     public function getMargenGananciaAttribute(): float
     {
-        if ($this->precio_compra == 0) return 0;
-        return (($this->precio_venta - $this->precio_compra) / $this->precio_compra) * 100;
+        if (floatval($this->precio_compra) == 0) return 0;
+        return ((floatval($this->precio_venta) - floatval($this->precio_compra)) / floatval($this->precio_compra)) * 100;
     }
     
     /**
@@ -123,20 +134,21 @@ class Producto extends Model
     {
         $unidades = [
             'UNIDAD' => 'Unidad',
+            'KILO' => 'Kilogramo',
+            'LITRO' => 'Litro',
+            'METRO' => 'Metro',
+            'CAJA' => 'Caja',
+            'PAQUETE' => 'Paquete',
+            'SACO' => 'Saco',
             'PAR' => 'Par',
             'JUEGO' => 'Juego',
-            'KILOGRAMO' => 'Kilogramo',
             'GRAMO' => 'Gramo',
             'LIBRA' => 'Libra',
             'ONZA' => 'Onza',
-            'LITRO' => 'Litro',
             'MILILITRO' => 'Mililitro',
             'GALON' => 'Galón',
-            'METRO' => 'Metro',
             'CENTIMETRO' => 'Centímetro',
             'PULGADA' => 'Pulgada',
-            'CAJA' => 'Caja',
-            'PAQUETE' => 'Paquete',
             'ROLLO' => 'Rollo',
             'DOCENA' => 'Docena'
         ];
@@ -147,7 +159,7 @@ class Producto extends Model
     /**
      * Obtener inventario de una sucursal específica
      */
-    public function inventarioEnSucursal($sucursalId)
+    public function inventarioSucursal($sucursalId)
     {
         return $this->inventarios()->where('sucursal_id', $sucursalId)->first();
     }

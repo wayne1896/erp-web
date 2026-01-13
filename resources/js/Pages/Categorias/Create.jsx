@@ -2,9 +2,27 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save, Tag, Percent } from 'lucide-react';
+import { ArrowLeft, Save, Tag, Percent, AlertCircle } from 'lucide-react';
 
-export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
+export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] }) {
+    // Definir valores por defecto si no llegan del servidor
+    const defaultTasasItbis = [
+        { value: 'ITBIS1', label: 'ITBIS General (18%)' },
+        { value: 'ITBIS2', label: 'ITBIS Reducido (16%)' },
+        { value: 'ITBIS3', label: 'ITBIS Mínimo (0%)' },
+        { value: 'EXENTO', label: 'Exento de ITBIS (0%)' }
+    ];
+
+    const defaultPorcentajes = [
+        { value: 0, label: '0%' },
+        { value: 16, label: '16%' },
+        { value: 18, label: '18%' }
+    ];
+
+    // Usar las props o los valores por defecto
+    const safeTasasItbis = tasas_itbis?.length > 0 ? tasas_itbis : defaultTasasItbis;
+    const safePorcentajesItbis = porcentajes_itbis?.length > 0 ? porcentajes_itbis : defaultPorcentajes;
+
     const { data, setData, post, processing, errors } = useForm({
         nombre: '',
         codigo: '',
@@ -15,7 +33,14 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('categorias.store'));
+        post(route('categorias.store'), {
+            onError: (errors) => {
+                console.log('Errores en el formulario:', errors);
+            },
+            onSuccess: () => {
+                console.log('Categoría creada exitosamente');
+            }
+        });
     };
 
     const handleTasaItbisChange = (value) => {
@@ -49,7 +74,7 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                     </div>
                     <Link
                         href={route('categorias.index')}
-                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        className="text-gray-600 hover:text-gray-900 flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -61,6 +86,18 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
 
             <div className="py-8">
                 <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
+                    {/* Debug info - Quitar en producción */}
+                    {/* <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center">
+                            <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                            <span className="font-medium">Debug Info:</span>
+                        </div>
+                        <div className="mt-2 text-sm">
+                            <p>Tasas ITBIS: {JSON.stringify(safeTasasItbis)}</p>
+                            <p>Porcentajes: {JSON.stringify(safePorcentajesItbis)}</p>
+                        </div>
+                    </div> */}
+
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={submit}>
                             <div className="p-6 space-y-6">
@@ -78,14 +115,18 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                                 type="text"
                                                 value={data.nombre}
                                                 onChange={(e) => setData('nombre', e.target.value)}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.nombre ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                                    errors.nombre ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
                                                 }`}
                                                 placeholder="Ej: Electrónica, Alimentos, Ropa"
                                                 required
+                                                disabled={processing}
                                             />
                                             {errors.nombre && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
+                                                <p className="mt-1 text-sm text-red-600 flex items-center">
+                                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                                    {errors.nombre}
+                                                </p>
                                             )}
                                         </div>
 
@@ -97,14 +138,18 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                                 type="text"
                                                 value={data.codigo}
                                                 onChange={(e) => setData('codigo', e.target.value.toUpperCase())}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                                    errors.codigo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
                                                 }`}
                                                 placeholder="Ej: ELEC, ALIM, ROPA"
                                                 required
+                                                disabled={processing}
                                             />
                                             {errors.codigo && (
-                                                <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
+                                                <p className="mt-1 text-sm text-red-600 flex items-center">
+                                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                                    {errors.codigo}
+                                                </p>
                                             )}
                                         </div>
                                     </div>
@@ -124,15 +169,24 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                             <select
                                                 value={data.tasa_itbis}
                                                 onChange={(e) => handleTasaItbisChange(e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                                    errors.tasa_itbis ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                                }`}
                                                 required
+                                                disabled={processing}
                                             >
-                                                {tasas_itbis.map((tasa) => (
+                                                {safeTasasItbis.map((tasa) => (
                                                     <option key={tasa.value} value={tasa.value}>
                                                         {tasa.label}
                                                     </option>
                                                 ))}
                                             </select>
+                                            {errors.tasa_itbis && (
+                                                <p className="mt-1 text-sm text-red-600 flex items-center">
+                                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                                    {errors.tasa_itbis}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div>
@@ -142,18 +196,27 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                             <select
                                                 value={data.itbis_porcentaje}
                                                 onChange={(e) => setData('itbis_porcentaje', parseFloat(e.target.value))}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                                    errors.itbis_porcentaje ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                                }`}
                                                 required
+                                                disabled={processing}
                                             >
-                                                {porcentajes_itbis.map((porcentaje) => (
+                                                {safePorcentajesItbis.map((porcentaje) => (
                                                     <option key={porcentaje.value} value={porcentaje.value}>
                                                         {porcentaje.label}
                                                     </option>
                                                 ))}
                                             </select>
+                                            {errors.itbis_porcentaje && (
+                                                <p className="mt-1 text-sm text-red-600 flex items-center">
+                                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                                    {errors.itbis_porcentaje}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                                         <p className="text-sm text-blue-700">
                                             <strong>Nota:</strong> La tasa ITBIS determina el tipo de impuesto aplicable según la normativa dominicana. 
                                             Seleccione la opción correspondiente a la naturaleza de los productos en esta categoría.
@@ -174,11 +237,17 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                             value={data.descripcion}
                                             onChange={(e) => setData('descripcion', e.target.value)}
                                             rows="4"
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                                errors.descripcion ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                            }`}
                                             placeholder="Describa el tipo de productos que pertenecen a esta categoría..."
+                                            disabled={processing}
                                         />
                                         {errors.descripcion && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>
+                                            <p className="mt-1 text-sm text-red-600 flex items-center">
+                                                <AlertCircle className="w-4 h-4 mr-1" />
+                                                {errors.descripcion}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -189,17 +258,30 @@ export default function Create({ auth, tasas_itbis, porcentajes_itbis }) {
                                 <div className="flex justify-end space-x-3">
                                     <Link
                                         href={route('categorias.index')}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={processing}
                                     >
                                         Cancelar
                                     </Link>
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
                                     >
-                                        <Save className="w-4 h-4 mr-2" />
-                                        {processing ? 'Creando...' : 'Crear Categoría'}
+                                        {processing ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Creando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-4 h-4 mr-2" />
+                                                Crear Categoría
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

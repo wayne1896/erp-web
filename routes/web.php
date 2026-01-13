@@ -23,6 +23,7 @@ Route::get('/', function () {
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 Route::get('/productos-test', function() {
     try {
         $productos = \App\Models\Producto::with(['categoria', 'proveedor'])->paginate(10);
@@ -46,6 +47,7 @@ Route::get('/productos-test', function() {
         ], 500);
     }
 })->middleware('auth');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -65,13 +67,34 @@ Route::middleware('auth')->group(function () {
     Route::resource('categorias', CategoriaController::class);
     Route::get('/categorias/buscar', [CategoriaController::class, 'buscar'])->name('categorias.buscar');
         
-    // Rutas de proveedores
-    Route::resource('proveedores', ProveedorController::class);
+    // Rutas de proveedores - ESPECIFICAR PARÁMETRO
+    Route::resource('proveedores', ProveedorController::class)
+        ->parameters(['proveedores' => 'proveedor']);
+    
+    // Alternativa: Definir rutas individualmente para más control
+    /*
+    Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
+    Route::get('/proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
+    Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
+    Route::get('/proveedores/{proveedor}', [ProveedorController::class, 'show'])->name('proveedores.show');
+    Route::get('/proveedores/{proveedor}/editar', [ProveedorController::class, 'edit'])->name('proveedores.edit');
+    Route::put('/proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
+    Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
+    */
+    
     Route::get('/proveedores/buscar', [ProveedorController::class, 'buscar'])->name('proveedores.buscar');
     
     // Rutas de productos
     Route::resource('productos', ProductoController::class);
     Route::get('/productos/buscar', [ProductoController::class, 'buscar'])->name('productos.buscar');
+    Route::get('/productos/{producto}/stock', [ProductoController::class, 'stock'])
+        ->name('productos.stock');
+    Route::post('/productos/{producto}/ajustar-stock', [ProductoController::class, 'ajustarStock'])
+        ->name('productos.ajustar-stock');
+    Route::post('/productos/{producto}/transferir-stock', [ProductoController::class, 'transferirStock'])
+        ->name('productos.transferir-stock');
+    Route::get('/inventario/reporte', [ProductoController::class, 'reporteInventario'])
+        ->name('productos.reporte-inventario');
 });
 
 require __DIR__.'/auth.php';

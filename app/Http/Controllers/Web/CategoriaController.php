@@ -1,18 +1,14 @@
 <?php
-// app/Http/Controllers/Web/CategoriaController.php
-
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\CategoriaProducto;
-use Illuminate\Http\Request;
+use App\Models\Producto;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    /**
-     * Mostrar lista de categorías
-     */
     public function index(Request $request)
     {
         $search = $request->query('search', '');
@@ -21,45 +17,40 @@ class CategoriaController extends Controller
         $categorias = CategoriaProducto::withCount('productos')
             ->when($search, function($query, $search) {
                 return $query->where('nombre', 'like', "%{$search}%")
-                            ->orWhere('codigo', 'like', "%{$search}%");
+                            ->orWhere('codigo', 'like', "%{$search}%")
+                            ->orWhere('descripcion', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
         
+        $stats = [
+            'total' => CategoriaProducto::count(),
+            'con_productos' => CategoriaProducto::has('productos')->count(),
+            'itbis_18' => CategoriaProducto::where('tasa_itbis', 'ITBIS1')->count(),
+            'itbis_16' => CategoriaProducto::where('tasa_itbis', 'ITBIS2')->count(),
+            'itbis_0' => CategoriaProducto::where('tasa_itbis', 'ITBIS3')->count(),
+            'exento' => CategoriaProducto::where('tasa_itbis', 'EXENTO')->count(),
+        ];
+        
         return Inertia::render('Categorias/Index', [
             'categorias' => $categorias,
             'filters' => $request->only(['search', 'per_page']),
-            'stats' => [
-                'total' => CategoriaProducto::count(),
-                'con_productos' => CategoriaProducto::has('productos')->count(),
-                'itbis_18' => CategoriaProducto::where('itbis_porcentaje', 18.00)->count(),
-            ]
+            'stats' => $stats,
         ]);
     }
 
-    /**
-     * Mostrar formulario para crear categoría
-     */
     public function create()
     {
         return Inertia::render('Categorias/Create', [
             'tasas_itbis' => [
-                ['value' => 'ITBIS1', 'label' => 'ITBIS 18% (General)'],
-                ['value' => 'ITBIS2', 'label' => 'ITBIS 16% (Turismo)'],
-                ['value' => 'ITBIS3', 'label' => 'ITBIS 0% (Selectivos)'],
-                ['value' => 'EXENTO', 'label' => 'Exento'],
+                ['value' => 'ITBIS1', 'label' => 'ITBIS 18% (General)', 'porcentaje' => 18],
+                ['value' => 'ITBIS2', 'label' => 'ITBIS 16% (Turismo)', 'porcentaje' => 16],
+                ['value' => 'ITBIS3', 'label' => 'ITBIS 0% (Selectivos)', 'porcentaje' => 0],
+                ['value' => 'EXENTO', 'label' => 'Exento', 'porcentaje' => 0],
             ],
-            'porcentajes_itbis' => [
-                ['value' => 0, 'label' => '0%'],
-                ['value' => 16, 'label' => '16%'],
-                ['value' => 18, 'label' => '18%'],
-            ]
         ]);
     }
 
-    /**
-     * Guardar nueva categoría
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -76,50 +67,55 @@ class CategoriaController extends Controller
             ->with('success', 'Categoría creada exitosamente.');
     }
 
-    /**
-     * Mostrar detalles de categoría
-     */
     public function show(CategoriaProducto $categoria)
     {
-        $categoria->load(['productos' => function($query) {
-            $query->where('activo', true)->limit(10);
-        }]);
+        // Cargar productos de esta categoría con sus relaciones
+        // IMPORTANTE: Si no tienes la relación proveedor, no la cargues
+        $productos = $categoria->productos()
+            ->with([
+                'categoria',
+                'inventarios.sucursal'
+                // 'proveedor' // REMOVER si no existe la relación
+            ])
+            ->where('activo', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+        
+        // Si necesitas estadísticas de la categoría
+        $estadisticas = [
+            'total_productos' => $categoria->productos()->count(),
+            'productos_activos' => $categoria->productos()->where('activo', true)->count(),
+            'valor_inventario_total' => $productos->sum(function($producto) {
+                return $producto->inventarios->sum('valor_inventario') ?? 0;
+            }),
+            'stock_total' => $productos->sum(function($producto) {
+                return $producto->inventarios->sum('stock_disponible') ?? 0;
+            }),
+        ];
         
         return Inertia::render('Categorias/Show', [
             'categoria' => $categoria,
-            'productos' => $categoria->productos,
-            'estadisticas' => [
-                'total_productos' => $categoria->productos()->count(),
-                'productos_activos' => $categoria->productos()->where('activo', true)->count(),
-                'valor_inventario' => 0, // Se calculará cuando tengamos productos
-            ]
+            'productos' => $productos,
+            'estadisticas' => $estadisticas,
         ]);
     }
 
-    /**
-     * Mostrar formulario para editar categoría
-     */
     public function edit(CategoriaProducto $categoria)
     {
+        $categoria->loadCount('productos');
+        
         return Inertia::render('Categorias/Edit', [
             'categoria' => $categoria,
             'tasas_itbis' => [
-                ['value' => 'ITBIS1', 'label' => 'ITBIS 18% (General)'],
-                ['value' => 'ITBIS2', 'label' => 'ITBIS 16% (Turismo)'],
-                ['value' => 'ITBIS3', 'label' => 'ITBIS 0% (Selectivos)'],
-                ['value' => 'EXENTO', 'label' => 'Exento'],
+                ['value' => 'ITBIS1', 'label' => 'ITBIS 18% (General)', 'porcentaje' => 18],
+                ['value' => 'ITBIS2', 'label' => 'ITBIS 16% (Turismo)', 'porcentaje' => 16],
+                ['value' => 'ITBIS3', 'label' => 'ITBIS 0% (Selectivos)', 'porcentaje' => 0],
+                ['value' => 'EXENTO', 'label' => 'Exento', 'porcentaje' => 0],
             ],
-            'porcentajes_itbis' => [
-                ['value' => 0, 'label' => '0%'],
-                ['value' => 16, 'label' => '16%'],
-                ['value' => 18, 'label' => '18%'],
-            ]
         ]);
     }
 
-    /**
-     * Actualizar categoría
-     */
     public function update(Request $request, CategoriaProducto $categoria)
     {
         $validated = $request->validate([
@@ -136,12 +132,8 @@ class CategoriaController extends Controller
             ->with('success', 'Categoría actualizada exitosamente.');
     }
 
-    /**
-     * Eliminar categoría
-     */
     public function destroy(CategoriaProducto $categoria)
     {
-        // Verificar si tiene productos asociados
         if ($categoria->productos()->count() > 0) {
             return redirect()->back()
                 ->with('error', 'No se puede eliminar la categoría porque tiene productos asociados.');
@@ -153,9 +145,6 @@ class CategoriaController extends Controller
             ->with('success', 'Categoría eliminada exitosamente.');
     }
     
-    /**
-     * API: Buscar categorías para autocomplete
-     */
     public function buscar(Request $request)
     {
         $search = $request->query('q', '');

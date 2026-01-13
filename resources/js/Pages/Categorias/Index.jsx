@@ -1,16 +1,17 @@
-// resources/js/Pages/Categorias/Index.jsx
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { 
     Search, Plus, Edit, Trash2, Eye, 
-    Tag, Percent, Package, ListFilter
+    Tag, Percent, Package, Filter, BarChart3, 
+    TrendingUp, TrendingDown, MinusCircle
 } from 'lucide-react';
 
 export default function Index({ auth, categorias, filters, stats }) {
+    const { flash = {} } = usePage().props;
     const { data, setData, get } = useForm({
-        search: filters.search || '',
-        per_page: filters.per_page || 10,
+        search: filters?.search || '',
+        per_page: filters?.per_page || 10,
     });
 
     const handleSearch = (e) => {
@@ -29,9 +30,54 @@ export default function Index({ auth, categorias, filters, stats }) {
         router.get(route('categorias.index'));
     };
 
+    const handleDelete = (categoria) => {
+        if (categoria.productos_count > 0) {
+            alert('No se puede eliminar porque tiene productos asociados');
+            return;
+        }
+        
+        if (confirm(`¿Estás seguro de eliminar la categoría "${categoria.nombre}"?`)) {
+            router.delete(route('categorias.destroy', categoria.id));
+        }
+    };
+
+    // Función para formatear ITBIS
+    const formatItbis = (tasa_itbis, itbis_porcentaje) => {
+        const descripciones = {
+            'ITBIS1': 'ITBIS 18%',
+            'ITBIS2': 'ITBIS 16%',
+            'ITBIS3': 'ITBIS 0%',
+            'EXENTO': 'Exento',
+        };
+        
+        const porcentaje = parseFloat(itbis_porcentaje || 0);
+        const descripcion = descripciones[tasa_itbis] || 'ITBIS 18%';
+        
+        if (tasa_itbis === 'EXENTO') {
+            return descripcion;
+        }
+        
+        return `${descripcion} (${porcentaje.toFixed(2)}%)`;
+    };
+
+    // Función para obtener color de ITBIS
+    const getItbisColor = (tasa_itbis) => {
+        switch(tasa_itbis) {
+            case 'ITBIS1': return 'bg-red-100 text-red-800';
+            case 'ITBIS2': return 'bg-orange-100 text-orange-800';
+            case 'ITBIS3': return 'bg-green-100 text-green-800';
+            case 'EXENTO': return 'bg-blue-100 text-blue-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    // Verificar datos seguros
+    const safeCategorias = categorias || { data: [], links: [], from: 0, to: 0, total: 0 };
+    const safeStats = stats || { total: 0, con_productos: 0, itbis_18: 0, itbis_16: 0, itbis_0: 0, exento: 0 };
+
     return (
         <AuthenticatedLayout
-            user={auth.user}
+            user={auth?.user}
             header={
                 <div className="flex justify-between items-center">
                     <h2 className="font-semibold text-xl text-gray-800 leading-tight">
@@ -39,7 +85,7 @@ export default function Index({ auth, categorias, filters, stats }) {
                     </h2>
                     <Link
                         href={route('categorias.create')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Nueva Categoría
@@ -51,42 +97,96 @@ export default function Index({ auth, categorias, filters, stats }) {
 
             <div className="py-8">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    
-                    {/* Estadísticas */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white rounded-lg shadow p-6">
+                    {/* Mensajes Flash */}
+                    {flash.success && (
+                        <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
                             <div className="flex items-center">
-                                <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                                    <ListFilter className="w-6 h-6 text-blue-600" />
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Total Categorías</p>
-                                    <p className="text-2xl font-bold">{stats.total}</p>
+                                <div className="ml-3">
+                                    <p className="text-sm text-green-700">{flash.success}</p>
                                 </div>
                             </div>
                         </div>
+                    )}
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                    {flash.error && (
+                        <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
                             <div className="flex items-center">
-                                <div className="bg-green-100 p-3 rounded-lg mr-4">
-                                    <Package className="w-6 h-6 text-green-600" />
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
+                                <div className="ml-3">
+                                    <p className="text-sm text-red-700">{flash.error}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Estadísticas Mejoradas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Total</p>
+                                    <p className="text-2xl font-bold">{safeStats.total}</p>
+                                </div>
+                                <BarChart3 className="w-8 h-8 text-blue-500" />
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                            <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">Con Productos</p>
-                                    <p className="text-2xl font-bold">{stats.con_productos}</p>
+                                    <p className="text-2xl font-bold">{safeStats.con_productos}</p>
                                 </div>
+                                <Package className="w-8 h-8 text-green-500" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
-                            <div className="flex items-center">
-                                <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                                    <Percent className="w-6 h-6 text-purple-600" />
-                                </div>
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                            <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">ITBIS 18%</p>
-                                    <p className="text-2xl font-bold">{stats.itbis_18}</p>
+                                    <p className="text-2xl font-bold">{safeStats.itbis_18}</p>
                                 </div>
+                                <TrendingUp className="w-8 h-8 text-red-500" />
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">ITBIS 16%</p>
+                                    <p className="text-2xl font-bold">{safeStats.itbis_16 || 0}</p>
+                                </div>
+                                <TrendingDown className="w-8 h-8 text-orange-500" />
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">ITBIS 0%</p>
+                                    <p className="text-2xl font-bold">{safeStats.itbis_0 || 0}</p>
+                                </div>
+                                <MinusCircle className="w-8 h-8 text-green-500" />
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Exento</p>
+                                    <p className="text-2xl font-bold">{safeStats.exento || 0}</p>
+                                </div>
+                                <Percent className="w-8 h-8 text-blue-500" />
                             </div>
                         </div>
                     </div>
@@ -101,25 +201,41 @@ export default function Index({ auth, categorias, filters, stats }) {
                                         type="text"
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
-                                        placeholder="Buscar por nombre o código..."
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Buscar por nombre, código o descripción..."
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                     />
                                 </div>
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-                                >
-                                    Buscar
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleReset}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg"
-                                >
-                                    Limpiar
-                                </button>
+                            <div className="flex flex-col md:flex-row gap-2">
+                                <div className="flex items-center">
+                                    <Filter className="w-5 h-5 text-gray-400 mr-2" />
+                                    <select
+                                        value={data.per_page}
+                                        onChange={(e) => setData('per_page', e.target.value)}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="10">10 por página</option>
+                                        <option value="25">25 por página</option>
+                                        <option value="50">50 por página</option>
+                                        <option value="100">100 por página</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200 flex items-center"
+                                    >
+                                        <Search className="w-4 h-4 mr-2" />
+                                        Buscar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleReset}
+                                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-2 rounded-lg transition duration-200"
+                                    >
+                                        Limpiar
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -151,9 +267,12 @@ export default function Index({ auth, categorias, filters, stats }) {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {categorias.data.length > 0 ? (
-                                        categorias.data.map((categoria) => (
-                                            <tr key={categoria.id} className="hover:bg-gray-50">
+                                    {safeCategorias.data && safeCategorias.data.length > 0 ? (
+                                        safeCategorias.data.map((categoria) => (
+                                            <tr 
+                                                key={categoria.id} 
+                                                className="hover:bg-gray-50 transition duration-150"
+                                            >
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -161,7 +280,7 @@ export default function Index({ auth, categorias, filters, stats }) {
                                                         </div>
                                                         <div className="ml-4">
                                                             <div className="text-sm font-medium text-gray-900">
-                                                                {categoria.nombre}
+                                                                {categoria.nombre || 'Sin nombre'}
                                                             </div>
                                                             <div className="text-sm text-gray-500 truncate max-w-xs">
                                                                 {categoria.descripcion || 'Sin descripción'}
@@ -170,57 +289,72 @@ export default function Index({ auth, categorias, filters, stats }) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
-                                                        {categoria.codigo}
+                                                    <div className="text-sm font-mono bg-gray-100 px-3 py-1 rounded-lg inline-block border border-gray-200">
+                                                        {categoria.codigo || 'N/A'}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">
-                                                        {categoria.descripcion_itbis}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {categoria.itbis_formateado}
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className={`text-xs font-medium px-2 py-1 rounded-full inline-block w-fit ${getItbisColor(categoria.tasa_itbis)}`}>
+                                                            {formatItbis(categoria.tasa_itbis, categoria.itbis_porcentaje)}
+                                                        </span>
+                                                        <div className="text-xs text-gray-500">
+                                                            {categoria.tasa_itbis}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">
-                                                        {categoria.productos_count}
+                                                    <div className="flex items-center">
+                                                        <Package className="w-4 h-4 text-gray-400 mr-2" />
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">
+                                                                {categoria.productos_count || 0}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">
+                                                                productos
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">
+                                                        {new Date(categoria.created_at).toLocaleDateString('es-ES')}
                                                     </div>
                                                     <div className="text-xs text-gray-500">
-                                                        productos
+                                                        {new Date(categoria.created_at).toLocaleTimeString('es-ES', { 
+                                                            hour: '2-digit', 
+                                                            minute: '2-digit' 
+                                                        })}
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {new Date(categoria.created_at).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div className="flex space-x-2">
                                                         <Link
                                                             href={route('categorias.show', categoria.id)}
-                                                            className="text-blue-600 hover:text-blue-900"
+                                                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition duration-200"
                                                             title="Ver detalles"
                                                         >
                                                             <Eye className="w-4 h-4" />
                                                         </Link>
                                                         <Link
                                                             href={route('categorias.edit', categoria.id)}
-                                                            className="text-yellow-600 hover:text-yellow-900"
+                                                            className="p-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg transition duration-200"
                                                             title="Editar"
                                                         >
                                                             <Edit className="w-4 h-4" />
                                                         </Link>
                                                         <button
-                                                            onClick={() => {
-                                                                if (categoria.productos_count > 0) {
-                                                                    alert('No se puede eliminar porque tiene productos asociados');
-                                                                    return;
-                                                                }
-                                                                if (confirm('¿Estás seguro de eliminar esta categoría?')) {
-                                                                    router.delete(route('categorias.destroy', categoria.id));
-                                                                }
-                                                            }}
-                                                            className="text-red-600 hover:text-red-900"
-                                                            title="Eliminar"
+                                                            onClick={() => handleDelete(categoria)}
+                                                            className={`p-2 rounded-lg transition duration-200 ${
+                                                                categoria.productos_count > 0
+                                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                            }`}
+                                                            title={categoria.productos_count > 0 
+                                                                ? 'No se puede eliminar (tiene productos)' 
+                                                                : 'Eliminar'
+                                                            }
+                                                            disabled={categoria.productos_count > 0}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
@@ -230,8 +364,28 @@ export default function Index({ auth, categorias, filters, stats }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                                                No se encontraron categorías
+                                            <td colSpan="6" className="px-6 py-12 text-center">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <Tag className="w-12 h-12 text-gray-300 mb-4" />
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                                        No se encontraron categorías
+                                                    </h3>
+                                                    <p className="text-gray-500 mb-4">
+                                                        {data.search 
+                                                            ? `No hay resultados para "${data.search}"`
+                                                            : 'Comienza creando tu primera categoría'
+                                                        }
+                                                    </p>
+                                                    {!data.search && (
+                                                        <Link
+                                                            href={route('categorias.create')}
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center"
+                                                        >
+                                                            <Plus className="w-4 h-4 mr-2" />
+                                                            Crear Primera Categoría
+                                                        </Link>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     )}
@@ -240,25 +394,27 @@ export default function Index({ auth, categorias, filters, stats }) {
                         </div>
 
                         {/* Paginación */}
-                        {categorias.links && (
+                        {safeCategorias.links && safeCategorias.links.length > 0 && (
                             <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div className="text-sm text-gray-700">
-                                        Mostrando <span className="font-medium">{categorias.from}</span> a{' '}
-                                        <span className="font-medium">{categorias.to}</span> de{' '}
-                                        <span className="font-medium">{categorias.total}</span> resultados
+                                        <span className="font-medium">{safeCategorias.from || 0}</span> -{' '}
+                                        <span className="font-medium">{safeCategorias.to || 0}</span> de{' '}
+                                        <span className="font-medium">{safeCategorias.total || 0}</span> resultados
                                     </div>
-                                    <div className="flex space-x-2">
-                                        {categorias.links.map((link, index) => (
+                                    <div className="flex flex-wrap gap-1">
+                                        {safeCategorias.links.map((link, index) => (
                                             <Link
                                                 key={index}
                                                 href={link.url || '#'}
                                                 preserveState
-                                                className={`px-3 py-1 rounded-md ${
+                                                className={`min-w-[40px] px-3 py-2 text-center rounded-md transition duration-200 ${
                                                     link.active
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
+                                                        ? 'bg-blue-600 text-white font-medium'
+                                                        : link.url
+                                                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                                                }`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
                                         ))}
