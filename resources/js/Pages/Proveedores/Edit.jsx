@@ -48,15 +48,15 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                             <Building className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Editar Proveedor
                             </h2>
-                            <p className="text-sm text-gray-600">{proveedor.codigo} - {proveedor.productos_count} productos</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{proveedor.codigo} - {proveedor.productos_count} productos</p>
                         </div>
                     </div>
                     <Link
                         href={route('proveedores.index')}
-                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -68,44 +68,44 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
 
             <div className="py-8">
                 <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         {/* Header del proveedor */}
-                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">
                                         {proveedor.nombre}
                                     </h3>
                                     <div className="flex items-center mt-1 space-x-4">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                             proveedor.activo 
-                                                ? 'bg-green-100 text-green-800' 
-                                                : 'bg-red-100 text-red-800'
+                                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' 
+                                                : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                                         }`}>
                                             {proveedor.activo ? 'ACTIVO' : 'INACTIVO'}
                                         </span>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                             proveedor.tipo_proveedor === 'LOCAL'
-                                                ? 'bg-blue-100 text-blue-800'
-                                                : 'bg-purple-100 text-purple-800'
+                                                ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                                                : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                                         }`}>
                                             {proveedor.tipo_proveedor === 'LOCAL' ? 'LOCAL' : 'INTERNACIONAL'}
                                         </span>
-                                        <span className="text-sm text-gray-600 flex items-center">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                                             <Package className="w-4 h-4 mr-1" />
                                             {proveedor.productos_count} productos
                                         </span>
-                                        <span className="text-sm text-gray-600">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
                                             Creado: {new Date(proveedor.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm text-gray-500">Límite de Crédito</p>
-                                    <p className="text-lg font-bold text-blue-600">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Límite de Crédito</p>
+                                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
                                         ${parseFloat(proveedor.limite_credito).toFixed(2)}
                                     </p>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         Días: {proveedor.dias_credito}
                                     </p>
                                 </div>
@@ -117,20 +117,20 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                             <form onSubmit={submit} className="space-y-6">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información del Proveedor
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.codigo}
                                                 onChange={(e) => setData('codigo', e.target.value.toUpperCase())}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                    errors.codigo ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                                                 }`}
                                                 required
                                             />
@@ -140,13 +140,13 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Tipo de Proveedor *
                                             </label>
                                             <select
                                                 value={data.tipo_proveedor}
                                                 onChange={(e) => setData('tipo_proveedor', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             >
                                                 {tipos_proveedor.map((tipo) => (
@@ -158,7 +158,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Nombre o Razón Social *
                                             </label>
                                             <input
@@ -176,7 +176,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 RNC
                                             </label>
                                             <input
@@ -200,14 +200,14 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                 </div>
 
                                 {/* Información de Contacto */}
-                                <div className="border-t border-gray-200 pt-6">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                                         <Phone className="w-5 h-5 mr-2 text-gray-400" />
                                         Información de Contacto
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Teléfono *
                                             </label>
                                             <div className="relative">
@@ -231,7 +231,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Email
                                             </label>
                                             <div className="relative">
@@ -242,8 +242,8 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                                     type="email"
                                                     value={data.email}
                                                     onChange={(e) => setData('email', e.target.value)}
-                                                    className={`pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                        errors.email ? 'border-red-500' : 'border-gray-300'
+                                                    className={`pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                        errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                                                     }`}
                                                 />
                                             </div>
@@ -253,7 +253,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Contacto Principal
                                             </label>
                                             <div className="relative">
@@ -264,13 +264,13 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                                     type="text"
                                                     value={data.contacto_nombre}
                                                     onChange={(e) => setData('contacto_nombre', e.target.value)}
-                                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Teléfono de Contacto
                                             </label>
                                             <div className="relative">
@@ -281,7 +281,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                                     type="tel"
                                                     value={data.contacto_telefono}
                                                     onChange={(e) => setData('contacto_telefono', e.target.value.replace(/\D/g, ''))}
-                                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                     maxLength={10}
                                                 />
                                             </div>
@@ -290,7 +290,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                 </div>
 
                                 {/* Dirección */}
-                                <div className="border-t border-gray-200 pt-6">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                                         <MapPin className="w-5 h-5 mr-2 text-gray-400" />
                                         Dirección
@@ -315,14 +315,14 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                 </div>
 
                                 {/* Condiciones Comerciales */}
-                                <div className="border-t border-gray-200 pt-6">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                                         <CreditCard className="w-5 h-5 mr-2 text-gray-400" />
                                         Condiciones Comerciales
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Días de Crédito
                                             </label>
                                             <div className="relative">
@@ -330,7 +330,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                                     type="number"
                                                     value={data.dias_credito}
                                                     onChange={(e) => setData('dias_credito', parseInt(e.target.value) || 0)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                     min="0"
                                                 />
                                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -340,7 +340,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Límite de Crédito ($)
                                             </label>
                                             <div className="relative">
@@ -352,7 +352,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                                     step="0.01"
                                                     value={data.limite_credito}
                                                     onChange={(e) => setData('limite_credito', parseFloat(e.target.value) || 0)}
-                                                    className="pl-8 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    className="pl-8 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                     min="0"
                                                 />
                                             </div>
@@ -361,7 +361,7 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                 </div>
 
                                 {/* Estado */}
-                                <div className="border-t border-gray-200 pt-6">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                                     <div className="flex items-center">
                                         <input
                                             type="checkbox"
@@ -369,26 +369,26 @@ export default function Edit({ auth, proveedor, tipos_proveedor }) {
                                             onChange={(e) => setData('activo', e.target.checked)}
                                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                         />
-                                        <label className="ml-2 block text-sm text-gray-900">
+                                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-200">
                                             Proveedor activo
                                         </label>
                                     </div>
-                                    <p className="mt-1 text-xs text-gray-500">
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         Los proveedores inactivos no aparecerán en las listas de selección.
                                     </p>
                                 </div>
 
                                 {/* Botones */}
-                                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                                     <Link
                                         href={route('proveedores.show', proveedor.id)}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
                                         Ver Detalles
                                     </Link>
                                     <Link
                                         href={route('proveedores.index')}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
                                         Cancelar
                                     </Link>

@@ -34,12 +34,12 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
             user={auth.user}
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                         Crear Nuevo Cliente
                     </h2>
                     <Link
                         href={route('clientes.index')}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center"
+                        className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg flex items-center"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Volver
@@ -51,24 +51,24 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
 
             <div className="py-8">
                 <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                         <form onSubmit={submit}>
                             <div className="p-6 space-y-6">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información Básica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Código *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.codigo}
                                                 onChange={e => setData('codigo', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.codigo && (
@@ -77,13 +77,13 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Tipo de Cliente *
                                             </label>
                                             <select
                                                 value={data.tipo_cliente}
                                                 onChange={e => setData('tipo_cliente', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             >
                                                 {tipos_cliente.map((tipo) => (
@@ -95,14 +95,14 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Nombre Completo *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.nombre_completo}
                                                 onChange={e => setData('nombre_completo', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.nombre_completo && (
@@ -111,14 +111,14 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Cédula/RNC *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.cedula_rnc}
                                                 onChange={e => setData('cedula_rnc', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.cedula_rnc && (
@@ -127,13 +127,13 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Tipo Contribuyente *
                                             </label>
                                             <select
                                                 value={data.tipo_contribuyente}
                                                 onChange={e => setData('tipo_contribuyente', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             >
                                                 {tipos_contribuyente.map((tipo) => (
@@ -150,19 +150,19 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
 
                                 {/* Información de Contacto */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información de Contacto
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Teléfono *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.telefono}
                                                 onChange={e => setData('telefono', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.telefono && (
@@ -171,26 +171,26 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Teléfono Alternativo
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.telefono_alternativo}
                                                 onChange={e => setData('telefono_alternativo', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Email
                                             </label>
                                             <input
                                                 type="email"
                                                 value={data.email}
                                                 onChange={e => setData('email', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                             {errors.email && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -201,18 +201,18 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
 
                                 {/* Dirección */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Dirección
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Provincia *
                                             </label>
                                             <select
                                                 value={data.provincia}
                                                 onChange={e => setData('provincia', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             >
                                                 <option value="">Seleccionar...</option>
@@ -226,14 +226,14 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Municipio *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.municipio}
                                                 onChange={e => setData('municipio', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.municipio && (
@@ -242,14 +242,14 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Sector *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.sector}
                                                 onChange={e => setData('sector', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.sector && (
@@ -258,14 +258,14 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Dirección Completa *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.direccion}
                                                 onChange={e => setData('direccion', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                             />
                                             {errors.direccion && (
@@ -277,12 +277,12 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
 
                                 {/* Información Comercial */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información Comercial
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Límite de Crédito ($)
                                             </label>
                                             <input
@@ -290,24 +290,24 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                                 step="0.01"
                                                 value={data.limite_credito}
                                                 onChange={e => setData('limite_credito', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Días de Crédito
                                             </label>
                                             <input
                                                 type="number"
                                                 value={data.dias_credito}
                                                 onChange={e => setData('dias_credito', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Descuento (%)
                                             </label>
                                             <input
@@ -315,7 +315,7 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                                                 step="0.01"
                                                 value={data.descuento}
                                                 onChange={e => setData('descuento', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </div>
 
@@ -335,11 +335,11 @@ export default function Create({ auth, tipos_cliente, tipos_contribuyente, provi
                             </div>
 
                             {/* Botones */}
-                            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                            <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-end space-x-3">
                                     <Link
                                         href={route('clientes.index')}
-                                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
+                                        className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg"
                                     >
                                         Cancelar
                                     </Link>

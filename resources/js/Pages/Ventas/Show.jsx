@@ -19,7 +19,7 @@ export default function VentasShow({ venta }) {
                             <FileText className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Error: Venta no encontrada
                             </h2>
                         </div>
@@ -74,7 +74,7 @@ export default function VentasShow({ venta }) {
                             <FileText className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Factura #{venta.numero_factura}
                             </h2>
                             <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -88,14 +88,14 @@ export default function VentasShow({ venta }) {
                     <div className="flex items-center space-x-3">
                         <Link
                             href={route('ventas.imprimir', venta.id)}
-                            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                            className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <Printer className="w-4 h-4 mr-2" />
                             Imprimir
                         </Link>
                         <Link
                             href={route('ventas.index')}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Volver
@@ -200,7 +200,7 @@ export default function VentasShow({ venta }) {
                         {/* Totales */}
                         <div className="mt-8 pt-6 border-t">
                             <div className="flex justify-between items-center">
-                                <span className="text-lg font-bold text-gray-800">Total:</span>
+                                <span className="text-lg font-bold text-gray-800 dark:text-gray-200">Total:</span>
                                 <span className="text-2xl font-bold text-blue-700">
                                     {formatCurrency(venta.total)}
                                 </span>

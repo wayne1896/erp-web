@@ -34,10 +34,10 @@ export default function VentasIndex({ ventas }) {
                             <FileText className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Ventas
                             </h2>
-                            <p className="text-gray-600 mt-1">
+                            <p className="text-gray-600 dark:text-gray-400 mt-1">
                                 Gestión de facturas y ventas registradas
                             </p>
                         </div>
@@ -60,39 +60,39 @@ export default function VentasIndex({ ventas }) {
             <div className="py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Tabla de ventas */}
-                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="font-bold text-gray-800">Ventas Registradas</h3>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="font-bold text-gray-800 dark:text-gray-200">Ventas Registradas</h3>
                         </div>
 
                         {ventas && ventas.data && ventas.data.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="py-3 px-6 text-left">Factura</th>
-                                            <th className="py-3 px-6 text-left">Cliente</th>
-                                            <th className="py-3 px-6 text-left">Fecha</th>
-                                            <th className="py-3 px-6 text-left">Total</th>
-                                            <th className="py-3 px-6 text-left">Acciones</th>
+                                        <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                                            <th className="py-3 px-6 text-left text-gray-700 dark:text-gray-300">Factura</th>
+                                            <th className="py-3 px-6 text-left text-gray-700 dark:text-gray-300">Cliente</th>
+                                            <th className="py-3 px-6 text-left text-gray-700 dark:text-gray-300">Fecha</th>
+                                            <th className="py-3 px-6 text-left text-gray-700 dark:text-gray-300">Total</th>
+                                            <th className="py-3 px-6 text-left text-gray-700 dark:text-gray-300">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {ventas.data.map((venta) => (
-                                            <tr key={venta.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <tr key={venta.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="py-3 px-6">
-                                                    <p className="font-medium">{venta.numero_factura}</p>
+                                                    <p className="font-medium text-gray-900 dark:text-gray-100">{venta.numero_factura}</p>
                                                 </td>
                                                 <td className="py-3 px-6">
-                                                    <p className="text-gray-800">
+                                                    <p className="text-gray-800 dark:text-gray-200">
                                                         {venta.cliente?.nombre_completo || 'Cliente no disponible'}
                                                     </p>
                                                 </td>
                                                 <td className="py-3 px-6">
-                                                    <p className="text-gray-600">{formatDate(venta.fecha_venta)}</p>
+                                                    <p className="text-gray-600 dark:text-gray-400">{formatDate(venta.fecha_venta)}</p>
                                                 </td>
                                                 <td className="py-3 px-6">
-                                                    <p className="font-bold text-blue-700">{formatCurrency(venta.total)}</p>
+                                                    <p className="font-bold text-blue-700 dark:text-blue-400">{formatCurrency(venta.total)}</p>
                                                 </td>
                                                 <td className="py-3 px-6">
                                                     <div className="flex space-x-2">
@@ -119,8 +119,8 @@ export default function VentasIndex({ ventas }) {
                             </div>
                         ) : (
                             <div className="py-12 text-center">
-                                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                <p className="text-gray-600">No hay ventas registradas</p>
+                                <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                <p className="text-gray-600 dark:text-gray-400">No hay ventas registradas</p>
                                 <Link
                                     href={route('ventas.create')}
                                     className="inline-flex items-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

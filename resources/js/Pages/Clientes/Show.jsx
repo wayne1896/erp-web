@@ -18,10 +18,10 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                             <User className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 {cliente.nombre_completo}
                             </h2>
-                            <p className="text-sm text-gray-600">{cliente.codigo} - Detalles del cliente</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{cliente.codigo} - Detalles del cliente</p>
                         </div>
                     </div>
                     <div className="flex space-x-3">
@@ -34,7 +34,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                         </Link>
                         <Link
                             href={route('clientes.index')}
-                            className="text-gray-600 hover:text-gray-900 flex items-center"
+                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1" />
                             Volver
@@ -51,32 +51,32 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                         {/* Columna izquierda - Información del cliente */}
                         <div className="lg:col-span-2 space-y-6">
                             {/* Tarjeta de información principal */}
-                            <div className="bg-white rounded-lg shadow">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
                                 <div className="p-6">
                                     <div className="flex items-start justify-between mb-6">
                                         <div>
-                                            <h3 className="text-2xl font-bold text-gray-900">
+                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">
                                                 {cliente.nombre_completo}
                                             </h3>
                                             <div className="flex items-center mt-2 space-x-4">
                                                 <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
                                                     cliente.activo 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-red-100 text-red-800'
+                                                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' 
+                                                        : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                                                 }`}>
                                                     {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
                                                 </span>
-                                                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+                                                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-semibold rounded-full">
                                                     {cliente.tipo_cliente === 'NATURAL' ? 'PERSONA NATURAL' : 'PERSONA JURÍDICA'}
                                                 </span>
-                                                <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-semibold rounded-full">
+                                                <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm font-semibold rounded-full">
                                                     {cliente.tipo_contribuyente}
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-gray-500">Cliente desde</p>
-                                            <p className="text-lg font-semibold">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Cliente desde</p>
+                                            <p className="text-lg font-semibold text-gray-900 dark:text-gray-200">
                                                 {new Date(cliente.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
@@ -86,18 +86,18 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
                                             <div className="flex items-center">
-                                                <Tag className="w-5 h-5 text-gray-400 mr-3" />
+                                                <Tag className="w-5 h-5 text-gray-400 dark:text-gray-500 mr-3" />
                                                 <div>
-                                                    <p className="text-sm text-gray-500">Código</p>
-                                                    <p className="font-medium">{cliente.codigo}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Código</p>
+                                                    <p className="font-medium text-gray-900 dark:text-gray-200">{cliente.codigo}</p>
                                                 </div>
                                             </div>
                                             
                                             <div className="flex items-center">
-                                                <FileText className="w-5 h-5 text-gray-400 mr-3" />
+                                                <FileText className="w-5 h-5 text-gray-400 dark:text-gray-500 mr-3" />
                                                 <div>
-                                                    <p className="text-sm text-gray-500">Documento</p>
-                                                    <p className="font-medium">{cliente.cedula_rnc}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Documento</p>
+                                                    <p className="font-medium text-gray-900 dark:text-gray-200">{cliente.cedula_rnc}</p>
                                                 </div>
                                             </div>
                                             
@@ -139,7 +139,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
 
                                     {/* Información de ubicación */}
                                     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Ubicación</h4>
+                                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ubicación</h4>
                                         <div className="grid grid-cols-3 gap-4">
                                             <div>
                                                 <p className="text-xs text-gray-500">Provincia</p>
@@ -160,7 +160,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
 
                             {/* Estadísticas financieras */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-green-100 p-3 rounded-lg mr-4">
                                             <ShoppingBag className="w-6 h-6 text-green-600" />
@@ -172,7 +172,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-blue-100 p-3 rounded-lg mr-4">
                                             <DollarSign className="w-6 h-6 text-blue-600" />
@@ -186,7 +186,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-purple-100 p-3 rounded-lg mr-4">
                                             <CreditCard className="w-6 h-6 text-purple-600" />
@@ -205,7 +205,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                             {ventas_recientes && ventas_recientes.length > 0 && (
                                 <div className="bg-white rounded-lg shadow">
                                     <div className="px-6 py-4 border-b border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-900">Ventas Recientes</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">Ventas Recientes</h3>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-200">
@@ -287,7 +287,7 @@ export default function Show({ auth, cliente, ventas_recientes, estadisticas }) 
                                                     <Clock className="w-4 h-4 mr-1" />
                                                     Días de Crédito
                                                 </span>
-                                                <span className="text-lg font-bold text-gray-800">
+                                                <span className="text-lg font-bold text-gray-800 dark:text-gray-200">
                                                     {cliente.dias_credito || 0} días
                                                 </span>
                                             </div>

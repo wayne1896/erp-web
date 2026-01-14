@@ -52,15 +52,15 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                             <Building className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Crear Nuevo Proveedor
                             </h2>
-                            <p className="text-sm text-gray-600">Registrar información del proveedor</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Registrar información del proveedor</p>
                         </div>
                     </div>
                     <Link
                         href={route('proveedores.index')}
-                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -72,25 +72,25 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
 
             <div className="py-8">
                 <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={submit}>
                             <div className="p-6 space-y-6">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información del Proveedor
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.codigo}
                                                 onChange={(e) => setData('codigo', e.target.value.toUpperCase())}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                    errors.codigo ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                                                 }`}
                                                 placeholder="Ej: PROV001"
                                                 required
@@ -101,7 +101,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Tipo de Proveedor *
                                             </label>
                                             <select
@@ -119,7 +119,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Nombre o Razón Social *
                                             </label>
                                             <input
@@ -138,7 +138,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 RNC
                                             </label>
                                             <input
@@ -163,13 +163,13 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
 
                                 {/* Información de Contacto */}
                                 <div className="border-t border-gray-200 pt-6">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <Phone className="w-5 h-5 mr-2 text-gray-400" />
                                         Información de Contacto
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Teléfono *
                                             </label>
                                             <div className="relative">
@@ -194,7 +194,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Email
                                             </label>
                                             <div className="relative">
@@ -217,7 +217,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Contacto Principal
                                             </label>
                                             <div className="relative">
@@ -235,7 +235,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Teléfono de Contacto
                                             </label>
                                             <div className="relative">
@@ -257,7 +257,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
 
                                 {/* Dirección */}
                                 <div className="border-t border-gray-200 pt-6">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <MapPin className="w-5 h-5 mr-2 text-gray-400" />
                                         Dirección
                                     </h3>
@@ -283,13 +283,13 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
 
                                 {/* Condiciones Comerciales */}
                                 <div className="border-t border-gray-200 pt-6">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <CreditCard className="w-5 h-5 mr-2 text-gray-400" />
                                         Condiciones Comerciales
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Días de Crédito
                                             </label>
                                             <div className="relative">
@@ -307,7 +307,7 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Límite de Crédito ($)
                                             </label>
                                             <div className="relative">
@@ -347,11 +347,11 @@ export default function Create({ auth, tipos_proveedor, provincias }) {
                             </div>
 
                             {/* Botones */}
-                            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                            <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-end space-x-3">
                                     <Link
                                         href={route('proveedores.index')}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
                                         Cancelar
                                     </Link>

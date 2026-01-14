@@ -135,8 +135,8 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                 <Head title="Producto no encontrado" />
                 <div className="py-12">
                     <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">Producto no encontrado</h2>
+                        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Producto no encontrado</h2>
                             <Link href={route('productos.index')} className="text-blue-600 hover:text-blue-800">
                                 ← Volver a la lista de productos
                             </Link>
@@ -157,16 +157,16 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                             <Package className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 {producto.nombre || 'Producto'}
                             </h2>
-                            <p className="text-sm text-gray-600">Código: {producto.codigo || 'N/A'}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Código: {producto.codigo || 'N/A'}</p>
                         </div>
                     </div>
                     <div className="flex space-x-2">
                         <Link
                             href={route('productos.index')}
-                            className="text-gray-600 hover:text-gray-900 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
+                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1" />
                             Volver
@@ -255,13 +255,13 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                     </div>
 
                     {/* Información principal */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Columna izquierda - Información básica */}
                                 <div className="space-y-6">
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                             <Package className="w-5 h-5 mr-2 text-gray-400" />
                                             Información Básica
                                         </h3>
@@ -271,7 +271,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                 <label className="block text-sm font-medium text-gray-500 mb-1">
                                                     Descripción
                                                 </label>
-                                                <p className="text-gray-900">
+                                                <p className="text-gray-900 dark:text-gray-200">
                                                     {producto.descripcion || 'Sin descripción'}
                                                 </p>
                                             </div>
@@ -281,7 +281,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                     Categoría
                                                 </label>
                                                 <div className="flex items-center">
-                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                                         {producto.categoria?.nombre || 'Sin categoría'}
                                                     </span>
                                                     {producto.categoria?.codigo && (
@@ -296,7 +296,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                 <label className="block text-sm font-medium text-gray-500 mb-1">
                                                     Unidad de Medida
                                                 </label>
-                                                <p className="text-gray-900">
+                                                <p className="text-gray-900 dark:text-gray-200">
                                                     {getUnidadMedidaTexto()}
                                                 </p>
                                             </div>
@@ -307,7 +307,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                 </label>
                                                 <div className="flex items-center">
                                                     <Barcode className="w-4 h-4 mr-2 text-gray-400" />
-                                                    <span className="font-mono text-gray-900">
+                                                    <span className="font-mono text-gray-900 dark:text-gray-200">
                                                         {producto.codigo_barras || 'No asignado'}
                                                     </span>
                                                 </div>
@@ -316,7 +316,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                     </div>
                                     
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                             <Tag className="w-5 h-5 mr-2 text-gray-400" />
                                             Configuración de Stock
                                         </h3>
@@ -327,7 +327,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                     producto.control_stock 
                                                         ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-gray-100 text-gray-800'
+                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                                                 }`}>
                                                     {producto.control_stock ? (
                                                         <CheckCircle className="w-3 h-3 mr-1" />
@@ -366,7 +366,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                 {/* Columna derecha - Precios e impuestos */}
                                 <div className="space-y-6">
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                             <DollarSign className="w-5 h-5 mr-2 text-gray-400" />
                                             Precios
                                         </h3>
@@ -375,7 +375,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                                                 <div>
                                                     <div className="text-sm text-gray-600">Precio Compra</div>
-                                                    <div className="text-lg font-medium text-gray-900">
+                                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-200">
                                                         ${formatNumber(producto.precio_compra)}
                                                     </div>
                                                 </div>
@@ -413,7 +413,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                     </div>
                                     
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                             <Percent className="w-5 h-5 mr-2 text-gray-400" />
                                             Impuestos (ITBIS)
                                         </h3>
@@ -452,7 +452,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                     </div>
                                     
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                             <Calendar className="w-5 h-5 mr-2 text-gray-400" />
                                             Información Técnica
                                         </h3>
@@ -501,7 +501,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
 
                     {/* Inventario por sucursal - Solo si hay inventarios */}
                     {Array.isArray(producto.inventarios) && producto.inventarios.length > 0 && (
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                             <div className="p-6">
                                 <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                                     <Truck className="w-5 h-5 mr-2 text-gray-400" />
@@ -529,11 +529,11 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                             {producto.inventarios.map((inventario, index) => (
-                                                <tr key={inventario.id || index}>
+                                                <tr key={inventario.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                     <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-200">
                                                             {inventario.sucursal?.nombre || 'Sucursal'}
                                                             {sucursal_actual?.id === inventario.sucursal_id && (
                                                                 <span className="ml-2 text-xs text-blue-600">(Actual)</span>
@@ -541,7 +541,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">
+                                                        <div className="text-sm text-gray-900 dark:text-gray-200">
                                                             {formatNumber(inventario.stock_actual)}
                                                         </div>
                                                     </td>
@@ -555,7 +555,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">
+                                                        <div className="text-sm text-gray-900 dark:text-gray-200">
                                                             ${formatNumber(inventario.costo_promedio)}
                                                         </div>
                                                     </td>

@@ -18,10 +18,10 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                             <Tag className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 {categoria.nombre}
                             </h2>
-                            <p className="text-sm text-gray-600">Detalles de la categoría</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Detalles de la categoría</p>
                         </div>
                     </div>
                     <div className="flex space-x-3">
@@ -34,7 +34,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                         </Link>
                         <Link
                             href={route('categorias.index')}
-                            className="text-gray-600 hover:text-gray-900 flex items-center"
+                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1" />
                             Volver
@@ -85,12 +85,12 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
 
                                     {/* Descripción */}
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                                             <FileText className="w-4 h-4 mr-2 text-gray-400" />
                                             Descripción
                                         </h4>
                                         <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-gray-700">
+                                            <p className="text-gray-700 dark:text-gray-300">
                                                 {categoria.descripcion || 'No hay descripción disponible.'}
                                             </p>
                                         </div>
@@ -141,7 +141,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
 
                             {/* Estadísticas */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-green-100 p-3 rounded-lg mr-4">
                                             <Package className="w-6 h-6 text-green-600" />
@@ -153,7 +153,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-blue-100 p-3 rounded-lg mr-4">
                                             <Package className="w-6 h-6 text-blue-600" />
@@ -165,7 +165,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg shadow p-6">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                     <div className="flex items-center">
                                         <div className="bg-purple-100 p-3 rounded-lg mr-4">
                                             <DollarSign className="w-6 h-6 text-purple-600" />
@@ -184,7 +184,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                             {productos && productos.length > 0 && (
                                 <div className="bg-white rounded-lg shadow">
                                     <div className="px-6 py-4 border-b border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-900">Productos Recientes</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">Productos Recientes</h3>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-200">
@@ -213,7 +213,7 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-200">
                                                                 {producto.nombre}
                                                             </div>
                                                             <div className="text-sm text-gray-500">

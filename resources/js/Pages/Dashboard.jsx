@@ -48,10 +48,10 @@ export default function Dashboard({
                             <BarChart3 className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Panel de Control
                             </h2>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {time.toLocaleDateString('es-ES', { 
                                     weekday: 'long', 
                                     year: 'numeric', 
@@ -72,11 +72,11 @@ export default function Dashboard({
                         </div>
                         <Link
                             href={route('profile.edit')}
-                            className="flex items-center space-x-3 bg-white border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition"
+                            className="flex items-center space-x-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <div className="text-right">
-                                <p className="font-semibold text-gray-800">{user.name}</p>
-                                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                                <p className="font-semibold text-gray-800 dark:text-gray-200">{user.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
                             </div>
                             <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
                                 <span className="font-bold text-blue-600 text-sm">
@@ -96,11 +96,11 @@ export default function Dashboard({
                     {alerts.length > 0 && (
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-gray-800 flex items-center">
-                                    <AlertCircle className="w-5 h-5 text-amber-500 mr-2" />
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                                    <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400 mr-2" />
                                     Alertas del Sistema
                                 </h3>
-                                <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                                <span className="text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full">
                                     {alerts.length} {alerts.length === 1 ? 'alerta' : 'alertas'}
                                 </span>
                             </div>
@@ -119,16 +119,16 @@ export default function Dashboard({
                                         <div className="flex items-start">
                                             <div className="text-2xl mr-3">{alert.icon}</div>
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-gray-800">{alert.title}</h4>
-                                                <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
+                                                <h4 className="font-bold text-gray-800 dark:text-gray-200">{alert.title}</h4>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{alert.message}</p>
                                                 <div className="flex items-center justify-between mt-3">
-                                                    <span className="text-xs text-gray-500">
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
                                                         {alert.timestamp}
                                                     </span>
                                                     {alert.action && (
                                                         <Link
                                                             href={alert.actionUrl}
-                                                            className="text-xs font-semibold px-3 py-1 rounded-lg bg-white border hover:shadow-sm transition"
+                                                            className="text-xs font-semibold px-3 py-1 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 hover:shadow-sm transition text-gray-700 dark:text-gray-300"
                                                         >
                                                             {alert.action}
                                                         </Link>
@@ -145,7 +145,7 @@ export default function Dashboard({
                     {/* Métricas principales */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {/* Ventas Hoy */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="bg-gradient-to-br from-green-100 to-green-200 p-3 rounded-xl">
                                     <DollarSign className="w-6 h-6 text-green-600" />
@@ -163,18 +163,18 @@ export default function Dashboard({
                                     </span>
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">
                                 {formatCurrency(metrics.ventas.hoy.total)}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">Ventas del día</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Ventas del día</p>
+                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span>{metrics.ventas.hoy.count} transacciones</span>
                                 <span>Tkt: {formatCurrency(metrics.ventas.hoy.ticket_promedio)}</span>
                             </div>
                         </div>
 
                         {/* Clientes */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-3 rounded-xl">
                                     <Users className="w-6 h-6 text-blue-600" />
@@ -183,18 +183,18 @@ export default function Dashboard({
                                     +{metrics.clientes.nuevos_hoy} hoy
                                 </span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">
                                 {formatNumber(metrics.clientes.total)}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">Clientes registrados</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Clientes registrados</p>
+                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span>{metrics.clientes.nuevos_semana} esta semana</span>
                                 <span>Activos</span>
                             </div>
                         </div>
 
                         {/* Inventario */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-3 rounded-xl">
                                     <Package className="w-6 h-6 text-purple-600" />
@@ -209,11 +209,11 @@ export default function Dashboard({
                                     </span>
                                 )}
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">
                                 {formatNumber(metrics.inventario.total_productos)}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">Productos activos</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Productos activos</p>
+                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span>Valor: {formatCurrency(metrics.inventario.valor_total_inventario)}</span>
                                 <Link href="/productos" className="text-purple-600 hover:text-purple-800">
                                     <Eye className="w-4 h-4" />
@@ -222,7 +222,7 @@ export default function Dashboard({
                         </div>
 
                         {/* Estado Caja */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className={`p-3 rounded-xl ${
                                     metrics.caja.abierta 
@@ -241,11 +241,11 @@ export default function Dashboard({
                                     {metrics.caja.abierta ? 'Abierta' : 'Cerrada'}
                                 </span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">
                                 {formatCurrency(metrics.caja.monto_actual)}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">Efectivo en caja</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Efectivo en caja</p>
+                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span>Inicial: {formatCurrency(metrics.caja.monto_inicial)}</span>
                                 {metrics.caja.abierta ? (
                                     <span className="text-emerald-600">● Abierta {metrics.caja.fecha_apertura}</span>
@@ -262,20 +262,20 @@ export default function Dashboard({
                     {/* Segunda fila: Ventas semanales y meta */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         {/* Ventas semanales */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 lg:col-span-2">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 lg:col-span-2">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-800">Ventas semanales</h3>
-                                    <p className="text-sm text-gray-600">Desempeño últimos 7 días</p>
+                                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Ventas semanales</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">Desempeño últimos 7 días</p>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                                        <span className="text-xs text-gray-600">Ventas</span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Ventas</span>
                                     </div>
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                                        <span className="text-xs text-gray-600">Ticket promedio</span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Ticket promedio</span>
                                     </div>
                                 </div>
                             </div>
@@ -283,29 +283,29 @@ export default function Dashboard({
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-gray-200">
-                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 uppercase">Día</th>
-                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 uppercase">Ventas</th>
-                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 uppercase">Total</th>
-                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 uppercase">Ticket</th>
-                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 uppercase">Tendencia</th>
+                                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Día</th>
+                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Ventas</th>
+                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Total</th>
+                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Ticket</th>
+                                            <th className="text-left py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Tendencia</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {charts.ventas_por_dia?.map((day, index) => (
-                                            <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="py-3">
-                                                    <div className="font-medium text-gray-800">{day.dia}</div>
-                                                    <div className="text-xs text-gray-500">{day.fecha}</div>
+                                                    <div className="font-medium text-gray-800 dark:text-gray-200">{day.dia}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{day.fecha}</div>
                                                 </td>
                                                 <td className="py-3">
-                                                    <div className="font-semibold">{day.ventas}</div>
+                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">{day.ventas}</div>
                                                 </td>
                                                 <td className="py-3">
-                                                    <div className="font-bold text-gray-800">{formatCurrency(day.total)}</div>
+                                                    <div className="font-bold text-gray-800 dark:text-gray-200">{formatCurrency(day.total)}</div>
                                                 </td>
                                                 <td className="py-3">
-                                                    <div className="text-sm text-gray-700">{formatCurrency(day.ticket_promedio)}</div>
+                                                    <div className="text-sm text-gray-700 dark:text-gray-300">{formatCurrency(day.ticket_promedio)}</div>
                                                 </td>
                                                 <td className="py-3">
                                                     {day.total > 0 ? (
@@ -325,17 +325,17 @@ export default function Dashboard({
                                 </table>
                             </div>
                             
-                            <div className="mt-6 pt-6 border-t border-gray-200">
+                            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <span className="text-sm text-gray-600">Total semana:</span>
-                                        <span className="ml-2 font-bold text-lg text-gray-800">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">Total semana:</span>
+                                        <span className="ml-2 font-bold text-lg text-gray-800 dark:text-gray-200">
                                             {formatCurrency(metrics.ventas.semana.total)}
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-sm text-gray-600">Total mes:</span>
-                                        <span className="ml-2 font-bold text-lg text-gray-800">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">Total mes:</span>
+                                        <span className="ml-2 font-bold text-lg text-gray-800 dark:text-gray-200">
                                             {formatCurrency(metrics.ventas.mes.total)}
                                         </span>
                                     </div>
@@ -344,10 +344,10 @@ export default function Dashboard({
                         </div>
 
                         {/* Meta diaria y rendimiento */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="mb-6">
-                                <h3 className="text-xl font-bold text-gray-800 mb-2">Meta diaria</h3>
-                                <p className="text-sm text-gray-600">Progreso del día</p>
+                                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Meta diaria</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Progreso del día</p>
                             </div>
                             
                             <div className="mb-6">
@@ -363,40 +363,40 @@ export default function Dashboard({
                                         style={{ width: `${Math.min(performance.meta_diaria?.porcentaje || 0, 100)}%` }}
                                     ></div>
                                 </div>
-                                <div className="flex justify-between mt-3 text-sm text-gray-600">
+                                <div className="flex justify-between mt-3 text-sm text-gray-600 dark:text-gray-400">
                                     <span>{formatCurrency(performance.meta_diaria?.progreso || 0)}</span>
                                     <span>{formatCurrency(performance.meta_diaria?.objetivo || 0)}</span>
                                 </div>
                             </div>
                             
                             <div className="space-y-4">
-                                <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
+                                <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-semibold text-blue-800">Ticket promedio</p>
-                                            <p className="text-2xl font-bold text-blue-900">
+                                            <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">Ticket promedio</p>
+                                            <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
                                                 {formatCurrency(performance.ticket_promedio)}
                                             </p>
                                         </div>
-                                        <CreditCard className="w-8 h-8 text-blue-600" />
+                                        <CreditCard className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                                     </div>
                                 </div>
                                 
-                                <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
+                                <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-semibold text-green-800">Conversión</p>
-                                            <p className="text-2xl font-bold text-green-900">
+                                            <p className="text-sm font-semibold text-green-800 dark:text-green-200">Conversión</p>
+                                            <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                                                 {performance.conversion_cliente}%
                                             </p>
                                         </div>
-                                        <TrendingUp className="w-8 h-8 text-green-600" />
+                                        <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="mt-6 pt-6 border-t border-gray-200">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-3">Acciones rápidas</h4>
+                            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Acciones rápidas</h4>
                                 <div className="grid grid-cols-2 gap-3">
                                     <Link
                                         href="/ventas/crear"
@@ -420,11 +420,11 @@ export default function Dashboard({
                     {/* Tercera fila: Ventas recientes y productos más vendidos */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                         {/* Ventas recientes */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-800">Ventas recientes</h3>
-                                    <p className="text-sm text-gray-600">Últimas transacciones</p>
+                                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Ventas recientes</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">Últimas transacciones</p>
                                 </div>
                                 <Link
                                     href="/ventas"
@@ -438,19 +438,19 @@ export default function Dashboard({
                             <div className="space-y-4">
                                 {recentSales.length > 0 ? (
                                     recentSales.map((sale) => (
-                                        <div key={sale.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-white hover:shadow-sm transition">
+                                        <div key={sale.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm transition">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div>
-                                                    <h4 className="font-semibold text-gray-800">Venta #{sale.numero_factura}</h4>
-                                                    <p className="text-sm text-gray-600">{sale.cliente_nombre}</p>
+                                                    <h4 className="font-semibold text-gray-800 dark:text-gray-200">Venta #{sale.numero_factura}</h4>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">{sale.cliente_nombre}</p>
                                                 </div>
-                                                <span className="font-bold text-lg text-gray-800">
+                                                <span className="font-bold text-lg text-gray-800 dark:text-gray-200">
                                                     {formatCurrency(sale.total)}
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between text-sm">
                                                 <div className="flex items-center space-x-4">
-                                                    <span className="text-gray-600">{sale.fecha_venta}</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">{sale.fecha_venta}</span>
                                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                                         sale.condicion_pago === 'CONTADO' 
                                                             ? 'bg-green-100 text-green-800'
@@ -459,16 +459,16 @@ export default function Dashboard({
                                                         {sale.condicion_pago}
                                                     </span>
                                                 </div>
-                                                <span className="text-gray-600">
+                                                <span className="text-gray-600 dark:text-gray-400">
                                                     {sale.items_count} {sale.items_count === 1 ? 'producto' : 'productos'}
                                                 </span>
                                             </div>
                                             {sale.items?.length > 0 && (
-                                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                                    <div className="text-xs text-gray-600">Productos:</div>
+                                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400">Productos:</div>
                                                     <div className="flex flex-wrap gap-1 mt-1">
                                                         {sale.items.map((item, idx) => (
-                                                            <span key={idx} className="bg-white border border-gray-300 px-2 py-1 rounded text-xs">
+                                                            <span key={idx} className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-2 py-1 rounded text-xs text-gray-800 dark:text-gray-200">
                                                                 {item.producto} ({item.cantidad})
                                                             </span>
                                                         ))}
@@ -479,8 +479,8 @@ export default function Dashboard({
                                     ))
                                 ) : (
                                     <div className="text-center py-8">
-                                        <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                        <p className="text-gray-500">No hay ventas recientes</p>
+                                        <ShoppingCart className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                        <p className="text-gray-500 dark:text-gray-400">No hay ventas recientes</p>
                                         <Link
                                             href="/ventas/crear"
                                             className="mt-2 inline-block text-blue-600 hover:text-blue-800 font-semibold"
@@ -493,11 +493,11 @@ export default function Dashboard({
                         </div>
 
                         {/* Productos más vendidos */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-800">Productos más vendidos</h3>
-                                    <p className="text-sm text-gray-600">Este mes</p>
+                                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Productos más vendidos</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">Este mes</p>
                                 </div>
                                 <Link
                                     href="/productos"
@@ -511,21 +511,21 @@ export default function Dashboard({
                             <div className="space-y-4">
                                 {topProducts.length > 0 ? (
                                     topProducts.map((product, index) => (
-                                        <div key={product.id} className="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-white hover:shadow-sm transition">
-                                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mr-4">
-                                                <span className="font-bold text-purple-700">
+                                        <div key={product.id} className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm transition">
+                                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-xl flex items-center justify-center mr-4">
+                                                <span className="font-bold text-purple-700 dark:text-purple-200">
                                                     #{index + 1}
                                                 </span>
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-800 truncate">{product.nombre}</h4>
-                                                <p className="text-sm text-gray-600">Código: {product.codigo}</p>
+                                                <h4 className="font-semibold text-gray-800 dark:text-gray-200 truncate">{product.nombre}</h4>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">Código: {product.codigo}</p>
                                             </div>
                                             <div className="text-right">
-                                                <div className="font-bold text-gray-800">
+                                                <div className="font-bold text-gray-800 dark:text-gray-200">
                                                     {formatNumber(product.total_vendido)} uds
                                                 </div>
-                                                <div className="text-sm text-purple-600 font-semibold">
+                                                <div className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
                                                     {formatCurrency(product.total_ingresos)}
                                                 </div>
                                             </div>
@@ -533,22 +533,22 @@ export default function Dashboard({
                                     ))
                                 ) : (
                                     <div className="text-center py-8">
-                                        <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                        <p className="text-gray-500">No hay datos de ventas este mes</p>
+                                        <Package className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                        <p className="text-gray-500 dark:text-gray-400">No hay datos de ventas este mes</p>
                                     </div>
                                 )}
                             </div>
                             
-                            <div className="mt-6 pt-6 border-t border-gray-200">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-3">Resumen sucursal</h4>
+                            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Resumen sucursal</h4>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-xl">
-                                        <p className="text-xs text-blue-800 font-semibold">Sucursal</p>
-                                        <p className="font-bold text-blue-900 truncate">{metrics.sucursal.nombre}</p>
+                                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 p-3 rounded-xl">
+                                        <p className="text-xs text-blue-800 dark:text-blue-200 font-semibold">Sucursal</p>
+                                        <p className="font-bold text-blue-900 dark:text-blue-100 truncate">{metrics.sucursal.nombre}</p>
                                     </div>
-                                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-xl">
-                                        <p className="text-xs text-green-800 font-semibold">Estado</p>
-                                        <p className="font-bold text-green-900">
+                                    <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 p-3 rounded-xl">
+                                        <p className="text-xs text-green-800 dark:text-green-200 font-semibold">Estado</p>
+                                        <p className="font-bold text-green-900 dark:text-green-100">
                                             {metrics.sucursal.activa ? 'Activa' : 'Inactiva'}
                                         </p>
                                     </div>
@@ -558,11 +558,11 @@ export default function Dashboard({
                     </div>
 
                     {/* Información del sistema */}
-                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-800">Sistema ERP</h3>
-                                <p className="text-sm text-gray-600">Información y estado del sistema</p>
+                                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Sistema ERP</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Información y estado del sistema</p>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <button className="p-2 hover:bg-gray-100 rounded-lg transition">
@@ -575,58 +575,58 @@ export default function Dashboard({
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl">
                                 <div className="flex items-center">
-                                    <div className="bg-green-100 p-2 rounded-lg mr-3">
-                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <div className="bg-green-100 dark:bg-green-900 p-2 rounded-lg mr-3">
+                                        <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-700">Estado</p>
-                                        <p className="text-lg font-bold text-green-700">Operativo</p>
+                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estado</p>
+                                        <p className="text-lg font-bold text-green-700 dark:text-green-400">Operativo</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl">
                                 <div className="flex items-center">
-                                    <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                                        <Clock className="w-5 h-5 text-blue-600" />
+                                    <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg mr-3">
+                                        <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-700">Uptime</p>
-                                        <p className="text-lg font-bold text-blue-700">99.8%</p>
+                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uptime</p>
+                                        <p className="text-lg font-bold text-blue-700 dark:text-blue-400">99.8%</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl">
                                 <div className="flex items-center">
-                                    <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                                        <Truck className="w-5 h-5 text-purple-600" />
+                                    <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg mr-3">
+                                        <Truck className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-700">Sincronización</p>
-                                        <p className="text-lg font-bold text-purple-700">Activa</p>
+                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sincronización</p>
+                                        <p className="text-lg font-bold text-purple-700 dark:text-purple-400">Activa</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl">
                                 <div className="flex items-center">
-                                    <div className="bg-amber-100 p-2 rounded-lg mr-3">
-                                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                                    <div className="bg-amber-100 dark:bg-amber-900 p-2 rounded-lg mr-3">
+                                        <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-700">Alertas</p>
-                                        <p className="text-lg font-bold text-amber-700">{alerts.length}</p>
+                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Alertas</p>
+                                        <p className="text-lg font-bold text-amber-700 dark:text-amber-400">{alerts.length}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div className="mt-6 pt-6 border-t border-gray-200">
+                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between">
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
                                     Última actualización: {new Date().toLocaleTimeString('es-ES')}
                                 </div>
                                 <Link

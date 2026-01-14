@@ -38,15 +38,15 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                             <User className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Editar Cliente
                             </h2>
-                            <p className="text-sm text-gray-600">{cliente.codigo} - {cliente.cedula_rnc}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{cliente.codigo} - {cliente.cedula_rnc}</p>
                         </div>
                     </div>
                     <Link
                         href={route('clientes.index')}
-                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -74,10 +74,10 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         }`}>
                                             {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
                                         </span>
-                                        <span className="text-sm text-gray-600">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
                                             {cliente.tipo_cliente === 'NATURAL' ? 'Persona Natural' : 'Persona Jurídica'}
                                         </span>
-                                        <span className="text-sm text-gray-600">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
                                             Creado: {new Date(cliente.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
@@ -99,12 +99,12 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información Básica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Código *
                                             </label>
                                             <input
@@ -122,7 +122,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Tipo de Cliente *
                                             </label>
                                             <select
@@ -140,7 +140,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Nombre Completo *
                                             </label>
                                             <input
@@ -158,7 +158,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Cédula/RNC *
                                             </label>
                                             <input
@@ -176,7 +176,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Tipo Contribuyente *
                                             </label>
                                             <select
@@ -199,12 +199,12 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
 
                                 {/* Información de Contacto */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información de Contacto
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Teléfono *
                                             </label>
                                             <input
@@ -222,7 +222,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Teléfono Alternativo
                                             </label>
                                             <input
@@ -234,7 +234,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Email
                                             </label>
                                             <input
@@ -254,12 +254,12 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
 
                                 {/* Dirección */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Dirección
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Provincia *
                                             </label>
                                             <select
@@ -279,7 +279,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Municipio *
                                             </label>
                                             <input
@@ -297,7 +297,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Sector *
                                             </label>
                                             <input
@@ -315,7 +315,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Dirección Completa *
                                             </label>
                                             <input
@@ -336,12 +336,12 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
 
                                 {/* Información Comercial */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información Comercial
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Límite de Crédito ($)
                                             </label>
                                             <div className="relative">
@@ -359,7 +359,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Días de Crédito
                                             </label>
                                             <input
@@ -371,7 +371,7 @@ export default function Edit({ auth, cliente, tipos_cliente, tipos_contribuyente
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Descuento (%)
                                             </label>
                                             <div className="relative">

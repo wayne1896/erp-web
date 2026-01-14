@@ -122,15 +122,15 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                             <Package className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Crear Nuevo Producto
                             </h2>
-                            <p className="text-sm text-gray-600">Agregar nuevo producto al inventario</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Agregar nuevo producto al inventario</p>
                         </div>
                     </div>
                     <Link
                         href={route('productos.index')}
-                        className="text-gray-600 hover:text-gray-900 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -189,18 +189,18 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                         </div>
                     )}
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={handleSubmit} className="p-6">
                             <div className="space-y-8">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                                        <Package className="w-5 h-5 mr-2 text-gray-400" />
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
+                                        <Package className="w-5 h-5 mr-2 text-gray-400 dark:text-gray-500" />
                                         Información Básica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código *
                                             </label>
                                             <input
@@ -210,8 +210,8 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                     setData('codigo', e.target.value);
                                                     clearErrors('codigo');
                                                 }}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                    errors.codigo ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                                                 }`}
                                                 placeholder="PROD001"
                                                 required
@@ -223,7 +223,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código de Barras
                                             </label>
                                             <input
@@ -245,7 +245,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Nombre *
                                             </label>
                                             <input
@@ -268,7 +268,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Descripción
                                             </label>
                                             <textarea
@@ -278,14 +278,14 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                     clearErrors('descripcion');
                                                 }}
                                                 rows="3"
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 placeholder="Descripción detallada del producto..."
                                                 disabled={processing}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Categoría *
                                             </label>
                                             <select
@@ -318,7 +318,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Unidad de Medida *
                                             </label>
                                             <select
@@ -327,7 +327,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                     setData('unidad_medida', e.target.value);
                                                     clearErrors('unidad_medida');
                                                 }}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                 required
                                                 disabled={processing}
                                             >
@@ -342,14 +342,14 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                 </div>
 
                                 {/* Precios */}
-                                <div className="border-t border-gray-200 pt-8">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <DollarSign className="w-5 h-5 mr-2 text-gray-400" />
                                         Precios
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Compra *
                                             </label>
                                             <div className="relative">
@@ -379,7 +379,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Venta *
                                             </label>
                                             <div className="relative">
@@ -407,14 +407,14 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                 <p className="mt-1 text-sm text-red-600">{errors.precio_venta}</p>
                                             )}
                                             {data.precio_venta > 0 && data.precio_compra > 0 && (
-                                                <p className="mt-1 text-sm text-gray-600">
+                                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                                                     Margen: {(((data.precio_venta - data.precio_compra) / data.precio_compra) * 100).toFixed(2)}%
                                                 </p>
                                             )}
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Mayorista
                                             </label>
                                             <div className="relative">
@@ -440,14 +440,14 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                 </div>
 
                                 {/* Impuestos */}
-                                <div className="border-t border-gray-200 pt-8">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <Percent className="w-5 h-5 mr-2 text-gray-400" />
                                         Impuestos
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Tasa ITBIS *
                                             </label>
                                             <select
@@ -471,7 +471,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Porcentaje ITBIS *
                                             </label>
                                             <div className="relative">
@@ -507,8 +507,8 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                 </div>
 
                                 {/* Stock */}
-                                <div className="border-t border-gray-200 pt-8">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <Tag className="w-5 h-5 mr-2 text-gray-400" />
                                         Control de Stock
                                     </h3>
@@ -533,7 +533,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                             
                                             {data.control_stock && (
                                                 <div className="w-48">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                         Stock Mínimo
                                                     </label>
                                                     <input
@@ -546,7 +546,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                             setData('stock_minimo', value);
                                                             clearErrors('stock_minimo');
                                                         }}
-                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                         disabled={processing}
                                                     />
                                                     {errors.stock_minimo && (
@@ -559,7 +559,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                         {data.control_stock && (
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                         Stock Inicial
                                                     </label>
                                                     <input
@@ -572,7 +572,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                             setData('stock_inicial', value);
                                                             clearErrors('stock_inicial');
                                                         }}
-                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                                         disabled={processing}
                                                     />
                                                     {errors.stock_inicial && (
@@ -581,7 +581,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                         Costo Inicial (Unitario)
                                                     </label>
                                                     <div className="relative">
@@ -608,7 +608,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                         Sucursal para Stock *
                                                     </label>
                                                     <select
@@ -645,7 +645,7 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                 </div>
 
                                 {/* Estado y Acciones */}
-                                <div className="border-t border-gray-200 pt-8">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
                                     <div className="flex items-center mb-6">
                                         <input
                                             type="checkbox"
@@ -658,20 +658,20 @@ export default function Create({ auth, categorias = [], tasas_itbis = [], unidad
                                             className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                             disabled={processing}
                                         />
-                                        <label htmlFor="activo" className="ml-2 text-sm font-medium text-gray-900">
+                                        <label htmlFor="activo" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-200">
                                             Producto Activo
                                         </label>
                                     </div>
 
                                     <div className="flex justify-between items-center">
-                                        <div className="text-sm text-gray-500">
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">
                                             <p>Los campos marcados con * son obligatorios</p>
                                         </div>
                                         
                                         <div className="flex space-x-3">
                                             <Link
                                                 href={route('productos.index')}
-                                                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                                 disabled={processing}
                                             >
                                                 Cancelar

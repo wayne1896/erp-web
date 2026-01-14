@@ -81,8 +81,8 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                 <Head title="Producto no encontrado" />
                 <div className="py-12">
                     <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">Producto no encontrado</h2>
+                        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Producto no encontrado</h2>
                             <Link href={route('productos.index')} className="text-blue-600 hover:text-blue-800">
                                 ← Volver a la lista de productos
                             </Link>
@@ -142,18 +142,18 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                         </div>
                     )}
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={handleSubmit} className="p-6">
                             <div className="space-y-8">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <Package className="w-5 h-5 mr-2 text-gray-400" />
                                         Información Básica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código *
                                             </label>
                                             <input
@@ -163,8 +163,8 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                                     setData('codigo', e.target.value);
                                                     clearErrors('codigo');
                                                 }}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                    errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                    errors.codigo ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                                                 }`}
                                                 required
                                                 disabled={processing}
@@ -175,7 +175,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código de Barras
                                             </label>
                                             <input
@@ -196,7 +196,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Nombre *
                                             </label>
                                             <input
@@ -218,7 +218,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Descripción
                                             </label>
                                             <textarea
@@ -234,7 +234,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Categoría *
                                             </label>
                                             <select
@@ -262,7 +262,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Unidad de Medida *
                                             </label>
                                             <select
@@ -293,7 +293,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Compra *
                                             </label>
                                             <div className="relative">
@@ -323,7 +323,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Venta *
                                             </label>
                                             <div className="relative">
@@ -351,14 +351,14 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                                 <p className="mt-1 text-sm text-red-600">{errors.precio_venta}</p>
                                             )}
                                             {data.precio_venta > 0 && data.precio_compra > 0 && (
-                                                <p className="mt-1 text-sm text-gray-600">
+                                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                                                     Margen: {(((data.precio_venta - data.precio_compra) / data.precio_compra) * 100).toFixed(2)}%
                                                 </p>
                                             )}
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Precio Mayorista
                                             </label>
                                             <div className="relative">
@@ -391,7 +391,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Tasa ITBIS *
                                             </label>
                                             <select
@@ -415,7 +415,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Porcentaje ITBIS *
                                             </label>
                                             <div className="relative">
@@ -477,7 +477,7 @@ export default function Edit({ auth, producto, categorias = [], tasas_itbis = []
                                             
                                             {data.control_stock && (
                                                 <div className="w-48">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                         Stock Mínimo
                                                     </label>
                                                     <input

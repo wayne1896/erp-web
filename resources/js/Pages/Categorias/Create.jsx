@@ -66,15 +66,15 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
                             <Tag className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Crear Nueva Categoría
                             </h2>
-                            <p className="text-sm text-gray-600">Definir categoría de productos</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Definir categoría de productos</p>
                         </div>
                     </div>
                     <Link
                         href={route('categorias.index')}
-                        className="text-gray-600 hover:text-gray-900 flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Volver
@@ -98,25 +98,25 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
                         </div>
                     </div> */}
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={submit}>
                             <div className="p-6 space-y-6">
                                 {/* Información Básica */}
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">
                                         Información de la Categoría
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Nombre *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.nombre}
                                                 onChange={(e) => setData('nombre', e.target.value)}
-                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                                                    errors.nombre ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                                                    errors.nombre ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'
                                                 }`}
                                                 placeholder="Ej: Electrónica, Alimentos, Ropa"
                                                 required
@@ -131,7 +131,7 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Código *
                                             </label>
                                             <input
@@ -157,13 +157,13 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
 
                                 {/* Configuración de Impuestos */}
                                 <div className="border-t border-gray-200 pt-6">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
                                         <Percent className="w-5 h-5 mr-2 text-gray-400" />
                                         Configuración de Impuestos
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Tasa ITBIS *
                                             </label>
                                             <select
@@ -190,7 +190,7 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Porcentaje ITBIS *
                                             </label>
                                             <select
@@ -254,11 +254,11 @@ export default function Create({ auth, tasas_itbis = [], porcentajes_itbis = [] 
                             </div>
 
                             {/* Botones */}
-                            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                            <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-end space-x-3">
                                     <Link
                                         href={route('categorias.index')}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={processing}
                                     >
                                         Cancelar

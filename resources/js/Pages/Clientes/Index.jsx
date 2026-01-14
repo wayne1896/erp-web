@@ -33,7 +33,7 @@ export default function Index({ auth, clientes, filters, stats }) {
             user={auth.user}
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                         Gestión de Clientes
                     </h2>
                     <Link
@@ -53,57 +53,57 @@ export default function Index({ auth, clientes, filters, stats }) {
                     
                     {/* Estadísticas */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                                    <Users className="w-6 h-6 text-blue-600" />
+                                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg mr-4">
+                                    <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Total Clientes</p>
-                                    <p className="text-2xl font-bold">{stats.total}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Clientes</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-green-100 p-3 rounded-lg mr-4">
-                                    <UserCheck className="w-6 h-6 text-green-600" />
+                                <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg mr-4">
+                                    <UserCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Activos</p>
-                                    <p className="text-2xl font-bold">{stats.activos}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Activos</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.activos}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-yellow-100 p-3 rounded-lg mr-4">
-                                    <UserX className="w-6 h-6 text-yellow-600" />
+                                <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg mr-4">
+                                    <UserX className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Inactivos</p>
-                                    <p className="text-2xl font-bold">{stats.total - stats.activos}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Inactivos</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total - stats.activos}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                                    <DollarSign className="w-6 h-6 text-purple-600" />
+                                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg mr-4">
+                                    <DollarSign className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Con Crédito</p>
-                                    <p className="text-2xl font-bold">{stats.con_credito}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Con Crédito</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.con_credito}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Barra de búsqueda */}
-                    <div className="bg-white rounded-lg shadow mb-6 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
                         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1">
                                 <div className="relative">
@@ -113,7 +113,7 @@ export default function Index({ auth, clientes, filters, stats }) {
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
                                         placeholder="Buscar por nombre, documento o email..."
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                     />
                                 </div>
                             </div>
@@ -136,12 +136,12 @@ export default function Index({ auth, clientes, filters, stats }) {
                     </div>
 
                     {/* Tabla de clientes */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Código
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -164,57 +164,57 @@ export default function Index({ auth, clientes, filters, stats }) {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {clientes.data.length > 0 ? (
                                         clientes.data.map((cliente) => (
-                                            <tr key={cliente.id} className="hover:bg-gray-50">
+                                            <tr key={cliente.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                         {cliente.codigo}
                                                     </div>
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
                                                         {cliente.tipo_cliente === 'NATURAL' ? 'Natural' : 'Jurídico'}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
-                                                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                            <span className="text-blue-600 font-semibold">
+                                                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                                            <span className="text-blue-600 dark:text-blue-400 font-semibold">
                                                                 {cliente.nombre_completo.charAt(0)}
                                                             </span>
                                                         </div>
                                                         <div className="ml-4">
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                                 {cliente.nombre_completo}
                                                             </div>
-                                                            <div className="text-sm text-gray-500">
+                                                            <div className="text-sm text-gray-500 dark:text-gray-400">
                                                                 {cliente.tipo_contribuyente}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{cliente.cedula_rnc}</div>
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm text-gray-900 dark:text-gray-100">{cliente.cedula_rnc}</div>
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
                                                         {/* Aquí puedes formatear si quieres */}
                                                         {cliente.cedula_rnc?.length === 9 ? 'RNC' : 
                                                          cliente.cedula_rnc?.length === 11 ? 'Cédula' : 'Documento'}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{cliente.email || 'Sin email'}</div>
-                                                    <div className="text-sm text-gray-500">{cliente.telefono || 'Sin teléfono'}</div>
+                                                    <div className="text-sm text-gray-900 dark:text-gray-100">{cliente.email || 'Sin email'}</div>
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">{cliente.telefono || 'Sin teléfono'}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                         ${parseFloat(cliente.limite_credito).toFixed(2)}
                                                     </div>
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
                                                         Días: {cliente.dias_credito}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${cliente.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${cliente.activo ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}`}>
                                                         {cliente.activo ? 'Activo' : 'Inactivo'}
                                                     </span>
                                                 </td>
@@ -251,7 +251,7 @@ export default function Index({ auth, clientes, filters, stats }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                                            <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                                                 No se encontraron clientes
                                             </td>
                                         </tr>
@@ -262,9 +262,9 @@ export default function Index({ auth, clientes, filters, stats }) {
 
                         {/* Paginación */}
                         {clientes.links && (
-                            <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                            <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                                 <div className="flex items-center justify-between">
-                                    <div className="text-sm text-gray-700">
+                                    <div className="text-sm text-gray-700 dark:text-gray-300">
                                         Mostrando <span className="font-medium">{clientes.from}</span> a{' '}
                                         <span className="font-medium">{clientes.to}</span> de{' '}
                                         <span className="font-medium">{clientes.total}</span> resultados
@@ -278,7 +278,7 @@ export default function Index({ auth, clientes, filters, stats }) {
                                                 className={`px-3 py-1 rounded-md ${
                                                     link.active
                                                         ? 'bg-blue-600 text-white'
-                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                                 } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />

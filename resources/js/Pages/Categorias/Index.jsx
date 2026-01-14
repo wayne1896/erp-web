@@ -80,7 +80,7 @@ export default function Index({ auth, categorias, filters, stats }) {
             user={auth?.user}
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                         Gestión de Categorías
                     </h2>
                     <Link
@@ -130,69 +130,69 @@ export default function Index({ auth, categorias, filters, stats }) {
 
                     {/* Estadísticas Mejoradas */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Total</p>
-                                    <p className="text-2xl font-bold">{safeStats.total}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.total}</p>
                                 </div>
-                                <BarChart3 className="w-8 h-8 text-blue-500" />
+                                <BarChart3 className="w-8 h-8 text-blue-500 dark:text-blue-400" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-green-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Con Productos</p>
-                                    <p className="text-2xl font-bold">{safeStats.con_productos}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Con Productos</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.con_productos}</p>
                                 </div>
-                                <Package className="w-8 h-8 text-green-500" />
+                                <Package className="w-8 h-8 text-green-500 dark:text-green-400" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-red-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">ITBIS 18%</p>
-                                    <p className="text-2xl font-bold">{safeStats.itbis_18}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">ITBIS 18%</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.itbis_18}</p>
                                 </div>
-                                <TrendingUp className="w-8 h-8 text-red-500" />
+                                <TrendingUp className="w-8 h-8 text-red-500 dark:text-red-400" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-orange-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">ITBIS 16%</p>
-                                    <p className="text-2xl font-bold">{safeStats.itbis_16 || 0}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">ITBIS 16%</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.itbis_16 || 0}</p>
                                 </div>
-                                <TrendingDown className="w-8 h-8 text-orange-500" />
+                                <TrendingDown className="w-8 h-8 text-orange-500 dark:text-orange-400" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-green-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">ITBIS 0%</p>
-                                    <p className="text-2xl font-bold">{safeStats.itbis_0 || 0}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">ITBIS 0%</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.itbis_0 || 0}</p>
                                 </div>
-                                <MinusCircle className="w-8 h-8 text-green-500" />
+                                <MinusCircle className="w-8 h-8 text-green-500 dark:text-green-400" />
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Exento</p>
-                                    <p className="text-2xl font-bold">{safeStats.exento || 0}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Exento</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.exento || 0}</p>
                                 </div>
-                                <Percent className="w-8 h-8 text-blue-500" />
+                                <Percent className="w-8 h-8 text-blue-500 dark:text-blue-400" />
                             </div>
                         </div>
                     </div>
 
                     {/* Barra de búsqueda */}
-                    <div className="bg-white rounded-lg shadow mb-6 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
                         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1">
                                 <div className="relative">
@@ -202,7 +202,7 @@ export default function Index({ auth, categorias, filters, stats }) {
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
                                         placeholder="Buscar por nombre, código o descripción..."
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                     />
                                 </div>
                             </div>
@@ -212,7 +212,7 @@ export default function Index({ auth, categorias, filters, stats }) {
                                     <select
                                         value={data.per_page}
                                         onChange={(e) => setData('per_page', e.target.value)}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                     >
                                         <option value="10">10 por página</option>
                                         <option value="25">25 por página</option>
@@ -241,12 +241,12 @@ export default function Index({ auth, categorias, filters, stats }) {
                     </div>
 
                     {/* Tabla de categorías */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Categoría
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -266,30 +266,30 @@ export default function Index({ auth, categorias, filters, stats }) {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {safeCategorias.data && safeCategorias.data.length > 0 ? (
                                         safeCategorias.data.map((categoria) => (
                                             <tr 
                                                 key={categoria.id} 
-                                                className="hover:bg-gray-50 transition duration-150"
+                                                className="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150"
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center">
-                                                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                            <Tag className="w-5 h-5 text-blue-600" />
+                                                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                                            <Tag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                         </div>
                                                         <div className="ml-4">
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                                 {categoria.nombre || 'Sin nombre'}
                                                             </div>
-                                                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
                                                                 {categoria.descripcion || 'Sin descripción'}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-mono bg-gray-100 px-3 py-1 rounded-lg inline-block border border-gray-200">
+                                                    <div className="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg inline-block border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                                                         {categoria.codigo || 'N/A'}
                                                     </div>
                                                 </td>
@@ -305,22 +305,22 @@ export default function Index({ auth, categorias, filters, stats }) {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
-                                                        <Package className="w-4 h-4 text-gray-400 mr-2" />
+                                                        <Package className="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2" />
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                                 {categoria.productos_count || 0}
                                                             </div>
-                                                            <div className="text-xs text-gray-500">
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">
                                                                 productos
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">
+                                                    <div className="text-sm text-gray-900 dark:text-gray-100">
                                                         {new Date(categoria.created_at).toLocaleDateString('es-ES')}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
                                                         {new Date(categoria.created_at).toLocaleTimeString('es-ES', { 
                                                             hour: '2-digit', 
                                                             minute: '2-digit' 
@@ -395,9 +395,9 @@ export default function Index({ auth, categorias, filters, stats }) {
 
                         {/* Paginación */}
                         {safeCategorias.links && safeCategorias.links.length > 0 && (
-                            <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                            <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                    <div className="text-sm text-gray-700">
+                                    <div className="text-sm text-gray-700 dark:text-gray-300">
                                         <span className="font-medium">{safeCategorias.from || 0}</span> -{' '}
                                         <span className="font-medium">{safeCategorias.to || 0}</span> de{' '}
                                         <span className="font-medium">{safeCategorias.total || 0}</span> resultados
@@ -412,8 +412,8 @@ export default function Index({ auth, categorias, filters, stats }) {
                                                     link.active
                                                         ? 'bg-blue-600 text-white font-medium'
                                                         : link.url
-                                                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                                                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                        : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                                                 }`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />

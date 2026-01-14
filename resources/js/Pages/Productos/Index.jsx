@@ -51,7 +51,7 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
             user={auth.user}
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                         Gestión de Productos
                     </h2>
                     <Link
@@ -70,64 +70,64 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Mensajes flash */}
                     {flash?.success && (
-                        <div className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+                        <div className="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg">
                             {flash.success}
                         </div>
                     )}
 
                     {/* Estadísticas */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                                    <Package className="w-6 h-6 text-blue-600" />
+                                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg mr-4">
+                                    <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Total Productos</p>
-                                    <p className="text-2xl font-bold">{safeStats.total}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Productos</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.total}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-green-100 p-3 rounded-lg mr-4">
-                                    <Package className="w-6 h-6 text-green-600" />
+                                <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg mr-4">
+                                    <Package className="w-6 h-6 text-green-600 dark:text-green-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Activos</p>
-                                    <p className="text-2xl font-bold">{safeStats.activos}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Activos</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.activos}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-yellow-100 p-3 rounded-lg mr-4">
-                                    <AlertCircle className="w-6 h-6 text-yellow-600" />
+                                <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg mr-4">
+                                    <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Stock Bajo</p>
-                                    <p className="text-2xl font-bold">{safeStats.stock_bajo}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Stock Bajo</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.stock_bajo}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                             <div className="flex items-center">
-                                <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                                    <Percent className="w-6 h-6 text-purple-600" />
+                                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg mr-4">
+                                    <Percent className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-500">Exentos ITBIS</p>
-                                    <p className="text-2xl font-bold">{safeStats.exento_itbis}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Exentos ITBIS</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{safeStats.exento_itbis}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Filtros */}
-                    <div className="bg-white rounded-lg shadow mb-6 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
                         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1">
                                 <div className="relative">
@@ -137,7 +137,7 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
                                         placeholder="Buscar por código, nombre, código de barras..."
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                     />
                                 </div>
                             </div>
@@ -146,7 +146,7 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                 <select
                                     value={data.categoria_id}
                                     onChange={(e) => setData('categoria_id', e.target.value)}
-                                    className="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                 >
                                     <option value="">Todas las categorías</option>
                                     {safeCategorias.map((categoria) => (
@@ -161,7 +161,7 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                 <select
                                     value={data.per_page}
                                     onChange={(e) => setData('per_page', e.target.value)}
-                                    className="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                 >
                                     <option value="10">10 por página</option>
                                     <option value="25">25 por página</option>
@@ -191,12 +191,12 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                     </div>
 
                     {/* Tabla de productos */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             <div className="flex items-center">
                                                 <Hash className="w-4 h-4 mr-2" />
                                                 Código
@@ -240,7 +240,7 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {safeProductos.data && safeProductos.data.length > 0 ? (
                                         safeProductos.data.map((producto) => {
                                             const tieneStockBajo = producto.control_stock && 
@@ -253,18 +253,18 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                                 : 0;
 
                                             return (
-                                                <tr key={producto.id} className="hover:bg-gray-50 transition-colors">
+                                                <tr key={producto.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center">
-                                                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                                <Package className="w-5 h-5 text-gray-600" />
+                                                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                                <Package className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                                             </div>
                                                             <div className="ml-4">
-                                                                <div className="text-sm font-medium text-gray-900">
+                                                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                                     {producto.codigo || 'N/A'}
                                                                 </div>
                                                                 {producto.codigo_barras && (
-                                                                    <div className="text-sm text-gray-500 flex items-center">
+                                                                    <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                                                                         <Barcode className="w-3 h-3 mr-1" />
                                                                         {producto.codigo_barras}
                                                                     </div>
@@ -273,37 +273,37 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                             {producto.nombre || 'Sin nombre'}
                                                         </div>
                                                         {producto.descripcion && (
-                                                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
                                                                 {producto.descripcion}
                                                             </div>
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center">
-                                                            <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                                                                <Tag className="w-4 h-4 text-blue-600" />
+                                                            <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg mr-3">
+                                                                <Tag className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                                             </div>
-                                                            <div className="text-sm text-gray-900">
+                                                            <div className="text-sm text-gray-900 dark:text-gray-100">
                                                                 {producto.categoria?.nombre || 'Sin categoría'}
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="space-y-1">
-                                                            <div className="text-sm text-gray-900 flex items-center">
-                                                                <ShoppingCart className="w-3 h-3 mr-2 text-gray-400" />
+                                                            <div className="text-sm text-gray-900 dark:text-gray-100 flex items-center">
+                                                                <ShoppingCart className="w-3 h-3 mr-2 text-gray-400 dark:text-gray-500" />
                                                                 Compra: ${parseFloat(producto.precio_compra || 0).toFixed(2)}
                                                             </div>
-                                                            <div className="text-sm font-medium text-green-600 flex items-center">
+                                                            <div className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center">
                                                                 <DollarSign className="w-3 h-3 mr-2" />
                                                                 Venta: ${parseFloat(producto.precio_venta || 0).toFixed(2)}
                                                             </div>
                                                             {producto.precio_mayor && (
-                                                                <div className="text-sm text-blue-600 flex items-center">
+                                                                <div className="text-sm text-blue-600 dark:text-blue-400 flex items-center">
                                                                     <Truck className="w-3 h-3 mr-2" />
                                                                     Mayor: ${parseFloat(producto.precio_mayor).toFixed(2)}
                                                                 </div>
@@ -312,18 +312,18 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="space-y-1">
-                                                            <div className="text-sm text-gray-900">
+                                                            <div className="text-sm text-gray-900 dark:text-gray-100">
                                                                 {producto.unidad_medida || 'Unidad'}
                                                             </div>
                                                             <div className={`text-sm font-medium flex items-center ${
-                                                                tieneStockBajo ? 'text-red-600' : 'text-green-600'
+                                                                tieneStockBajo ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
                                                             }`}>
-                                                                <Layers className={`w-3 h-3 mr-2 ${tieneStockBajo ? 'text-red-500' : 'text-green-500'}`} />
+                                                                <Layers className={`w-3 h-3 mr-2 ${tieneStockBajo ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400'}`} />
                                                                 Stock: {stockSucursal}
                                                             </div>
                                                             {producto.control_stock && (
-                                                                <div className="text-xs text-gray-500 flex items-center">
-                                                                    <AlertCircle className="w-3 h-3 mr-1 text-yellow-500" />
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                                                    <AlertCircle className="w-3 h-3 mr-1 text-yellow-500 dark:text-yellow-400" />
                                                                     Mín: {producto.stock_minimo || 0}
                                                                 </div>
                                                             )}
@@ -333,19 +333,19 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                                         <div className="space-y-2">
                                                             <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                                 producto.activo
-                                                                    ? 'bg-green-100 text-green-800'
-                                                                    : 'bg-red-100 text-red-800'
+                                                                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                                                                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                                                             }`}>
                                                                 {producto.activo ? 'Activo' : 'Inactivo'}
                                                             </span>
                                                             <div className="text-sm">
                                                                 {producto.exento_itbis ? (
-                                                                    <span className="text-blue-600 flex items-center">
+                                                                    <span className="text-blue-600 dark:text-blue-400 flex items-center">
                                                                         <Percent className="w-3 h-3 mr-1" />
                                                                         Exento ITBIS
                                                                     </span>
                                                                 ) : (
-                                                                    <span className="text-gray-600 flex items-center">
+                                                                    <span className="text-gray-600 dark:text-gray-400 flex items-center">
                                                                         <Percent className="w-3 h-3 mr-1" />
                                                                         ITBIS {producto.itbis_porcentaje || 0}%
                                                                     </span>
@@ -407,9 +407,9 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
 
                         {/* Paginación */}
                         {safeProductos.data && safeProductos.data.length > 0 && safeProductos.links && (
-                            <div className="bg-white px-6 py-4 border-t border-gray-200">
+                            <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center justify-between">
-                                    <div className="text-sm text-gray-700">
+                                    <div className="text-sm text-gray-700 dark:text-gray-300">
                                         Mostrando <span className="font-medium">{safeProductos.from}</span> a{' '}
                                         <span className="font-medium">{safeProductos.to}</span> de{' '}
                                         <span className="font-medium">{safeProductos.total}</span> resultados
@@ -424,8 +424,8 @@ export default function Index({ auth, productos, filters, categorias, stats }) {
                                                     link.active
                                                         ? 'bg-blue-600 text-white'
                                                         : link.url
-                                                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                                                 }`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />

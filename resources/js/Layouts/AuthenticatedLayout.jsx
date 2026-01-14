@@ -2,6 +2,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import ThemeToggle from '@/Components/ThemeToggle';
 import { Link, usePage } from '@inertiajs/react';
 import { useState, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
@@ -12,14 +13,14 @@ export default function AuthenticatedLayout({ header, children }) {
     const [inventarioOpen, setInventarioOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+            <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
                                 <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                                 </Link>
                             </div>
 
@@ -47,8 +48,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                             route().current('categorias.*') || 
                                             route().current('proveedores.*') || 
                                             route().current('productos.*')
-                                                ? 'border-b-2 border-blue-500 text-gray-900'
-                                                : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                                ? 'border-b-2 border-blue-500 text-gray-900 dark:text-gray-100'
+                                                : 'border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                     >
                                         Inventario
@@ -75,7 +76,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         leaveFrom="transform opacity-100 scale-100"
                                         leaveTo="transform opacity-0 scale-95"
                                     >
-                                        <Menu.Items className="absolute left-0 top-full mt-0 w-48 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                                        <Menu.Items className="absolute left-0 top-full mt-0 w-48 origin-top-left rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50">
                                             <div className="py-1">
                                                 <Menu.Item>
                                                     {({ active }) => (
@@ -83,10 +84,10 @@ export default function AuthenticatedLayout({ header, children }) {
                                                             href={route('productos.index')}
                                                             className={`block px-4 py-2 text-sm ${
                                                                 route().current('productos.*')
-                                                                    ? 'bg-blue-50 text-blue-700'
+                                                                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
                                                                     : active
-                                                                    ? 'bg-gray-100 text-gray-900'
-                                                                    : 'text-gray-700'
+                                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                                    : 'text-gray-700 dark:text-gray-300'
                                                             }`}
                                                         >
                                                             Productos
@@ -99,10 +100,10 @@ export default function AuthenticatedLayout({ header, children }) {
                                                             href={route('categorias.index')}
                                                             className={`block px-4 py-2 text-sm ${
                                                                 route().current('categorias.*')
-                                                                    ? 'bg-blue-50 text-blue-700'
+                                                                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
                                                                     : active
-                                                                    ? 'bg-gray-100 text-gray-900'
-                                                                    : 'text-gray-700'
+                                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                                    : 'text-gray-700 dark:text-gray-300'
                                                             }`}
                                                         >
                                                             Categorías
@@ -115,10 +116,10 @@ export default function AuthenticatedLayout({ header, children }) {
                                                             href={route('proveedores.index')}
                                                             className={`block px-4 py-2 text-sm ${
                                                                 route().current('proveedores.*')
-                                                                    ? 'bg-blue-50 text-blue-700'
+                                                                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
                                                                     : active
-                                                                    ? 'bg-gray-100 text-gray-900'
-                                                                    : 'text-gray-700'
+                                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                                    : 'text-gray-700 dark:text-gray-300'
                                                             }`}
                                                         >
                                                             Proveedores
@@ -142,13 +143,14 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         {/* DROPDOWN USUARIO - ESCRITORIO */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            <ThemeToggle />
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <span className="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                className="inline-flex items-center rounded-md border border-transparent bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium leading-4 text-gray-500 dark:text-gray-400 transition duration-150 ease-in-out hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none"
                                             >
                                                 {user.name}
                                                 <svg
@@ -315,17 +317,20 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
 
                     {/* USUARIO MÓVIL */}
-                    <div className="border-t border-gray-200 pb-1 pt-4">
+                    <div className="border-t border-gray-200 dark:border-gray-700 pb-1 pt-4">
                         <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
+                            <div className="text-base font-medium text-gray-800 dark:text-gray-200">
                                 {user.name}
                             </div>
-                            <div className="text-sm font-medium text-gray-500">
+                            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 {user.email}
                             </div>
                         </div>
 
                         <div className="mt-3 space-y-1">
+                            <div className="px-4 py-2">
+                                <ThemeToggle />
+                            </div>
                             <ResponsiveNavLink href={route('profile.edit')}>
                                 Perfil
                             </ResponsiveNavLink>
@@ -342,7 +347,7 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="bg-white shadow">
+                <header className="bg-white dark:bg-gray-800 shadow">
                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                         {header}
                     </div>
