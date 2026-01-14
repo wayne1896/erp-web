@@ -66,7 +66,12 @@ class Venta extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+    // Agregar esta relación como alias
+    public function usuario(): BelongsTo
+    {
+        return $this->vendedor();
+    }
+
     public function detalles(): HasMany
     {
         return $this->hasMany(DetalleVenta::class);

@@ -66,7 +66,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </svg>
                                     </Menu.Button>
                                     
-                                    {/* EL TRANSITION DEBE ESTAR DENTRO DEL MENU */}
                                     <Transition
                                         as={Fragment}
                                         enter="transition ease-out duration-200"
@@ -129,13 +128,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                             </div>
                                         </Menu.Items>
                                     </Transition>
-                                </Menu> {/* CIERRE CORRECTO DEL MENU */}
+                                </Menu>
                                 
-                                {/* Ventas (placeholder) */}
+                                {/* Ventas */}
                                 <NavLink
-                                    href="#"
+                                    href={route('ventas.index')}
                                     active={route().current('ventas.*')}
-                                    className="opacity-50 cursor-not-allowed"
                                 >
                                     Ventas
                                 </NavLink>
@@ -307,10 +305,10 @@ export default function AuthenticatedLayout({ header, children }) {
                             )}
                         </div>
                         
+                        {/* Ventas - Móvil */}
                         <ResponsiveNavLink
-                            href="#"
+                            href={route('ventas.index')}
                             active={route().current('ventas.*')}
-                            className="opacity-50 cursor-not-allowed"
                         >
                             Ventas
                         </ResponsiveNavLink>

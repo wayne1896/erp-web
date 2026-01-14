@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\Venta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class ClienteController extends Controller
 {
@@ -225,21 +226,138 @@ class ClienteController extends Controller
     }
 
     /**
-     * API: Buscar clientes para autocomplete
+     * API: Buscar clientes para autocomplete (VENTAS)
      */
     public function buscar(Request $request)
     {
-        $search = $request->query('q', '');
+        Log::info('Buscando clientes para ventas', [
+            'query' => $request->get('q'),
+            'modo' => $request->get('modo', 'nombre'),
+            'user_id' => auth()->id()
+        ]);
+
+        $query = $request->get('q');
+        $modo = $request->get('modo', 'nombre');
         
+        if (!$query || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
         $clientes = Cliente::where('activo', true)
-            ->where(function($query) use ($search) {
-                $query->where('nombre_completo', 'like', "%{$search}%")
-                      ->orWhere('cedula_rnc', 'like', "%{$search}%")
-                      ->orWhere('codigo', 'like', "%{$search}%");
+            ->when($modo === 'cedula', function($q) use ($query) {
+                return $q->where('cedula_rnc', 'like', "%{$query}%");
             })
-            ->limit(10)
-            ->get(['id', 'codigo', 'nombre_completo', 'cedula_rnc', 'email', 'telefono', 'limite_credito', 'saldo_pendiente']);
-        
+            ->when($modo === 'email', function($q) use ($query) {
+                return $q->where('email', 'like', "%{$query}%");
+            })
+            ->when($modo === 'nombre', function($q) use ($query) {
+                return $q->where('nombre_completo', 'like', "%{$query}%");
+            })
+            ->limit(20)
+            ->get()
+            ->map(function($cliente) {
+                return [
+                    'id' => $cliente->id,
+                    'codigo' => $cliente->codigo,
+                    'tipo' => $cliente->tipo_cliente === 'NATURAL' ? 'FISICA' : 'JURIDICA',
+                    'tipo_cliente' => $cliente->tipo_cliente,
+                    'cedula' => $cliente->cedula_rnc,
+                    'cedula_rnc' => $cliente->cedula_rnc,
+                    'nombre_completo' => $cliente->nombre_completo,
+                    'email' => $cliente->email,
+                    'telefono' => $cliente->telefono,
+                    'direccion' => $cliente->direccion,
+                    'limite_credito' => $cliente->limite_credito,
+                    'saldo_pendiente' => $cliente->saldo_pendiente,
+                ];
+            });
+
+        Log::info('Clientes encontrados', ['count' => $clientes->count()]);
+            
         return response()->json($clientes);
+    }
+/**
+ * Reporte de clientes
+ */
+public function reporteClientes()
+{
+    $clientes = Cliente::with(['ventas'])
+        ->orderBy('nombre_completo')
+        ->paginate(20);
+    
+    return Inertia::render('Clientes/Reporte', [
+        'clientes' => $clientes,
+    ]);
+}
+    /**
+     * API: Crear cliente rápido desde ventas
+     */
+    public function storeApi(Request $request)
+    {
+        Log::info('Creando cliente desde API', $request->all());
+
+        $request->validate([
+            'tipo' => 'required|in:FISICA,JURIDICA',
+            'cedula' => 'required|string|max:20|unique:clientes,cedula_rnc',
+            'nombre_completo' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'telefono' => 'nullable|string|max:20',
+            'direccion' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            // Generar código único
+            $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
+            $numero = $ultimoCliente ? intval(preg_replace('/[^0-9]/', '', $ultimoCliente->codigo)) + 1 : 1;
+            $codigo = 'CLI' . str_pad($numero, 6, '0', STR_PAD_LEFT);
+
+            $cliente = Cliente::create([
+                'codigo' => $codigo,
+                'tipo_cliente' => $request->tipo === 'FISICA' ? 'NATURAL' : 'JURIDICO',
+                'nombre_completo' => $request->nombre_completo,
+                'cedula_rnc' => $request->cedula,
+                'email' => $request->email,
+                'telefono' => $request->telefono,
+                'direccion' => $request->direccion,
+                'provincia' => 'Distrito Nacional',
+                'municipio' => 'Santo Domingo',
+                'sector' => 'Centro',
+                'tipo_contribuyente' => 'CONSUMIDOR_FINAL',
+                'activo' => true,
+                'limite_credito' => 0,
+                'dias_credito' => 0,
+                'descuento' => 0,
+            ]);
+
+            Log::info('Cliente creado exitosamente', ['cliente_id' => $cliente->id]);
+
+            return response()->json([
+                'success' => true,
+                'cliente' => [
+                    'id' => $cliente->id,
+                    'codigo' => $cliente->codigo,
+                    'tipo' => $cliente->tipo_cliente === 'NATURAL' ? 'FISICA' : 'JURIDICA',
+                    'tipo_cliente' => $cliente->tipo_cliente,
+                    'cedula' => $cliente->cedula_rnc,
+                    'cedula_rnc' => $cliente->cedula_rnc,
+                    'nombre_completo' => $cliente->nombre_completo,
+                    'email' => $cliente->email,
+                    'telefono' => $cliente->telefono,
+                    'direccion' => $cliente->direccion,
+                ],
+                'message' => 'Cliente creado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error creando cliente desde API', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear cliente: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

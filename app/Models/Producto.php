@@ -1,5 +1,4 @@
 <?php
-// app/Models/Producto.php
 
 namespace App\Models;
 
@@ -18,7 +17,7 @@ class Producto extends Model
         'nombre',
         'descripcion',
         'categoria_id',
-        'proveedor_id',  // Asegúrate de que esto esté en fillable
+        'proveedor_id',
         'unidad_medida',
         'precio_compra',
         'precio_venta',
@@ -42,22 +41,17 @@ class Producto extends Model
         'activo' => 'boolean'
     ];
     
-    protected $appends = [
-        'precio_venta_con_itbis',
-        'margen_ganancia',
-        'descripcion_itbis',
-        'unidad_medida_texto',
-        'stock_total',
-        'stock_disponible_total',
-        'valor_inventario_total'
-    ];
-    
     /**
      * Relaciones
      */
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaProducto::class, 'categoria_id');
+    }
+    
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
     
     public function inventarios(): HasMany
@@ -93,7 +87,7 @@ class Producto extends Model
     }
     
     /**
-     * Precio con ITBIS
+     * Calcula el precio con ITBIS
      */
     public function getPrecioVentaConItbisAttribute(): float
     {
@@ -104,7 +98,7 @@ class Producto extends Model
     }
     
     /**
-     * Margen de ganancia
+     * Calcula el margen de ganancia
      */
     public function getMargenGananciaAttribute(): float
     {
@@ -186,5 +180,19 @@ class Producto extends Model
     public function getValorInventarioTotalAttribute(): float
     {
         return $this->inventarios()->sum('valor_inventario');
+    }
+    
+    /**
+     * Buscar productos por término
+     */
+    public static function buscar($termino)
+    {
+        return self::where('nombre', 'like', "%{$termino}%")
+            ->orWhere('codigo', 'like', "%{$termino}%")
+            ->orWhere('codigo_barras', 'like', "%{$termino}%")
+            ->activos()
+            ->with(['categoria', 'inventarios'])
+            ->limit(20)
+            ->get();
     }
 }

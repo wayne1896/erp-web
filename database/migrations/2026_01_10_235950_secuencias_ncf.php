@@ -64,6 +64,7 @@ Schema::create('detalle_ventas', function (Blueprint $table) {
     $table->decimal('cantidad', 15, 2);
     $table->decimal('precio_unitario', 15, 2);
     $table->decimal('descuento', 15, 2)->default(0);
+    $table->decimal('descuento_monto', 15, 2)->default(0); // Monto en pesos
     $table->decimal('subtotal', 15, 2);
     $table->decimal('itbis_porcentaje', 5, 2)->default(18.00);
     $table->decimal('itbis_monto', 15, 2);
