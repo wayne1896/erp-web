@@ -117,12 +117,12 @@ class ProductoController extends Controller
         
         // Procesar valores booleanos
         $request->merge([
-            'exento_itbis' => $request->boolean('exento_itbis'),
+           'exento_itbis' => $request->boolean('exento_itbis'),
             'control_stock' => $request->boolean('control_stock'),
             'activo' => $request->boolean('activo'),
             'precio_mayor' => $request->precio_mayor ?: null,
-            'stock_inicial' => $request->control_stock ? ($request->stock_inicial ?: 0) : 0,
-            'costo_inicial' => $request->control_stock ? ($request->costo_inicial ?: $request->precio_compra) : 0,
+            'stock_inicial' => $request->control_stock ? (floatval($request->stock_inicial) ?: 0) : 0,
+            'costo_inicial' => $request->control_stock ? (floatval($request->costo_inicial) ?: floatval($request->precio_compra) ?: 0) : 0,
         ]);
 
         $validated = $request->validate([
@@ -140,7 +140,7 @@ class ProductoController extends Controller
             'tasa_itbis' => 'required|string|in:ITBIS1,ITBIS2,ITBIS3,EXENTO',
             'control_stock' => 'boolean',
             'stock_minimo' => 'nullable|numeric|min:0',
-            'stock_inicial' => 'nullable|numeric|min:0',
+            'stock_inicial' => 'required_if:control_stock,true|numeric|min:0',
             'costo_inicial' => 'nullable|numeric|min:0',
             'sucursal_id' => 'required_if:control_stock,true|exists:sucursales,id',
             'activo' => 'boolean'
@@ -148,7 +148,7 @@ class ProductoController extends Controller
 
         Log::info('Datos validados:', $validated);
 
-        // Iniciar transacción para crear producto e inventario
+         // Iniciar transacción para crear producto e inventario
         DB::beginTransaction();
         
         try {
@@ -157,13 +157,26 @@ class ProductoController extends Controller
             unset($productoData['sucursal_id'], $productoData['stock_inicial'], $productoData['costo_inicial']);
             
             $producto = Producto::create($productoData);
-            Log::info('Producto creado:', $producto->toArray());
+            \Log::info('Producto creado:', $producto->toArray());
             
             // Si tiene control de stock
             if ($validated['control_stock']) {
                 $sucursal_id = $validated['sucursal_id'] ?? ($request->user()->sucursal_id ?? Sucursal::principal()->id);
-                $stock_inicial = $validated['stock_inicial'] ?? 0;
-                $costo_inicial = $validated['costo_inicial'] ?? $validated['precio_compra'];
+                $stock_inicial = floatval($validated['stock_inicial']);
+                $costo_inicial = floatval($validated['costo_inicial']) ?: floatval($validated['precio_compra']);
+                
+                \Log::info('Configurando inventario:', [
+                    'producto_id' => $producto->id,
+                    'sucursal_id' => $sucursal_id,
+                    'stock_inicial' => $stock_inicial,
+                    'costo_inicial' => $costo_inicial,
+                ]);
+                
+                // Verificar que la sucursal existe
+                $sucursal = Sucursal::find($sucursal_id);
+                if (!$sucursal) {
+                    throw new \Exception("La sucursal con ID {$sucursal_id} no existe");
+                }
                 
                 // Crear inventario
                 $inventario = InventarioSucursal::create([
@@ -172,13 +185,14 @@ class ProductoController extends Controller
                     'stock_actual' => $stock_inicial,
                     'stock_reservado' => 0,
                     'costo_promedio' => $costo_inicial,
+                    'stock_minimo' => $validated['stock_minimo'] ?? 0,
                 ]);
                 
-                Log::info('Inventario creado:', $inventario->toArray());
+                \Log::info('Inventario creado:', $inventario->toArray());
                 
                 // Registrar movimiento inicial si hay stock
                 if ($stock_inicial > 0) {
-                    MovimientoInventario::create([
+                    $movimiento = MovimientoInventario::create([
                         'producto_id' => $producto->id,
                         'sucursal_id' => $sucursal_id,
                         'usuario_id' => $request->user()->id,
@@ -188,10 +202,14 @@ class ProductoController extends Controller
                         'cantidad_nueva' => $stock_inicial,
                         'costo' => $costo_inicial,
                         'motivo' => 'Stock inicial al crear producto',
+                        'referencia' => 'CREACION_PRODUCTO_' . now()->format('YmdHis'),
                     ]);
-                    Log::info('Movimiento de inventario creado para stock inicial');
+                    \Log::info('Movimiento de inventario creado:', $movimiento->toArray());
+                } else {
+                    \Log::info('Stock inicial es 0, no se crea movimiento');
                 }
             } else {
+                \Log::info('Producto sin control de stock, creando inventarios en todas las sucursales...');
                 // Si no controla stock, crear inventarios en todas las sucursales activas
                 $sucursales = Sucursal::activas()->get();
                 foreach ($sucursales as $sucursal) {
@@ -201,20 +219,23 @@ class ProductoController extends Controller
                         'stock_actual' => 0,
                         'stock_reservado' => 0,
                         'costo_promedio' => $validated['precio_compra'],
+                        'stock_minimo' => $validated['stock_minimo'] ?? 0,
                     ]);
                 }
+                \Log::info('Inventarios creados en ' . $sucursales->count() . ' sucursales');
             }
             
             DB::commit();
-            Log::info('Transacción completada exitosamente');
+            \Log::info('=== TRANSACCIÓN COMPLETADA EXITOSAMENTE ===');
             
             return redirect()->route('productos.index')
                 ->with('success', 'Producto creado exitosamente.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al crear producto: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+            \Log::error('Error al crear producto: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $validated ?? $request->all()
             ]);
             return back()->with('error', 'Error al crear el producto: ' . $e->getMessage());
         }

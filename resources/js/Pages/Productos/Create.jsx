@@ -15,7 +15,9 @@ import {
     TrendingUp,
     Shield,
     CheckCircle,
-    XCircle
+    XCircle,
+    Info,
+    Building
 } from 'lucide-react';
 
 export default function Create({ 
@@ -25,6 +27,16 @@ export default function Create({
     unidades_medida = [], 
     sucursales = [] 
 }) {
+    // Ordenar sucursales: principal primero, luego por nombre
+    const sucursalesOrdenadas = [...sucursales].sort((a, b) => {
+        if (a.principal && !b.principal) return -1;
+        if (!a.principal && b.principal) return 1;
+        return a.nombre.localeCompare(b.nombre);
+    });
+
+    // Encontrar sucursal principal
+    const sucursalPrincipal = sucursalesOrdenadas.find(s => s.principal);
+    
     const { data, setData, post, processing, errors, clearErrors } = useForm({
         codigo: '',
         codigo_barras: '',
@@ -42,7 +54,8 @@ export default function Create({
         stock_minimo: 0,
         stock_inicial: 0,
         costo_inicial: 0,
-        sucursal_id: sucursales[0]?.id || '',
+        // Seleccionar sucursal principal por defecto si existe
+        sucursal_id: sucursalPrincipal?.id || sucursalesOrdenadas[0]?.id || '',
         activo: true,
     });
 
@@ -63,6 +76,13 @@ export default function Create({
         ? unidades_medida
         : ['UNIDAD', 'KILO', 'LITRO', 'METRO', 'CAJA', 'PAQUETE', 'SACO'];
 
+    // Auto-seleccionar sucursal principal cuando se activa control de stock
+    useEffect(() => {
+        if (data.control_stock && !data.sucursal_id && sucursalPrincipal) {
+            setData('sucursal_id', sucursalPrincipal.id);
+        }
+    }, [data.control_stock, sucursalPrincipal]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         
@@ -74,7 +94,10 @@ export default function Create({
             itbis_porcentaje: parseFloat(data.itbis_porcentaje) || 0,
             stock_minimo: parseFloat(data.stock_minimo) || 0,
             stock_inicial: data.control_stock ? (parseFloat(data.stock_inicial) || 0) : 0,
-            costo_inicial: data.control_stock ? (parseFloat(data.costo_inicial) || data.precio_compra) : 0,
+            costo_inicial: data.control_stock ? (parseFloat(data.costo_inicial) || parseFloat(data.precio_compra) || 0) : 0,
+            control_stock: Boolean(data.control_stock),
+            exento_itbis: Boolean(data.exento_itbis),
+            activo: Boolean(data.activo),
         };
 
         post(route('productos.store'), {
@@ -279,7 +302,7 @@ export default function Create({
                                     <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
                                         Categorías requeridas
                                     </h3>
-                                    <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
+                                    <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
                                         Es necesario crear categorías antes de agregar productos.
                                     </p>
                                     <Link
@@ -818,7 +841,7 @@ export default function Create({
                                                         </label>
                                                         <input
                                                             type="number"
-                                                            step="0.01"
+                                                            step="any"
                                                             min="0"
                                                             value={data.stock_minimo}
                                                             onChange={(e) => {
@@ -836,11 +859,11 @@ export default function Create({
 
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                            Stock Inicial
+                                                            Stock Inicial *
                                                         </label>
                                                         <input
                                                             type="number"
-                                                            step="0.01"
+                                                            step="any"
                                                             min="0"
                                                             value={data.stock_inicial}
                                                             onChange={(e) => {
@@ -849,6 +872,7 @@ export default function Create({
                                                                 clearErrors('stock_inicial');
                                                             }}
                                                             className="mt-1 block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                            required={data.control_stock}
                                                             disabled={processing}
                                                         />
                                                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -866,7 +890,7 @@ export default function Create({
                                                             </div>
                                                             <input
                                                                 type="number"
-                                                                step="0.01"
+                                                                step="any"
                                                                 min="0"
                                                                 value={data.costo_inicial}
                                                                 onChange={(e) => {
@@ -890,7 +914,7 @@ export default function Create({
                                                     </label>
                                                     <div className="relative">
                                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                            <Warehouse className="text-gray-400" />
+                                                            <Building className="text-gray-400" />
                                                         </div>
                                                         <select
                                                             value={data.sucursal_id}
@@ -902,28 +926,55 @@ export default function Create({
                                                                 errors.sucursal_id 
                                                                     ? 'border-red-500 dark:border-red-500' 
                                                                     : 'border-gray-300 dark:border-gray-600'
-                                                            } ${sucursales.length === 0 ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                                                            } ${sucursalesOrdenadas.length === 0 ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
                                                             required={data.control_stock}
-                                                            disabled={processing || sucursales.length === 0}
+                                                            disabled={processing || sucursalesOrdenadas.length === 0}
                                                         >
                                                             <option value="">Seleccionar sucursal...</option>
-                                                            {sucursales.map((sucursal) => (
-                                                                <option key={sucursal.id} value={sucursal.id}>
-                                                                    {sucursal.nombre} {sucursal.principal && '⭐'}
+                                                            {sucursalesOrdenadas.map((sucursal) => (
+                                                                <option 
+                                                                    key={sucursal.id} 
+                                                                    value={sucursal.id}
+                                                                    className={sucursal.principal ? 'font-semibold' : ''}
+                                                                >
+                                                                    {sucursal.principal && '🏠 '}
+                                                                    {sucursal.nombre}
+                                                                    {sucursal.principal && ' (Principal)'}
                                                                 </option>
                                                             ))}
                                                         </select>
                                                     </div>
+                                                    
+                                                    {/* Información sobre la selección */}
+                                                    {data.sucursal_id && (
+                                                        <div className="mt-2 flex items-start text-xs text-gray-600 dark:text-gray-400">
+                                                            <Info className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                                                            <span>
+                                                                El stock inicial se registrará en esta sucursal. 
+                                                                Puedes transferir stock a otras sucursales después.
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    
                                                     {errors.sucursal_id && (
                                                         <div className="mt-2 flex items-center text-sm text-red-600 dark:text-red-400">
                                                             <AlertCircle className="w-4 h-4 mr-1" />
                                                             {errors.sucursal_id}
                                                         </div>
                                                     )}
-                                                    {sucursales.length === 0 && (
-                                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                                            No hay sucursales disponibles
-                                                        </p>
+                                                    
+                                                    {sucursalesOrdenadas.length === 0 && (
+                                                        <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                                                            <p className="text-sm text-amber-700 dark:text-amber-400">
+                                                                ⚠️ No hay sucursales disponibles. Debes crear al menos una sucursal antes de agregar productos con control de stock.
+                                                            </p>
+                                                            <Link
+                                                                href={route('configuracion.sucursales')}
+                                                                className="mt-1 inline-block text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                                            >
+                                                                Ir a crear sucursal →
+                                                            </Link>
+                                                        </div>
                                                     )}
                                                 </div>
 
@@ -1035,7 +1086,7 @@ export default function Create({
                                             </Link>
                                             <button
                                                 type="submit"
-                                                disabled={processing || categorias.length === 0 || (data.control_stock && sucursales.length === 0)}
+                                                disabled={processing || categorias.length === 0 || (data.control_stock && sucursalesOrdenadas.length === 0)}
                                                 className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {processing ? (

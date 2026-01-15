@@ -65,7 +65,7 @@ class Caja extends Model
 
     public function ventas(): HasMany
     {
-        return $this->hasMany(Venta::class);
+        return $this->hasMany(Venta::class, 'caja_id'); // Asegurar que use el campo correcto
     }
 
     public function movimientos(): HasMany
@@ -106,21 +106,82 @@ class Caja extends Model
      */
     public function calcularTotalVentas()
     {
-        return Venta::where('sucursal_id', $this->sucursal_id)
-            ->where('user_id', $this->user_id)
-            ->whereDate('fecha_venta', $this->fecha_apertura->toDateString())
+        // CORRECCIÓN: Usar la relación directa en lugar de filtrar manualmente
+        return $this->ventas()
             ->where('estado', Venta::ESTADO_PROCESADA)
             ->sum('total');
     }
-     
+
+    public function calcularVentasEfectivo()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->where('tipo_pago', 'EFECTIVO')
+            ->sum('total');
+    }
+
+    public function calcularVentasTarjetaDebito()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->where('tipo_pago', 'TARJETA_DEBITO')
+            ->sum('total');
+    }
+
+    public function calcularVentasTarjetaCredito()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->where('tipo_pago', 'TARJETA_CREDITO')
+            ->sum('total');
+    }
+
+    public function calcularVentasTransferencia()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->where('tipo_pago', 'TRANSFERENCIA')
+            ->sum('total');
+    }
+    public function calcularVentasPorCondicion()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->selectRaw('condicion_pago, SUM(total) as total, COUNT(*) as cantidad')
+            ->groupBy('condicion_pago')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->condicion_pago => [
+                    'total' => (float) $item->total,
+                    'cantidad' => $item->cantidad
+                ]];
+            })
+            ->toArray();
+    }
+    public function calcularVentasPorTipo()
+    {
+        return $this->ventas()
+            ->where('estado', Venta::ESTADO_PROCESADA)
+            ->selectRaw('tipo_pago, SUM(total) as total, COUNT(*) as cantidad')
+            ->groupBy('tipo_pago')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->tipo_pago => [
+                    'total' => (float) $item->total,
+                    'cantidad' => $item->cantidad
+                ]];
+            })
+            ->toArray();
+    }
 
     public function calcularEfectivoTeorico()
     {
-        $totalVentas = $this->calcularTotalVentas();
+        // CORRECCIÓN: Usar solo ventas en efectivo para cálculo teórico
+        $ventasEfectivo = $this->calcularVentasEfectivo();
         $totalIngresos = $this->obtenerTotalIngresos();
         $totalEgresos = $this->obtenerTotalEgresos();
         
-        return $this->monto_inicial + $totalVentas + $totalIngresos - $totalEgresos;
+        return $this->monto_inicial + $ventasEfectivo + $totalIngresos - $totalEgresos;
     }
 
     public function calcularDiferencia()
@@ -142,17 +203,14 @@ class Caja extends Model
             ->where('tipo', MovimientoCaja::TIPO_EGRESO)
             ->sum('monto');
     }
+
     public function recalcularVentas()
-{
-    $this->total_ventas = Venta::where('sucursal_id', $this->sucursal_id)
-        ->where('user_id', $this->user_id)
-        ->whereDate('fecha_venta', $this->fecha_apertura->toDateString())
-        ->where('estado', Venta::ESTADO_PROCESADA)
-        ->sum('total');
-    
-    $this->save();
-    return $this;
-}
+    {
+        $this->total_ventas = $this->calcularTotalVentas();
+        $this->save();
+        return $this;
+    }
+
     public function puedeCerrarse(): bool
     {
         return $this->estado === self::ESTADO_ABIERTA && 
@@ -180,7 +238,7 @@ class Caja extends Model
 
     public function cerrar($efectivoFinal, $observaciones = null)
     {
-        // Calcular diferencia
+        // Calcular todos los totales
         $this->total_ventas = $this->calcularTotalVentas();
         $this->total_ingresos = $this->obtenerTotalIngresos();
         $this->total_egresos = $this->obtenerTotalEgresos();
@@ -189,6 +247,7 @@ class Caja extends Model
         
         $this->estado = self::ESTADO_CERRADA;
         $this->fecha_cierre = now();
+        $this->cerrada_por_id = auth()->id();
         $this->observaciones = $observaciones ?: $this->observaciones;
         $this->save();
 
@@ -200,6 +259,17 @@ class Caja extends Model
             'descripcion' => 'Cierre de caja',
             'user_id' => auth()->id(),
         ]);
+
+        // Si hay diferencia, registrar movimiento adicional
+        if ($this->diferencia != 0) {
+            MovimientoCaja::create([
+                'caja_id' => $this->id,
+                'tipo' => $this->diferencia > 0 ? MovimientoCaja::TIPO_INGRESO : MovimientoCaja::TIPO_EGRESO,
+                'monto' => abs($this->diferencia),
+                'descripcion' => $this->diferencia > 0 ? 'Sobrante en cierre' : 'Faltante en cierre',
+                'user_id' => auth()->id(),
+            ]);
+        }
     }
 
     public function registrarIngreso($monto, $descripcion, $referencia = null)
@@ -234,5 +304,98 @@ class Caja extends Model
         $this->save();
 
         return $movimiento;
+    }
+
+    /**
+     * Obtener resumen completo para el cierre
+     */
+    public function obtenerResumenCierre()
+    {
+        $ventasPorTipo = $this->calcularVentasPorTipo();
+        $ventasPorCondicion = $this->calcularVentasPorCondicion();
+        
+        return [
+            // Resumen financiero básico
+            'monto_inicial' => (float) $this->monto_inicial,
+            'total_ventas' => (float) $this->calcularTotalVentas(),
+            'total_ingresos' => (float) $this->obtenerTotalIngresos(),
+            'total_egresos' => (float) $this->obtenerTotalEgresos(),
+            'efectivo_teorico' => (float) $this->calcularEfectivoTeorico(),
+            'efectivo_actual' => (float) $this->efectivo,
+            
+            // Ventas por tipo de pago
+            'ventas_efectivo' => (float) $this->calcularVentasEfectivo(),
+            'ventas_tarjeta_debito' => (float) $this->calcularVentasTarjetaDebito(),
+            'ventas_tarjeta_credito' => (float) $this->calcularVentasTarjetaCredito(),
+            'ventas_tarjeta_total' => (float) ($this->calcularVentasTarjetaDebito() + $this->calcularVentasTarjetaCredito()),
+            'ventas_transferencia' => (float) $this->calcularVentasTransferencia(),
+            'ventas_por_tipo' => $ventasPorTipo,
+            
+            // Ventas por condición de pago
+            'ventas_contado' => (float) ($ventasPorCondicion['CONTADO']['total'] ?? 0),
+            'ventas_credito' => (float) ($ventasPorCondicion['CREDITO']['total'] ?? 0),
+            'ventas_por_condicion' => $ventasPorCondicion,
+            
+            // Cantidades
+            'cantidad_ventas' => $this->ventas()->where('estado', Venta::ESTADO_PROCESADA)->count(),
+        ];
+    }
+
+    /**
+     * Attribute: Diferencia formateada
+     */
+    public function getDiferenciaFormateadaAttribute()
+    {
+        return number_format($this->diferencia, 2);
+    }
+
+    /**
+     * Attribute: Estado formateado
+     */
+    public function getEstadoFormateadoAttribute()
+    {
+        return ucfirst($this->estado);
+    }
+
+    /**
+     * Attribute: Color del estado
+     */
+    public function getColorEstadoAttribute()
+    {
+        return match($this->estado) {
+            self::ESTADO_ABIERTA => 'success',
+            self::ESTADO_CERRADA => 'secondary',
+            self::ESTADO_PENDIENTE => 'warning',
+            default => 'light'
+        };
+    }
+
+    /**
+     * Attribute: Icono del estado
+     */
+    public function getIconoEstadoAttribute()
+    {
+        return match($this->estado) {
+            self::ESTADO_ABIERTA => 'lock-open',
+            self::ESTADO_CERRADA => 'lock',
+            self::ESTADO_PENDIENTE => 'clock',
+            default => 'question-circle'
+        };
+    }
+
+    /**
+     * Verificar si la caja está abierta
+     */
+    public function estaAbierta(): bool
+    {
+        return $this->estado === self::ESTADO_ABIERTA;
+    }
+
+    /**
+     * Verificar si la caja está cerrada
+     */
+    public function estaCerrada(): bool
+    {
+        return $this->estado === self::ESTADO_CERRADA;
     }
 }

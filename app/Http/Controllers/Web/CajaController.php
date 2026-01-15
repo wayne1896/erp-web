@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Caja;
 use App\Models\MovimientoCaja;
 use App\Models\Sucursal;
+use App\Models\Venta; // Asegúrate de importar el modelo Venta
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +25,10 @@ class CajaController extends Controller
             ->where('user_id', $user->id)
             ->where('estado', 'abierta')
             ->whereNull('fecha_cierre')
+            ->with(['usuario', 'sucursal'])
             ->first();
             
-        $cajasHoy = Caja::with(['usuario', 'cerradaPor'])
+        $cajasHoy = Caja::with(['usuario', 'cerradaPor', 'sucursal'])
             ->where('sucursal_id', $sucursalId)
             ->whereDate('fecha_apertura', today())
             ->orderBy('created_at', 'desc')
@@ -120,92 +122,114 @@ class CajaController extends Controller
     }
     
     /**
-     * Formulario para cerrar caja
+     * Formulario para cerrar caja - MODIFICADO
      */
     public function edit(Caja $caja)
-    {
-        $user = auth()->user();
-        
-        // Verificar permisos
-        if ($caja->user_id !== $user->id || $caja->estado !== 'abierta') {
-            return redirect()->route('caja.index')
-                ->with('error', 'No puedes cerrar esta caja');
+{
+    $user = auth()->user();
+    
+    // Verificar permisos
+    if ($caja->user_id !== $user->id || $caja->estado !== 'abierta') {
+        return redirect()->route('caja.index')
+            ->with('error', 'No puedes cerrar esta caja');
+    }
+    
+    // Cargar relaciones necesarias
+    $caja->load(['usuario', 'sucursal']);
+    
+    // Obtener ventas con relación de cliente
+    $ventas = $caja->ventas()
+        ->with(['cliente'])
+        ->where('estado', Venta::ESTADO_PROCESADA)
+        ->select(['id', 'cliente_id', 'total', 'tipo_pago', 'condicion_pago', 'numero_factura', 'created_at'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    // Si no existe tipo_pago, usar condicion_pago como fallback
+    $ventas->each(function ($venta) {
+        if (empty($venta->tipo_pago)) {
+            $venta->tipo_pago = $venta->condicion_pago === 'CREDITO' ? 'CREDITO' : 'EFECTIVO';
         }
-        
-        // Calcular resumen
-        $resumen = [
-            'monto_inicial' => (float) $caja->monto_inicial,
-            'total_ventas' => (float) $caja->calcularTotalVentas(),
-            'total_ingresos' => (float) $caja->obtenerTotalIngresos(),
-            'total_egresos' => (float) $caja->obtenerTotalEgresos(),
-            'efectivo_teorico' => (float) $caja->calcularEfectivoTeorico(),
-            'efectivo_actual' => (float) $caja->efectivo,
+    });
+    
+    // Obtener movimientos de caja con usuario
+    $movimientos = $caja->movimientos()
+        ->with(['usuario'])
+        ->select(['id', 'tipo', 'monto', 'descripcion', 'referencia', 'user_id', 'created_at'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    // Usar el método del modelo para obtener el resumen
+    $resumen = $caja->obtenerResumenCierre();
+    
+    return Inertia::render('Caja/Cerrar', [
+        'caja' => $caja,
+        'resumen' => $resumen,
+        'movimientos' => $movimientos,
+        'ventas' => $ventas,
+        'sucursal' => $caja->sucursal,
+    ]);
+}
+    
+    /**
+     * Calcular ventas por tipo de pago
+     */
+    private function calcularVentasPorTipo($ventas)
+    {
+        $tipos = [
+            'EFECTIVO' => 0,
+            'TARJETA_DEBITO' => 0,
+            'TARJETA_CREDITO' => 0,
+            'TRANSFERENCIA' => 0,
+            'CHEQUE' => 0,
+            'SIN_DEFINIR' => 0,
         ];
         
-        return Inertia::render('Caja/Cerrar', [
-            'caja' => $caja,
-            'resumen' => $resumen,
-            'movimientos' => $caja->movimientos()->orderBy('created_at', 'desc')->get(),
-            'ventas' => $caja->ventas()->with(['cliente'])->get(),
-            'sucursal' => $caja->sucursal, // Asegúrate de incluir esto
-        ]);
+        foreach ($ventas as $venta) {
+            $tipo = $venta->tipo_pago ?? 'SIN_DEFINIR';
+            $tipos[$tipo] = ($tipos[$tipo] ?? 0) + (float) $venta->total;
+        }
+        
+        return $tipos;
     }
     
     /**
-     * Cerrar caja
+     * Cerrar caja - MODIFICADO
      */
     public function update(Request $request, Caja $caja)
-    {
-        $request->validate([
-            'efectivo_final' => 'required|numeric|min:0',
-            'observaciones' => 'nullable|string|max:500',
-        ]);
+{
+    // Verificar que la caja esté abierta
+    if ($caja->estado !== Caja::ESTADO_ABIERTA) {
+        return redirect()->route('caja.index')
+            ->with('error', 'La caja ya está cerrada');
+    }
+    
+    $request->validate([
+        'efectivo_final' => 'required|numeric|min:0',
+        'observaciones' => 'nullable|string|max:500',
+    ]);
+    
+    DB::beginTransaction();
+    
+    try {
+        // Cerrar la caja
+        $caja->cerrar($request->efectivo_final, $request->observaciones);
         
-        $user = auth()->user();
-        
-        // Verificar permisos
-        if ($caja->user_id !== $user->id || $caja->estado !== 'abierta') {
-            return redirect()->route('caja.index')
-                ->with('error', 'No puedes cerrar esta caja');
-        }
-        
-        DB::transaction(function () use ($request, $caja, $user) {
-            // Calcular diferencias
-            $totalVentas = $caja->calcularTotalVentas();
-            $totalIngresos = $caja->obtenerTotalIngresos();
-            $totalEgresos = $caja->obtenerTotalEgresos();
-            
-            $efectivoTeorico = $caja->monto_inicial + $totalVentas + $totalIngresos - $totalEgresos;
-            $diferencia = $request->efectivo_final - $efectivoTeorico;
-            
-            $caja->update([
-                'total_ventas' => $totalVentas,
-                'total_ingresos' => $totalIngresos,
-                'total_egresos' => $totalEgresos,
-                'efectivo' => $request->efectivo_final,
-                'diferencia' => $diferencia,
-                'estado' => 'cerrada',
-                'fecha_cierre' => now(),
-                'cerrada_por_id' => $user->id,
-                'observaciones' => $request->observaciones ?: $caja->observaciones,
-            ]);
-            
-            // Registrar movimiento de cierre
-            MovimientoCaja::create([
-                'caja_id' => $caja->id,
-                'tipo' => 'CIERRE',
-                'monto' => $request->efectivo_final,
-                'descripcion' => 'Cierre de caja',
-                'user_id' => $user->id,
-            ]);
-        });
+        DB::commit();
         
         return redirect()->route('caja.index')
             ->with('success', 'Caja cerrada exitosamente');
+            
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al cerrar caja: ' . $e->getMessage());
+        
+        return back()->with('error', 'Error al cerrar caja: ' . $e->getMessage());
     }
+}
     
     /**
-     * Mostrar movimientos de caja
+     * Mostrar movimientos de caja - MODIFICADO
      */
     public function movimientos(Caja $caja)
     {
@@ -217,12 +241,19 @@ class CajaController extends Controller
                 ->with('error', 'No tienes permisos para ver estos movimientos');
         }
         
+        // Cargar la caja con relaciones
+        $caja->load(['usuario', 'sucursal', 'cerradaPor']);
+        
+        // Obtener movimientos con usuario
+        $movimientos = $caja->movimientos()
+            ->with(['usuario'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
         return Inertia::render('Caja/Movimientos', [
             'caja' => $caja,
-            'movimientos' => $caja->movimientos()
-                ->with(['usuario'])
-                ->orderBy('created_at', 'desc')
-                ->get(),
+            'movimientos' => $movimientos,
+            'sucursal' => $caja->sucursal,
         ]);
     }
     
@@ -254,29 +285,31 @@ class CajaController extends Controller
         
         return back()->with('success', 'Ingreso registrado exitosamente');
     }
+    
     /**
- * Reporte de caja
- */
-public function reporteCaja(Request $request)
-{
-    $user = auth()->user();
-    $sucursalId = $user->sucursal_id;
+     * Reporte de caja
+     */
+    public function reporteCaja(Request $request)
+    {
+        $user = auth()->user();
+        $sucursalId = $user->sucursal_id;
+        
+        $fechaInicio = $request->get('fecha_inicio', date('Y-m-01'));
+        $fechaFin = $request->get('fecha_fin', date('Y-m-d'));
+        
+        $cajas = Caja::where('sucursal_id', $sucursalId)
+            ->whereBetween('fecha_apertura', [$fechaInicio, $fechaFin])
+            ->with(['usuario', 'cerradaPor', 'sucursal'])
+            ->orderBy('fecha_apertura', 'desc')
+            ->paginate(20);
+        
+        return Inertia::render('Caja/Reporte', [
+            'cajas' => $cajas,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin,
+        ]);
+    }
     
-    $fechaInicio = $request->get('fecha_inicio', date('Y-m-01'));
-    $fechaFin = $request->get('fecha_fin', date('Y-m-d'));
-    
-    $cajas = Caja::where('sucursal_id', $sucursalId)
-        ->whereBetween('fecha_apertura', [$fechaInicio, $fechaFin])
-        ->with(['user'])
-        ->orderBy('fecha_apertura', 'desc')
-        ->paginate(20);
-    
-    return Inertia::render('Caja/Reporte', [
-        'cajas' => $cajas,
-        'fechaInicio' => $fechaInicio,
-        'fechaFin' => $fechaFin,
-    ]);
-}
     /**
      * Registrar egreso
      */
@@ -309,5 +342,62 @@ public function reporteCaja(Request $request)
         $caja->decrement('efectivo', $request->monto);
         
         return back()->with('success', 'Egreso registrado exitosamente');
+    }
+    
+    /**
+     * Mostrar detalle de caja cerrada
+     */
+    public function show(Caja $caja)
+    {
+        // Cargar todas las relaciones necesarias
+        $caja->load([
+            'usuario',
+            'cerradaPor',
+            'sucursal',
+            'ventas' => function ($query) {
+                $query->with(['cliente', 'detalles.producto'])
+                      ->orderBy('created_at', 'desc');
+            },
+            'movimientos' => function ($query) {
+                $query->with(['usuario'])
+                      ->orderBy('created_at', 'desc');
+            }
+        ]);
+        
+        // Obtener resumen para el cierre
+        $resumen = $caja->obtenerResumenCierre();
+        
+        // Preparar datos para la vista
+        $ventas = $caja->ventas->map(function ($venta) {
+            return [
+                'id' => $venta->id,
+                'numero_factura' => $venta->numero_factura,
+                'cliente' => $venta->cliente?->nombre_completo ?? 'Consumidor Final',
+                'total' => (float) $venta->total,
+                'tipo_pago' => $venta->tipo_pago ?? 'EFECTIVO',
+                'condicion_pago' => $venta->condicion_pago,
+                'created_at' => $venta->created_at,
+            ];
+        });
+        
+        $movimientos = $caja->movimientos->map(function ($movimiento) {
+            return [
+                'id' => $movimiento->id,
+                'tipo' => $movimiento->tipo,
+                'descripcion' => $movimiento->descripcion,
+                'monto' => (float) $movimiento->monto,
+                'referencia' => $movimiento->referencia,
+                'created_at' => $movimiento->created_at,
+                'usuario' => $movimiento->usuario,
+            ];
+        });
+        
+        return Inertia::render('Caja/Cerrar', [
+            'caja' => $caja,
+            'sucursal' => $caja->sucursal,
+            'resumen' => $resumen,
+            'ventas' => $ventas,
+            'movimientos' => $movimientos,
+        ]);
     }
 }

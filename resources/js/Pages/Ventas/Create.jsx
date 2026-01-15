@@ -16,18 +16,36 @@ import {
     Flag, Bookmark, Share2, Send,
     PhoneCall, MessageCircle, AtSign, Hash, Lock, Unlock, Key,
     EyeOff, Bell, Settings, UserPlus, UserCheck,
-    UserX, UserMinus, UserCog
+    UserX, UserMinus, UserCog,
+    // Iconos para tipos de pago
+    Banknote, // Para efectivo
+    Landmark, // Para transferencia
+    Smartphone // Para pago móvil
 } from 'lucide-react';
 import axios from 'axios';
 
-export default function VentasCreate({ caja, clienteDefault, tiposComprobante, condicionesPago }) {
+export default function VentasCreate({ caja, clienteDefault, tiposComprobante, condicionesPago, tiposPago }) {
     const [productos, setProductos] = useState([]);
     const [productoSeleccionado, setProductoSeleccionado] = useState(null);
     const [busqueda, setBusqueda] = useState('');
     const [resultadosBusqueda, setResultadosBusqueda] = useState([]);
     const [mostrarResultados, setMostrarResultados] = useState(false);
     const [cargandoBusqueda, setCargandoBusqueda] = useState(false);
-    const [clienteInfo, setClienteInfo] = useState(clienteDefault || null);
+    const [clienteInfo, setClienteInfo] = useState(() => {
+        // Si no hay cliente default, usar Consumidor Final
+        if (!clienteDefault || !clienteDefault.id) {
+            return {
+                id: null,
+                nombre_completo: 'Consumidor Final',
+                tipo: 'FISICA',
+                cedula: '000-0000000-0',
+                email: '',
+                telefono: '',
+                direccion: ''
+            };
+        }
+        return clienteDefault;
+    });
     const [mostrarModalClientes, setMostrarModalClientes] = useState(false);
     const [clientesLista, setClientesLista] = useState([]);
     const [busquedaCliente, setBusquedaCliente] = useState('');
@@ -44,19 +62,38 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
     const [descuentoGlobal, setDescuentoGlobal] = useState(0);
     const [descuentoPorProducto, setDescuentoPorProducto] = useState({});
     const [error, setError] = useState(null);
+    const [procesando, setProcesando] = useState(false);
     
     const buscadorRef = useRef(null);
 
-    const { data, setData, post, processing, errors } = useForm({
-        cliente_id: clienteDefault?.id || '',
+ // CORRECTO: Pasar el componente directamente
+const tiposPagoDefault = tiposPago || [
+    { key: 'EFECTIVO', nombre: 'Efectivo', icono: Banknote, color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30' },
+    { key: 'TARJETA_DEBITO', nombre: 'Tarjeta Débito', icono: CreditCard, color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
+    { key: 'TARJETA_CREDITO', nombre: 'Tarjeta Crédito', icono: CreditCard, color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30' },
+    { key: 'TRANSFERENCIA', nombre: 'Transferencia', icono: Landmark, color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
+    { key: 'CHEQUE', nombre: 'Cheque', icono: FileCheck, color: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30' },
+    { key: 'PAGO_MOVIL', nombre: 'Pago Móvil', icono: Smartphone, color: 'text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-900/30' },
+];
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        cliente_id: clienteInfo.id || '',
         tipo_comprobante: 'FACTURA',
         condicion_pago: 'CONTADO',
+        tipo_pago: 'EFECTIVO',
         dias_credito: 0,
         fecha_venta: new Date().toISOString().split('T')[0],
         productos: [],
         notas: '',
         descuento_global: 0,
     });
+
+    // Inicializar cliente_id con Consumidor Final si no hay cliente
+    useEffect(() => {
+        if (!clienteInfo.id) {
+            setData('cliente_id', ''); // Dejar vacío para cliente genérico
+        }
+    }, [clienteInfo]);
 
     // Formatear moneda
     const formatCurrency = (amount) => {
@@ -108,7 +145,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
         }
 
         try {
-            const response = await axios.get(route('clientes.buscar'), {
+            const response = await axios.get(route('ventas.buscar-clientes'), { // Cambié la ruta
                 params: { 
                     q: query,
                     modo: modoBusquedaCliente 
@@ -181,6 +218,21 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
         setMostrarModalClientes(false);
         setBusquedaCliente('');
         setClientesLista([]);
+    };
+
+    // Seleccionar Consumidor Final
+    const seleccionarConsumidorFinal = () => {
+        setClienteInfo({
+            id: null,
+            nombre_completo: 'Consumidor Final',
+            tipo: 'FISICA',
+            cedula: '000-0000000-0',
+            email: '',
+            telefono: '',
+            direccion: ''
+        });
+        setData('cliente_id', ''); // Vacío para cliente genérico
+        setMostrarModalClientes(false);
     };
 
     // Agregar producto a la lista
@@ -349,25 +401,70 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
         };
     };
 
+    // Función para obtener icono de tipo de pago
+    const obtenerIconoTipoPago = (tipo) => {
+        const tipoPago = tiposPagoDefault.find(tp => tp.key === tipo);
+        if (tipoPago && tipoPago.icono) {
+            return tipoPago.icono;
+        }
+        
+        // Fallback si no se encuentra
+        switch(tipo) {
+            case 'EFECTIVO': return Banknote;
+            case 'TARJETA_DEBITO': return CreditCard;
+            case 'TARJETA_CREDITO': return CreditCard;
+            case 'TRANSFERENCIA': return Landmark;
+            case 'CHEQUE': return FileCheck;
+            case 'PAGO_MOVIL': return Smartphone;
+            default: return Banknote;
+        }
+    };
+
+    // Función para obtener color de tipo de pago
+    const obtenerColorTipoPago = (tipo) => {
+        const tipoPago = tiposPagoDefault.find(tp => tp.key === tipo);
+        if (tipoPago && tipoPago.color) {
+            return tipoPago.color;
+        }
+        
+        // Fallback si no se encuentra
+        switch(tipo) {
+            case 'EFECTIVO': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+            case 'TARJETA_DEBITO': return 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30';
+            case 'TARJETA_CREDITO': return 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30';
+            case 'TRANSFERENCIA': return 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30';
+            case 'CHEQUE': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
+            case 'PAGO_MOVIL': return 'text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-900/30';
+            default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
+        }
+    };
+
+    // Función para obtener nombre de tipo de pago
+    const obtenerNombreTipoPago = (tipo) => {
+        const tipoPago = tiposPagoDefault.find(tp => tp.key === tipo);
+        if (tipoPago && tipoPago.nombre) {
+            return tipoPago.nombre;
+        }
+        return tipo.replace('_', ' ');
+    };
+
     const totales = calcularTotales();
 
     // Enviar formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setProcesando(true);
         
         if (data.productos.length === 0) {
             alert('❌ Debe agregar al menos un producto');
-            return;
-        }
-
-        if (!data.cliente_id) {
-            alert('❌ Debe seleccionar un cliente');
+            setProcesando(false);
             return;
         }
 
         if (!caja) {
             alert('❌ Debe tener una caja abierta para realizar ventas');
+            setProcesando(false);
             return;
         }
 
@@ -375,6 +472,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
         for (const producto of data.productos) {
             if (producto.cantidad > producto.stock_disponible) {
                 alert(`❌ Stock insuficiente para "${producto.nombre}". Disponible: ${producto.stock_disponible}, Solicitado: ${producto.cantidad}`);
+                setProcesando(false);
                 return;
             }
         }
@@ -387,18 +485,58 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
             descuento: parseFloat(producto.descuento) || 0,
         }));
 
+        // Determinar tipo de pago basado en condición de pago
+        let tipoPagoFinal = data.tipo_pago;
+        if (data.condicion_pago === 'CREDITO') {
+            tipoPagoFinal = 'CREDITO';
+        }
+
         // Actualizar datos del formulario
         const formData = {
             ...data,
             productos: productosParaEnviar,
             descuento_global: parseFloat(descuentoGlobal) || 0,
+            tipo_pago: tipoPagoFinal,
+            cliente_id: data.cliente_id || null, // Permitir null para consumidor final
         };
 
+        console.log('Enviando venta:', formData);
+
         try {
-            await post(route('ventas.store'), formData);
+            await post(route('ventas.store'), formData, {
+                onSuccess: () => {
+                    setProcesando(false);
+                    // Resetear formulario
+                    setData({
+                        cliente_id: clienteInfo.id || '',
+                        tipo_comprobante: 'FACTURA',
+                        condicion_pago: 'CONTADO',
+                        tipo_pago: 'EFECTIVO',
+                        dias_credito: 0,
+                        fecha_venta: new Date().toISOString().split('T')[0],
+                        productos: [],
+                        notas: '',
+                        descuento_global: 0,
+                    });
+                    setProductos([]);
+                    setProductoSeleccionado(null);
+                    setDescuentoGlobal(0);
+                    setDescuentoPorProducto({});
+                },
+                onError: (errors) => {
+                    setProcesando(false);
+                    console.error('Errores del formulario:', errors);
+                    if (errors.message) {
+                        setError(errors.message);
+                    } else {
+                        setError('Error al procesar la venta. Por favor, verifica los datos.');
+                    }
+                }
+            });
         } catch (error) {
             console.error('Error al enviar venta:', error);
             setError('Error al procesar la venta. Por favor, intente nuevamente.');
+            setProcesando(false);
         }
     };
 
@@ -480,6 +618,14 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                     <CreditCard className="w-4 h-4 mr-1" />
                                     {data.condicion_pago}
+                                </div>
+                                <span className="text-gray-400 dark:text-gray-600">•</span>
+                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                    {(() => {
+                                        const Icon = obtenerIconoTipoPago(data.tipo_pago);
+                                        return <Icon className="w-4 h-4 mr-1" />;
+                                    })()}
+                                    <span>{obtenerNombreTipoPago(data.tipo_pago)}</span>
                                 </div>
                             </div>
                         </div>
@@ -579,62 +725,47 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                     </div>
 
                                     <div className="p-6">
-                                        {clienteInfo ? (
-                                            <div className="space-y-4">
-                                                <div className="flex items-start">
-                                                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-3 rounded-xl mr-4">
-                                                        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-gray-800 dark:text-gray-200 text-lg">
-                                                            {clienteInfo.nombre_completo}
-                                                        </h4>
-                                                        <div className="flex items-center mt-2 space-x-4">
-                                                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-                                                                {clienteInfo.tipo}
-                                                            </span>
-                                                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                                {clienteInfo.cedula}
-                                                            </span>
-                                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="flex items-start">
+                                                <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-3 rounded-xl mr-4">
+                                                    <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="font-bold text-gray-800 dark:text-gray-200 text-lg">
+                                                        {clienteInfo.nombre_completo}
+                                                    </h4>
+                                                    <div className="flex items-center mt-2 space-x-4">
+                                                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
+                                                            {clienteInfo.tipo}
+                                                        </span>
+                                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                            {clienteInfo.cedula}
+                                                        </span>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                <div className="space-y-3">
-                                                    {clienteInfo.email && (
-                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                                            <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
-                                                            <span>{clienteInfo.email}</span>
-                                                        </div>
-                                                    )}
-                                                    {clienteInfo.telefono && (
-                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                                            <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
-                                                            <span>{clienteInfo.telefono}</span>
-                                                        </div>
-                                                    )}
-                                                    {clienteInfo.direccion && (
-                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                                            <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
-                                                            <span className="truncate">{clienteInfo.direccion}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                            <div className="space-y-3">
+                                                {clienteInfo.email && (
+                                                    <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                        <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
+                                                        <span>{clienteInfo.email}</span>
+                                                    </div>
+                                                )}
+                                                {clienteInfo.telefono && (
+                                                    <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                        <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
+                                                        <span>{clienteInfo.telefono}</span>
+                                                    </div>
+                                                )}
+                                                {clienteInfo.direccion && (
+                                                    <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
+                                                        <span className="truncate">{clienteInfo.direccion}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className="text-center py-6">
-                                                <User className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-                                                <p className="text-gray-600 dark:text-gray-400">No hay cliente seleccionado</p>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setMostrarModalClientes(true)}
-                                                    className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                                >
-                                                    <UserPlus className="w-4 h-4 mr-2" />
-                                                    Seleccionar cliente
-                                                </button>
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -712,6 +843,9 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                             setData('condicion_pago', condicion);
                                                             if (condicion === 'CONTADO') {
                                                                 setData('dias_credito', 0);
+                                                                setData('tipo_pago', 'EFECTIVO');
+                                                            } else {
+                                                                setData('tipo_pago', 'CREDITO');
                                                             }
                                                         }}
                                                         className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
@@ -727,6 +861,46 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                 ))}
                                             </div>
                                         </div>
+
+                                        {/* TIPO DE PAGO - NUEVA SECCIÓN */}
+                                        {data.condicion_pago === 'CONTADO' && (
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                    <Banknote className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+                                                    Tipo de Pago
+                                                </label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {tiposPagoDefault.map((tipoPago) => {
+                                                        const Icon = tipoPago.icono;
+                                                        return (
+                                                            <button
+                                                                key={tipoPago.key}
+                                                                type="button"
+                                                                onClick={() => setData('tipo_pago', tipoPago.key)}
+                                                                className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-center ${
+                                                                    data.tipo_pago === tipoPago.key
+                                                                        ? tipoPago.key === 'EFECTIVO'
+                                                                            ? 'border-green-500 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 shadow-sm'
+                                                                            : tipoPago.key === 'TARJETA_DEBITO'
+                                                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 shadow-sm'
+                                                                            : tipoPago.key === 'TARJETA_CREDITO'
+                                                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 shadow-sm'
+                                                                            : tipoPago.key === 'TRANSFERENCIA'
+                                                                            ? 'border-amber-500 bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-300 shadow-sm'
+                                                                            : tipoPago.key === 'CHEQUE'
+                                                                            ? 'border-red-500 bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 shadow-sm'
+                                                                            : 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 shadow-sm'
+                                                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                                }`}
+                                                            >
+                                                                <Icon className="w-4 h-4 mr-2" />
+                                                                <div className="text-sm font-medium">{tipoPago.nombre}</div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {data.condicion_pago === 'CREDITO' && (
                                             <div className="space-y-2">
@@ -820,61 +994,6 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                     </button>
                                                 )}
                                             </div>
-
-                                            {/* Resultados de búsqueda */}
-                                            {mostrarResultados && resultadosBusqueda.length > 0 && (
-                                                <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
-                                                    {resultadosBusqueda.map((producto) => (
-                                                        <div
-                                                            key={producto.id}
-                                                            className="px-4 py-3 hover:bg-green-50 dark:hover:bg-green-900 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition group"
-                                                            onClick={() => seleccionarProducto(producto)}
-                                                        >
-                                                            <div className="flex justify-between items-center">
-                                                                <div className="flex items-center">
-                                                                    <div className="bg-green-100 dark:bg-green-800 p-2 rounded-lg mr-3">
-                                                                        <Package className="w-4 h-4 text-green-600 dark:text-green-400" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-300">
-                                                                            {producto.nombre}
-                                                                        </p>
-                                                                        <div className="flex items-center mt-1 space-x-3">
-                                                                            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                                                                                {producto.codigo}
-                                                                            </span>
-                                                                            <span className={`text-xs px-2 py-1 rounded ${
-                                                                                producto.stock_disponible > 10 
-                                                                                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                                                                                    : producto.stock_disponible > 0
-                                                                                    ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200'
-                                                                                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                                                                            }`}>
-                                                                                Stock: {producto.stock_disponible}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <p className="font-bold text-green-700 dark:text-green-400">
-                                                                        {formatCurrency(producto.precio_venta)}
-                                                                    </p>
-                                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                        +ITBIS {producto.itbis_porcentaje}%
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            
-                                            {/* Mensaje de no resultados */}
-                                            {mostrarResultados && busqueda.length >= 2 && resultadosBusqueda.length === 0 && !cargandoBusqueda && (
-                                                <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-4">
-                                                    <p className="text-gray-600 dark:text-gray-400 text-center">No se encontraron productos</p>
-                                                </div>
-                                            )}
                                         </div>
 
                                         {/* Producto seleccionado */}
@@ -955,6 +1074,78 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Resultados de búsqueda - FUERA DEL CARD */}
+                                {mostrarResultados && (
+                                    <div className="relative" ref={buscadorRef}>
+                                        {/* Resultados de búsqueda */}
+                                        {resultadosBusqueda.length > 0 && (
+                                            <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+                                                {resultadosBusqueda.map((producto) => (
+                                                    <div
+                                                        key={producto.id}
+                                                        className="px-4 py-3 hover:bg-green-50 dark:hover:bg-green-900 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition group"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            seleccionarProducto(producto);
+                                                        }}
+                                                    >
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex items-center">
+                                                                <div className="bg-green-100 dark:bg-green-800 p-2 rounded-lg mr-3">
+                                                                    <Package className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-300">
+                                                                        {producto.nombre}
+                                                                    </p>
+                                                                    <div className="flex items-center mt-1 space-x-3">
+                                                                        <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                                            {producto.codigo}
+                                                                        </span>
+                                                                        <span className={`text-xs px-2 py-1 rounded ${
+                                                                            producto.stock_disponible > 10 
+                                                                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                                                                                : producto.stock_disponible > 0
+                                                                                ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200'
+                                                                                : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                                                                        }`}>
+                                                                            Stock: {producto.stock_disponible}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="font-bold text-green-700 dark:text-green-400">
+                                                                    {formatCurrency(producto.precio_venta)}
+                                                                </p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                    +ITBIS {producto.itbis_porcentaje}%
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Mensaje de no resultados */}
+                                        {mostrarResultados && busqueda.length >= 2 && resultadosBusqueda.length === 0 && !cargandoBusqueda && (
+                                            <div 
+                                                className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-4"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <div className="text-center py-3">
+                                                    <Package className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                                    <p className="text-gray-600 dark:text-gray-400">No se encontraron productos</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                        Intenta con otros términos de búsqueda
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Lista de productos en la venta */}
                                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -1132,6 +1323,22 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                     </div>
 
                                     <div className="p-6">
+                                        {/* Información del tipo de pago */}
+                                        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border border-blue-200 dark:border-blue-700 rounded-xl">
+                                            <div className="flex items-center">
+                                                <div className={`p-2 rounded-lg ${obtenerColorTipoPago(data.tipo_pago).split(' ')[0]} ${obtenerColorTipoPago(data.tipo_pago).split(' ')[1]}`}>
+                                                    {(() => {
+                                                        const Icon = obtenerIconoTipoPago(data.tipo_pago);
+                                                        return <Icon className="w-4 h-4" />;
+                                                    })()}
+                                                </div>
+                                                <div className="ml-3">
+                                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de pago</div>
+                                                    <div className="font-bold text-gray-900 dark:text-white">{obtenerNombreTipoPago(data.tipo_pago)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
@@ -1226,10 +1433,10 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         <div className="space-y-3">
                                             <button
                                                 type="submit"
-                                                disabled={processing || data.productos.length === 0 || !caja || !data.cliente_id}
+                                                disabled={procesando || data.productos.length === 0 || !caja}
                                                 className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition disabled:opacity-50 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
                                             >
-                                                {processing ? (
+                                                {procesando ? (
                                                     <>
                                                         <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
                                                         Procesando...
@@ -1356,6 +1563,25 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                         </div>
 
                         <div className="p-6">
+                            {/* Botón para Consumidor Final */}
+                            <div className="mb-6">
+                                <button
+                                    onClick={seleccionarConsumidorFinal}
+                                    className="w-full inline-flex items-center justify-between px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 transition"
+                                >
+                                    <div className="flex items-center">
+                                        <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-2 rounded-lg mr-4">
+                                            <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="text-left">
+                                            <h4 className="font-bold text-gray-800 dark:text-gray-200">Consumidor Final</h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">Cliente genérico para ventas rápidas</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                </button>
+                            </div>
+
                             {/* Buscador de clientes */}
                             <div className="mb-6">
                                 <div className="flex flex-col sm:flex-row gap-3 mb-4">

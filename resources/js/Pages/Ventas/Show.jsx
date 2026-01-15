@@ -18,7 +18,18 @@ import {
     CheckCircle,
     AlertCircle,
     Download,
-    Share2
+    Share2,
+    Clock,
+    Tag,
+    Percent,
+    Wallet,
+    Banknote,
+    Landmark,
+    Smartphone,
+    FileCheck,
+    AlertTriangle,
+    Truck,
+    Shield
 } from 'lucide-react';
 
 export default function VentasShow({ venta }) {
@@ -105,7 +116,16 @@ export default function VentasShow({ venta }) {
         });
     };
 
-    // Estado de la venta para colores del badge - ACTUALIZADO
+    const formatTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    // Estado de la venta para colores del badge
     const getStatusClasses = (estado) => {
         switch(estado?.toUpperCase()) {
             case 'PROCESADA':
@@ -118,6 +138,105 @@ export default function VentasShow({ venta }) {
                 return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
         }
     };
+
+    // Obtener icono de tipo de pago
+    const getPaymentIcon = (tipoPago) => {
+        switch(tipoPago?.toUpperCase()) {
+            case 'EFECTIVO':
+                return Banknote;
+            case 'TARJETA_DEBITO':
+            case 'TARJETA_CREDITO':
+                return CreditCard;
+            case 'TRANSFERENCIA':
+                return Landmark;
+            case 'PAGO_MOVIL':
+                return Smartphone;
+            case 'CHEQUE':
+                return FileCheck;
+            default:
+                return Wallet;
+        }
+    };
+
+    // Obtener color de tipo de pago
+    const getPaymentColor = (tipoPago) => {
+        switch(tipoPago?.toUpperCase()) {
+            case 'EFECTIVO':
+                return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+            case 'TARJETA_DEBITO':
+                return 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30';
+            case 'TARJETA_CREDITO':
+                return 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30';
+            case 'TRANSFERENCIA':
+                return 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30';
+            case 'PAGO_MOVIL':
+                return 'text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-900/30';
+            case 'CHEQUE':
+                return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
+            default:
+                return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
+        }
+    };
+
+    // Obtener nombre de tipo de pago
+    const getPaymentName = (tipoPago) => {
+        switch(tipoPago?.toUpperCase()) {
+            case 'EFECTIVO':
+                return 'Efectivo';
+            case 'TARJETA_DEBITO':
+                return 'Tarjeta Débito';
+            case 'TARJETA_CREDITO':
+                return 'Tarjeta Crédito';
+            case 'TRANSFERENCIA':
+                return 'Transferencia';
+            case 'PAGO_MOVIL':
+                return 'Pago Móvil';
+            case 'CHEQUE':
+                return 'Cheque';
+            default:
+                return tipoPago?.replace('_', ' ') || 'No especificado';
+        }
+    };
+
+    // Calcular totales de impresión
+    const calcularTotalesImpuestos = () => {
+        let subtotal = 0;
+        let itbis = 0;
+        let descuentoProductos = 0;
+        
+        if (venta.detalles) {
+            venta.detalles.forEach(detalle => {
+                const cantidad = parseFloat(detalle.cantidad) || 0;
+                const precio = parseFloat(detalle.precio_unitario) || 0;
+                const descuentoPorcentaje = parseFloat(detalle.descuento) || 0;
+                const itbisPorcentaje = parseFloat(detalle.itbis_porcentaje) || 0;
+                
+                const subtotalProducto = cantidad * precio;
+                const descuentoProducto = subtotalProducto * (descuentoPorcentaje / 100);
+                const subtotalConDescuento = subtotalProducto - descuentoProducto;
+                const itbisProducto = subtotalConDescuento * (itbisPorcentaje / 100);
+                
+                subtotal += subtotalProducto;
+                itbis += itbisProducto;
+                descuentoProductos += descuentoProducto;
+            });
+        }
+        
+        const descuentoGlobalMonto = (subtotal - descuentoProductos) * (parseFloat(venta.descuento_global) / 100 || 0);
+        const descuentoTotal = descuentoProductos + descuentoGlobalMonto;
+        const total = (subtotal - descuentoTotal) + itbis;
+        
+        return {
+            subtotal: parseFloat(subtotal.toFixed(2)),
+            itbis: parseFloat(itbis.toFixed(2)),
+            descuentoProductos: parseFloat(descuentoProductos.toFixed(2)),
+            descuentoGlobal: parseFloat(descuentoGlobalMonto.toFixed(2)),
+            descuentoTotal: parseFloat(descuentoTotal.toFixed(2)),
+            total: parseFloat(total.toFixed(2)),
+        };
+    };
+
+    const totales = calcularTotalesImpuestos();
 
     // Función para imprimir
     const handlePrint = () => {
@@ -325,6 +444,42 @@ export default function VentasShow({ venta }) {
                         border-bottom: 1px solid #000;
                         margin: 0 20px;
                     }
+                    
+                    .payment-info {
+                        margin-top: 20px;
+                        padding: 15px;
+                        background: #f8fafc;
+                        border-radius: 5px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    .payment-method {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin-top: 5px;
+                    }
+                    
+                    .payment-icon {
+                        padding: 5px;
+                        border-radius: 5px;
+                        font-size: 14px;
+                    }
+                    
+                    .payment-cash {
+                        background: #d1fae5;
+                        color: #065f46;
+                    }
+                    
+                    .payment-card {
+                        background: #dbeafe;
+                        color: #1e40af;
+                    }
+                    
+                    .payment-transfer {
+                        background: #fef3c7;
+                        color: #92400e;
+                    }
                 }
                 
                 @media screen {
@@ -340,6 +495,9 @@ export default function VentasShow({ venta }) {
             </style>
         `;
 
+        const PaymentIcon = getPaymentIcon(venta.tipo_pago);
+        const paymentIconName = PaymentIcon.displayName || PaymentIcon.name || 'Wallet';
+        
         const printHTML = `
             <!DOCTYPE html>
             <html>
@@ -364,6 +522,7 @@ export default function VentasShow({ venta }) {
                             <div><strong>FACTURA COMERCIAL</strong></div>
                             <div><strong>N°:</strong> ${venta.numero_factura}</div>
                             <div><strong>Fecha:</strong> ${formatDateShort(venta.fecha_venta)}</div>
+                            <div><strong>Hora:</strong> ${formatTime(venta.fecha_venta)}</div>
                             <div><strong>NCF:</strong> ${venta.ncf || 'No aplica'}</div>
                             <div>
                                 <strong>Estado:</strong> 
@@ -397,6 +556,10 @@ export default function VentasShow({ venta }) {
                                 <span class="info-label">Email:</span>
                                 <span class="info-value">${venta.cliente?.email || 'No disponible'}</span>
                             </div>
+                            <div class="info-row">
+                                <span class="info-label">Dirección:</span>
+                                <span class="info-value">${venta.cliente?.direccion || 'No disponible'}</span>
+                            </div>
                         </div>
                         
                         <div class="info-section">
@@ -409,15 +572,62 @@ export default function VentasShow({ venta }) {
                                 <span class="info-label">Condición de pago:</span>
                                 <span class="info-value">${venta.condicion_pago || 'Contado'}</span>
                             </div>
+                            ${venta.condicion_pago === 'CREDITO' && venta.dias_credito ? `
+                                <div class="info-row">
+                                    <span class="info-label">Días de crédito:</span>
+                                    <span class="info-value">${venta.dias_credito} días</span>
+                                </div>
+                            ` : ''}
                             <div class="info-row">
                                 <span class="info-label">Fecha de emisión:</span>
                                 <span class="info-value">${formatDate(venta.fecha_venta)}</span>
                             </div>
                             <div class="info-row">
-                                <span class="info-label">Método de pago:</span>
-                                <span class="info-value">${venta.metodo_pago || 'Efectivo'}</span>
+                                <span class="info-label">Tipo de comprobante:</span>
+                                <span class="info-value">${venta.tipo_comprobante || 'FACTURA'}</span>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Información de pago -->
+                    <div class="payment-info">
+                        <h3>INFORMACIÓN DE PAGO</h3>
+                        <div class="info-row">
+                            <span class="info-label">Método de pago:</span>
+                            <span class="info-value">
+                                <div class="payment-method">
+                                    <span class="payment-icon payment-${venta.tipo_pago?.toLowerCase() || 'cash'}">
+                                        ${getPaymentName(venta.tipo_pago)}
+                                    </span>
+                                </div>
+                            </span>
+                        </div>
+                        ${venta.tipo_pago === 'TRANSFERENCIA' && venta.referencia_transferencia ? `
+                            <div class="info-row">
+                                <span class="info-label">Referencia de transferencia:</span>
+                                <span class="info-value">${venta.referencia_transferencia}</span>
+                            </div>
+                        ` : ''}
+                        ${venta.tipo_pago === 'TARJETA_DEBITO' || venta.tipo_pago === 'TARJETA_CREDITO' ? `
+                            <div class="info-row">
+                                <span class="info-label">Últimos 4 dígitos:</span>
+                                <span class="info-value">${venta.ultimos_digitos_tarjeta || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Autorización:</span>
+                                <span class="info-value">${venta.autorizacion_tarjeta || 'N/A'}</span>
+                            </div>
+                        ` : ''}
+                        ${venta.tipo_pago === 'CHEQUE' ? `
+                            <div class="info-row">
+                                <span class="info-label">Número de cheque:</span>
+                                <span class="info-value">${venta.numero_cheque || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Banco:</span>
+                                <span class="info-value">${venta.banco_cheque || 'N/A'}</span>
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <!-- Tabla de productos -->
@@ -429,37 +639,65 @@ export default function VentasShow({ venta }) {
                                 <th>DESCRIPCIÓN</th>
                                 <th>CANTIDAD</th>
                                 <th>PRECIO UNITARIO</th>
-                                <th>DESCUENTO</th>
-                                <th>TOTAL</th>
+                                <th>DESCUENTO %</th>
+                                <th>ITBIS %</th>
+                                <th>SUBTOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${venta.detalles?.map((detalle, index) => `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${detalle.producto?.nombre || 'Producto eliminado'}</td>
-                                    <td>${detalle.cantidad}</td>
-                                    <td>${formatCurrency(detalle.precio_unitario)}</td>
-                                    <td>${formatCurrency(detalle.descuento || 0)}</td>
-                                    <td>${formatCurrency(detalle.total)}</td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="6" style="text-align: center;">No hay productos</td></tr>'}
+                            ${venta.detalles?.map((detalle, index) => {
+                                const subtotalProducto = (parseFloat(detalle.cantidad) || 0) * (parseFloat(detalle.precio_unitario) || 0);
+                                const descuentoProducto = subtotalProducto * ((parseFloat(detalle.descuento) || 0) / 100);
+                                const subtotalConDescuento = subtotalProducto - descuentoProducto;
+                                const itbisProducto = subtotalConDescuento * ((parseFloat(detalle.itbis_porcentaje) || 0) / 100);
+                                const totalProducto = subtotalConDescuento + itbisProducto;
+                                
+                                return `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${detalle.producto?.nombre || 'Producto eliminado'}</td>
+                                        <td>${detalle.cantidad}</td>
+                                        <td>${formatCurrency(detalle.precio_unitario)}</td>
+                                        <td>${parseFloat(detalle.descuento || 0).toFixed(2)}%</td>
+                                        <td>${parseFloat(detalle.itbis_porcentaje || 0).toFixed(2)}%</td>
+                                        <td>${formatCurrency(totalProducto)}</td>
+                                    </tr>
+                                `;
+                            }).join('') || '<tr><td colspan="7" style="text-align: center;">No hay productos</td></tr>'}
                         </tbody>
                     </table>
                     
                     <!-- Totales -->
                     <div class="totals-section">
                         <div class="total-row">
-                            <span>Subtotal:</span>
-                            <span>${formatCurrency(venta.subtotal || venta.total)}</span>
+                            <span>Subtotal productos:</span>
+                            <span>${formatCurrency(totales.subtotal)}</span>
+                        </div>
+                        ${totales.descuentoProductos > 0 ? `
+                            <div class="total-row">
+                                <span>Descuento productos:</span>
+                                <span style="color: #dc2626;">-${formatCurrency(totales.descuentoProductos)}</span>
+                            </div>
+                        ` : ''}
+                        ${venta.descuento_global > 0 ? `
+                            <div class="total-row">
+                                <span>Descuento global (${parseFloat(venta.descuento_global).toFixed(2)}%):</span>
+                                <span style="color: #dc2626;">-${formatCurrency(totales.descuentoGlobal)}</span>
+                            </div>
+                        ` : ''}
+                        ${totales.descuentoTotal > 0 ? `
+                            <div class="total-row">
+                                <span>Descuento total:</span>
+                                <span style="color: #dc2626;">-${formatCurrency(totales.descuentoTotal)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="total-row">
+                            <span>Subtotal con descuentos:</span>
+                            <span>${formatCurrency(totales.subtotal - totales.descuentoTotal)}</span>
                         </div>
                         <div class="total-row">
-                            <span>Descuento:</span>
-                            <span>${formatCurrency(venta.descuento_total || 0)}</span>
-                        </div>
-                        <div class="total-row">
-                            <span>ITBIS (18%):</span>
-                            <span>${formatCurrency(venta.impuestos || 0)}</span>
+                            <span>ITBIS:</span>
+                            <span>${formatCurrency(totales.itbis)}</span>
                         </div>
                         <div class="total-row grand-total">
                             <span>TOTAL GENERAL:</span>
@@ -471,9 +709,28 @@ export default function VentasShow({ venta }) {
                     ${venta.notas || venta.observaciones ? `
                         <div class="info-section" style="margin-top: 30px;">
                             <h3>OBSERVACIONES</h3>
-                            <p>${venta.notas || venta.observaciones}</p>
+                            <p style="white-space: pre-line;">${venta.notas || venta.observaciones}</p>
                         </div>
                     ` : ''}
+                    
+                    <!-- Información adicional -->
+                    <div class="info-section" style="margin-top: 30px;">
+                        <h3>INFORMACIÓN ADICIONAL</h3>
+                        <div class="info-row">
+                            <span class="info-label">Caja:</span>
+                            <span class="info-value">${venta.caja?.nombre || 'N/A'} - ${venta.caja?.usuario?.name || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de registro:</span>
+                            <span class="info-value">${formatDate(venta.created_at)}</span>
+                        </div>
+                        ${venta.updated_at !== venta.created_at ? `
+                            <div class="info-row">
+                                <span class="info-label">Última actualización:</span>
+                                <span class="info-value">${formatDate(venta.updated_at)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
                     
                     <!-- Firmas -->
                     <div class="signature-area">
@@ -499,6 +756,9 @@ export default function VentasShow({ venta }) {
                         <p>Documento válido como factura fiscal - Esta factura cumple con los requisitos de la DGII</p>
                         <p>Para consultas o aclaraciones contacte a: contacto@miempresa.com | Tel: (809) 555-1234</p>
                         <p>Impreso el: ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</p>
+                        <p style="margin-top: 10px; font-size: 10px; color: #9ca3af;">
+                            ID de transacción: ${venta.id} | Usuario: ${venta.user?.name || 'Sistema'} | Versión: 1.0
+                        </p>
                     </div>
                 </div>
             </body>
@@ -518,11 +778,15 @@ export default function VentasShow({ venta }) {
         };
     };
 
-    // Función para descargar como PDF (placeholder)
+    // Función para descargar como PDF
     const handleDownloadPDF = () => {
         alert('La funcionalidad de descarga PDF estará disponible próximamente.');
-        // Aquí puedes integrar con una librería como jsPDF o html2pdf.js
     };
+
+    // Obtener icono de tipo de pago
+    const PaymentIcon = getPaymentIcon(venta.tipo_pago);
+    const paymentColor = getPaymentColor(venta.tipo_pago);
+    const paymentName = getPaymentName(venta.tipo_pago);
 
     return (
         <>
@@ -550,6 +814,20 @@ export default function VentasShow({ venta }) {
                                         <Calendar className="w-4 h-4 mr-1.5" />
                                         {formatDate(venta.fecha_venta)}
                                     </div>
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                        <PaymentIcon className="w-4 h-4 mr-1.5" />
+                                        {paymentName}
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                        <CreditCard className="w-4 h-4 mr-1.5" />
+                                        {venta.condicion_pago}
+                                    </div>
+                                    {venta.condicion_pago === 'CREDITO' && venta.dias_credito && (
+                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                            <Clock className="w-4 h-4 mr-1.5" />
+                                            {venta.dias_credito} días
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -594,17 +872,23 @@ export default function VentasShow({ venta }) {
                             {/* Resumen de totales - Card superior */}
                             <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl shadow-lg overflow-hidden">
                                 <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                         <div className="text-center">
                                             <p className="text-blue-100 text-sm font-medium mb-1">Subtotal</p>
                                             <p className="text-2xl font-bold text-white">
-                                                {formatCurrency(venta.subtotal || venta.total)}
+                                                {formatCurrency(totales.subtotal)}
                                             </p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-blue-100 text-sm font-medium mb-1">Impuestos</p>
+                                            <p className="text-blue-100 text-sm font-medium mb-1">Descuentos</p>
                                             <p className="text-2xl font-bold text-white">
-                                                {formatCurrency(venta.impuestos || 0)}
+                                                -{formatCurrency(totales.descuentoTotal)}
+                                            </p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-blue-100 text-sm font-medium mb-1">ITBIS</p>
+                                            <p className="text-2xl font-bold text-white">
+                                                {formatCurrency(totales.itbis)}
                                             </p>
                                         </div>
                                         <div className="text-center">
@@ -619,7 +903,7 @@ export default function VentasShow({ venta }) {
 
                             {/* Grid principal de información */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Sección Cliente */}
+                                {/* Sección Cliente y Datos de venta */}
                                 <div className="lg:col-span-2 space-y-6">
                                     {/* Información del cliente */}
                                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -638,8 +922,8 @@ export default function VentasShow({ venta }) {
                                             )}
                                         </div>
                                         
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
                                                 <div>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Nombre completo</p>
                                                     <p className="font-medium text-gray-900 dark:text-white">
@@ -648,13 +932,19 @@ export default function VentasShow({ venta }) {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Identificación</p>
-                                                    <p className="font-medium text-gray-900 dark:text-white">
-                                                        {venta.cliente?.cedula || 'Sin cédula'}
-                                                    </p>
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium text-gray-900 dark:text-white">
+                                                            {venta.cliente?.cedula || 'Sin cédula'}
+                                                        </span>
+                                                        <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                                                            venta.cliente?.tipo === 'JURIDICA' 
+                                                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                                                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                                        }`}>
+                                                            {venta.cliente?.tipo || 'FISICA'}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="space-y-3">
                                                 {venta.cliente?.email && (
                                                     <div className="flex items-start">
                                                         <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-1 mr-3 flex-shrink-0" />
@@ -666,6 +956,9 @@ export default function VentasShow({ venta }) {
                                                         </div>
                                                     </div>
                                                 )}
+                                            </div>
+                                            
+                                            <div className="space-y-4">
                                                 {venta.cliente?.telefono && (
                                                     <div className="flex items-start">
                                                         <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-1 mr-3 flex-shrink-0" />
@@ -673,6 +966,28 @@ export default function VentasShow({ venta }) {
                                                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
                                                                 {venta.cliente.telefono}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {venta.cliente?.direccion && (
+                                                    <div className="flex items-start">
+                                                        <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Dirección</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {venta.cliente.direccion}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {venta.cliente?.created_at && (
+                                                    <div className="flex items-start">
+                                                        <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Cliente desde</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {formatDate(venta.cliente.created_at)}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -689,7 +1004,7 @@ export default function VentasShow({ venta }) {
                                                 Productos ({venta.detalles?.length || 0})
                                             </h3>
                                             <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                Total productos
+                                                Total productos: {formatCurrency(totales.subtotal)}
                                             </span>
                                         </div>
                                         
@@ -705,7 +1020,13 @@ export default function VentasShow({ venta }) {
                                                                 Cantidad
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                                Precio Unitario
+                                                                Precio
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                Desc. %
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                ITBIS %
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                                 Total
@@ -713,41 +1034,74 @@ export default function VentasShow({ venta }) {
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                                        {venta.detalles.map((detalle, index) => (
-                                                            <tr 
-                                                                key={index}
-                                                                className="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
-                                                            >
-                                                                <td className="px-6 py-4">
-                                                                    <div className="flex items-center">
-                                                                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center mr-3">
-                                                                            <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="font-medium text-gray-900 dark:text-white">
-                                                                                {detalle.producto?.nombre || 'Producto eliminado'}
-                                                                            </p>
-                                                                            {detalle.producto?.codigo && (
-                                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                    Código: {detalle.producto.codigo}
+                                                        {venta.detalles.map((detalle, index) => {
+                                                            const cantidad = parseFloat(detalle.cantidad) || 0;
+                                                            const precio = parseFloat(detalle.precio_unitario) || 0;
+                                                            const descuentoPorcentaje = parseFloat(detalle.descuento) || 0;
+                                                            const itbisPorcentaje = parseFloat(detalle.itbis_porcentaje) || 0;
+                                                            
+                                                            const subtotal = cantidad * precio;
+                                                            const descuentoProducto = subtotal * (descuentoPorcentaje / 100);
+                                                            const subtotalConDescuento = subtotal - descuentoProducto;
+                                                            const itbis = subtotalConDescuento * (itbisPorcentaje / 100);
+                                                            const total = subtotalConDescuento + itbis;
+                                                            
+                                                            return (
+                                                                <tr 
+                                                                    key={index}
+                                                                    className="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                                                                >
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="flex items-center">
+                                                                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center mr-3">
+                                                                                <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                                                    {detalle.producto?.nombre || 'Producto eliminado'}
                                                                                 </p>
-                                                                            )}
+                                                                                {detalle.producto?.codigo && (
+                                                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                        Código: {detalle.producto.codigo}
+                                                                                        {detalle.producto?.codigo_barras && ` | Barras: ${detalle.producto.codigo_barras}`}
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                                                        {detalle.cantidad}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                                    {formatCurrency(detalle.precio_unitario)}
-                                                                </td>
-                                                                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
-                                                                    {formatCurrency(detalle.total)}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                                                            {cantidad}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                                        {formatCurrency(precio)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        {descuentoPorcentaje > 0 ? (
+                                                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                                                                -{descuentoPorcentaje.toFixed(2)}%
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="text-gray-400 text-sm">-</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                                                                            {itbisPorcentaje.toFixed(2)}%
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                                                                        {formatCurrency(total)}
+                                                                        {descuentoProducto > 0 && (
+                                                                            <div className="text-xs text-red-600 dark:text-red-400">
+                                                                                -{formatCurrency(descuentoProducto)} desc.
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -773,7 +1127,7 @@ export default function VentasShow({ venta }) {
                                         
                                         <div className="space-y-4">
                                             <div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Número de Comprobante</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Número de Factura</p>
                                                 <p className="font-mono font-bold text-gray-900 dark:text-white">
                                                     #{venta.numero_factura}
                                                 </p>
@@ -786,45 +1140,232 @@ export default function VentasShow({ venta }) {
                                                 </p>
                                             </div>
                                             
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {formatDateShort(venta.fecha_venta)}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Hora</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {formatTime(venta.fecha_venta)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
                                             <div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Condición de Pago</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Tipo de Comprobante</p>
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                                    {venta.condicion_pago}
+                                                    {venta.tipo_comprobante}
                                                 </span>
                                             </div>
                                             
                                             <div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha de Emisión</p>
-                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                    {formatDate(venta.fecha_venta)}
-                                                </p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Condición de Pago</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        venta.condicion_pago === 'CONTADO' 
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
+                                                    }`}>
+                                                        {venta.condicion_pago}
+                                                    </span>
+                                                    {venta.condicion_pago === 'CREDITO' && venta.dias_credito && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                                                            {venta.dias_credito} días
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Vendedor */}
+                                    {/* Información de pago */}
+                                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <PaymentIcon className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                            Información de Pago
+                                        </h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Método de Pago</p>
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-2 rounded-lg ${paymentColor}`}>
+                                                        <PaymentIcon className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="font-medium text-gray-900 dark:text-white">
+                                                        {paymentName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Información específica del método de pago */}
+                                            {venta.tipo_pago === 'TRANSFERENCIA' && venta.referencia_transferencia && (
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Referencia</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {venta.referencia_transferencia}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            
+                                            {(venta.tipo_pago === 'TARJETA_DEBITO' || venta.tipo_pago === 'TARJETA_CREDITO') && (
+                                                <>
+                                                    {venta.ultimos_digitos_tarjeta && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Últimos 4 dígitos</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                **** {venta.ultimos_digitos_tarjeta}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {venta.autorizacion_tarjeta && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Autorización</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {venta.autorizacion_tarjeta}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                            
+                                            {venta.tipo_pago === 'CHEQUE' && (
+                                                <>
+                                                    {venta.numero_cheque && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Número de cheque</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {venta.numero_cheque}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {venta.banco_cheque && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Banco</p>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {venta.banco_cheque}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Vendedor y Caja */}
                                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                                         <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
                                             <User className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-                                            Vendedor
+                                            Personal y Caja
                                         </h3>
                                         
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                                {venta.vendedor?.name?.charAt(0) || 'V'}
-                                            </div>
+                                        <div className="space-y-4">
                                             <div>
-                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                    {venta.vendedor?.name || 'No asignado'}
-                                                </p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    {venta.vendedor?.email || 'N/A'}
-                                                </p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Vendedor</p>
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                        {venta.vendedor?.name?.charAt(0) || 'V'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 dark:text-white">
+                                                            {venta.vendedor?.name || 'No asignado'}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                            {venta.vendedor?.email || 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {venta.caja && (
+                                                <div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Caja</p>
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white">
+                                                            <Wallet className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium text-gray-900 dark:text-white">
+                                                                {venta.caja.nombre || 'Caja Principal'}
+                                                            </p>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                                Responsable: {venta.caja.usuario?.name || 'Sistema'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Descuentos y Totales */}
+                                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <Percent className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                            Descuentos y Totales
+                                        </h3>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm text-gray-600 dark:text-gray-400">Subtotal productos</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">
+                                                    {formatCurrency(totales.subtotal)}
+                                                </span>
+                                            </div>
+                                            
+                                            {totales.descuentoProductos > 0 && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Descuento productos</span>
+                                                    <span className="font-medium text-red-600 dark:text-red-400">
+                                                        -{formatCurrency(totales.descuentoProductos)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            {venta.descuento_global > 0 && (
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center">
+                                                        <span className="text-sm text-gray-600 dark:text-gray-400">Descuento global</span>
+                                                        <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                            {parseFloat(venta.descuento_global).toFixed(2)}%
+                                                        </span>
+                                                    </div>
+                                                    <span className="font-medium text-red-600 dark:text-red-400">
+                                                        -{formatCurrency(totales.descuentoGlobal)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            {totales.descuentoTotal > 0 && (
+                                                <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total descuentos</span>
+                                                    <span className="font-medium text-red-600 dark:text-red-400">
+                                                        -{formatCurrency(totales.descuentoTotal)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm text-gray-600 dark:text-gray-400">ITBIS</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">
+                                                    {formatCurrency(totales.itbis)}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
+                                                <span className="text-lg font-bold text-gray-900 dark:text-white">Total General</span>
+                                                <span className="text-xl font-bold text-purple-700 dark:text-purple-400">
+                                                    {formatCurrency(venta.total)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Notas */}
+                                    {/* Notas y Observaciones */}
                                     {(venta.notas || venta.observaciones) && (
                                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                                             <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
@@ -847,11 +1388,22 @@ export default function VentasShow({ venta }) {
                                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                                     <div className="text-center sm:text-left">
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                                            Gracias por su compra
+                                            Garantía y soporte
                                         </p>
-                                        <p className="font-medium text-gray-900 dark:text-white">
-                                            Documento válido como factura
-                                        </p>
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                <Shield className="w-4 h-4 text-green-600 dark:text-green-400 mr-1.5" />
+                                                <span>Garantía 30 días</span>
+                                            </div>
+                                            <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-1.5" />
+                                                <span>Entrega inmediata</span>
+                                            </div>
+                                            <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-1.5" />
+                                                <span>Factura original requerida</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <div className="flex items-center space-x-4">
@@ -865,6 +1417,14 @@ export default function VentasShow({ venta }) {
                                             <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
                                         </div>
                                     </div>
+                                </div>
+                                
+                                {/* Información de fecha */}
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    <p>
+                                        Registrado el: {formatDate(venta.created_at)} | 
+                                        Última actualización: {formatDate(venta.updated_at)}
+                                    </p>
                                 </div>
                             </div>
                         </div>

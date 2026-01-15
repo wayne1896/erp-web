@@ -31,6 +31,7 @@ Schema::create('ventas', function (Blueprint $table) {
     $table->string('numero_factura')->unique();
     $table->string('ncf', 19)->unique(); // NCF dominicano: B0100000001
     $table->enum('tipo_comprobante', ['FACTURA', 'NOTA_CREDITO', 'NOTA_DEBITO', 'COMPROBANTE_GASTOS']);
+    
     $table->foreignId('cliente_id')->constrained('clientes');
     $table->foreignId('sucursal_id')->constrained('sucursales');
     $table->foreignId('user_id')->constrained('users');
@@ -38,6 +39,8 @@ Schema::create('ventas', function (Blueprint $table) {
     $table->foreignId('caja_id')->nullable()->constrained('cajas')->onDelete('set null');
     $table->enum('estado', ['PENDIENTE', 'PROCESADA', 'ANULADA', 'DEVUELTA'])->default('PENDIENTE');
     $table->enum('condicion_pago', ['CONTADO', 'CREDITO'])->default('CONTADO');
+    $table->enum('tipo_pago', ['EFECTIVO', 'TARJETA_DEBITO', 'TARJETA_CREDITO', 'TRANSFERENCIA', 'CHEQUE', 'OTRO'])
+    ->default('EFECTIVO');
     $table->integer('dias_credito')->default(0);
     $table->date('fecha_vencimiento')->nullable();
     
