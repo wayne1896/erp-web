@@ -9,6 +9,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Venta extends Model
 {
+    // Constantes de estado
+    const ESTADO_PENDIENTE = 'PENDIENTE';
+    const ESTADO_PROCESADA = 'PROCESADA';
+    const ESTADO_ANULADA = 'ANULADA';
+    const ESTADO_FACTURADA = 'FACTURADA';
+    const ESTADO_ENVIADA = 'ENVIADA';
+    
+    // Constantes de condición de pago
+    const CONDICION_CONTADO = 'CONTADO';
+    const CONDICION_CREDITO = 'CREDITO';
+    
+    // Constantes de tipo de comprobante
+    const TIPO_FACTURA = 'FACTURA';
+    const TIPO_NOTA_CREDITO = 'NOTA_CREDITO';
+    const TIPO_NOTA_DEBITO = 'NOTA_DEBITO';
+    const TIPO_COMPROBANTE_FISCAL = 'COMPROBANTE_FISCAL';
+
     protected $fillable = [
         'numero_factura',
         'ncf',
@@ -66,6 +83,7 @@ class Venta extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    
     // Agregar esta relación como alias
     public function usuario(): BelongsTo
     {
@@ -95,7 +113,7 @@ class Venta extends Model
      */
     public function scopePendientes($query)
     {
-        return $query->where('estado', 'PENDIENTE');
+        return $query->where('estado', self::ESTADO_PENDIENTE);
     }
     
     /**
@@ -103,7 +121,7 @@ class Venta extends Model
      */
     public function scopeAlCredito($query)
     {
-        return $query->where('condicion_pago', 'CREDITO');
+        return $query->where('condicion_pago', self::CONDICION_CREDITO);
     }
     
     /**
@@ -169,7 +187,7 @@ class Venta extends Model
         $this->total = $subtotal - $descuento + $itbis;
         
         // Si es a crédito, calcular fecha de vencimiento
-        if ($this->condicion_pago === 'CREDITO' && $this->dias_credito > 0) {
+        if ($this->condicion_pago === self::CONDICION_CREDITO && $this->dias_credito > 0) {
             $this->fecha_vencimiento = $this->fecha_venta->addDays($this->dias_credito);
         }
     }
@@ -179,7 +197,7 @@ class Venta extends Model
      */
     public function procesar()
     {
-        if ($this->estado !== 'PENDIENTE') {
+        if ($this->estado !== self::ESTADO_PENDIENTE) {
             throw new \Exception('La venta ya fue procesada');
         }
         
@@ -194,7 +212,7 @@ class Venta extends Model
                 }
             }
             
-            $this->estado = 'PROCESADA';
+            $this->estado = self::ESTADO_PROCESADA;
             $this->save();
         });
     }
@@ -204,7 +222,7 @@ class Venta extends Model
      */
     public function anular($motivo = null)
     {
-        if ($this->estado === 'ANULADA') {
+        if ($this->estado === self::ESTADO_ANULADA) {
             throw new \Exception('La venta ya está anulada');
         }
         
@@ -220,9 +238,51 @@ class Venta extends Model
                 }
             }
             
-            $this->estado = 'ANULADA';
+            $this->estado = self::ESTADO_ANULADA;
             $this->notas = $motivo ? ($this->notas . "\nANULADA: " . $motivo) : $this->notas;
             $this->save();
         });
+    }
+    
+    /**
+     * Obtener opciones de estado
+     */
+    public static function getEstados()
+    {
+        return [
+            self::ESTADO_PENDIENTE => 'Pendiente',
+            self::ESTADO_PROCESADA => 'Procesada',
+            self::ESTADO_ANULADA => 'Anulada',
+            self::ESTADO_FACTURADA => 'Facturada',
+            self::ESTADO_ENVIADA => 'Enviada',
+        ];
+    }
+    // En app/Models/Venta.php
+public function caja(): BelongsTo
+{
+    return $this->belongsTo(Caja::class);
+}
+    /**
+     * Obtener opciones de condición de pago
+     */
+    public static function getCondicionesPago()
+    {
+        return [
+            self::CONDICION_CONTADO => 'Contado',
+            self::CONDICION_CREDITO => 'Crédito',
+        ];
+    }
+    
+    /**
+     * Obtener opciones de tipo de comprobante
+     */
+    public static function getTiposComprobante()
+    {
+        return [
+            self::TIPO_FACTURA => 'Factura',
+            self::TIPO_NOTA_CREDITO => 'Nota de Crédito',
+            self::TIPO_NOTA_DEBITO => 'Nota de Débito',
+            self::TIPO_COMPROBANTE_FISCAL => 'Comprobante Fiscal',
+        ];
     }
 }

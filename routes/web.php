@@ -111,6 +111,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/abrir', [CajaController::class, 'create'])->name('caja.create');
         Route::post('/abrir', [CajaController::class, 'store'])->name('caja.store');
         Route::get('/{caja}/cerrar', [CajaController::class, 'edit'])->name('caja.edit');
+        
         Route::put('/{caja}', [CajaController::class, 'update'])->name('caja.update');
         Route::get('/{caja}/movimientos', [CajaController::class, 'movimientos'])->name('caja.movimientos');
         Route::post('/{caja}/ingreso', [CajaController::class, 'registrarIngreso'])->name('caja.ingreso');
@@ -149,6 +150,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reportes/mensual', [VentaController::class, 'reporteMensual'])->name('ventas.reporte-mensual');
         Route::get('/reportes/productos', [VentaController::class, 'reporteProductos'])->name('ventas.reporte-productos');
         Route::get('/reportes/general', [VentaController::class, 'reporteVentas'])->name('ventas.reporte-general');
+        Route::get('/ventas/{venta}/imprimir', [VentaController::class, 'imprimir']) ->name('ventas.imprimir');
     });
 
     // ==================== REPORTES GENERALES ====================
@@ -167,6 +169,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // Reportes de clientes
         Route::get('/clientes', [ClienteController::class, 'reporteClientes'])->name('reportes.clientes');
+        
+        // Exportación de ventas
+        Route::get('/ventas/exportar', [VentaController::class, 'export'])->name('ventas.export');
     });
 
     // ==================== CONFIGURACIÓN ====================

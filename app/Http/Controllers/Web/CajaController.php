@@ -147,6 +147,7 @@ class CajaController extends Controller
             'resumen' => $resumen,
             'movimientos' => $caja->movimientos()->orderBy('created_at', 'desc')->get(),
             'ventas' => $caja->ventas()->with(['cliente'])->get(),
+            'sucursal' => $caja->sucursal, // Asegúrate de incluir esto
         ]);
     }
     

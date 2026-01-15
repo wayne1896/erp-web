@@ -1,19 +1,20 @@
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { 
     Package, DollarSign, Percent, Tag, 
     Edit, Trash2, ArrowLeft, BarChart3,
-    Truck, Calendar, Barcode, CheckCircle, XCircle
+    Truck, Calendar, Barcode, CheckCircle, XCircle,
+    Layers, TrendingUp, Warehouse, FileText,
+    AlertTriangle, Download, Share2, Copy,
+    Eye, EyeOff, MoreVertical, ShoppingCart,
+    RefreshCw, Clock, Grid, List
 } from 'lucide-react';
 
 export default function Show({ auth, producto, movimientos = [], sucursales = [], sucursal_actual }) {
-    
-    console.log('Producto recibido en Show:', producto);
-    console.log('Categoría del producto:', producto?.categoria);
-    console.log('Inventarios del producto:', producto?.inventarios);
-    console.log('Primer inventario:', producto?.inventarios?.[0]);
-    console.log('Costo promedio del primer inventario:', producto?.inventarios?.[0]?.costo_promedio);
-    console.log('Tipo de costo promedio:', typeof producto?.inventarios?.[0]?.costo_promedio);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showStats, setShowStats] = useState(true);
 
     const handleDelete = () => {
         if (confirm('¿Estás seguro de eliminar este producto?\n\nEsta acción no se puede deshacer.')) {
@@ -28,14 +29,10 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
     // Función segura para formatear números
     const formatNumber = (value, decimals = 2) => {
         try {
-            // Convertir a número
             const num = parseFloat(value);
-            // Verificar si es un número válido
             if (isNaN(num)) return '0.00';
-            // Formatear con decimales
             return num.toFixed(decimals);
         } catch (error) {
-            console.error('Error formateando número:', error, 'Valor:', value);
             return '0.00';
         }
     };
@@ -50,7 +47,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
         }
     };
 
-    // Calcular estadísticas con manejo seguro
+    // Calcular estadísticas
     const calcularEstadisticas = () => {
         try {
             const precioCompra = safeNumber(producto?.precio_compra);
@@ -59,8 +56,7 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                 ? ((precioVenta - precioCompra) / precioCompra) * 100 
                 : 0;
             
-            // Determinar porcentaje ITBIS
-            let itbisPorcentaje = 18; // Valor por defecto
+            let itbisPorcentaje = 18;
             if (producto?.tasa_itbis === 'ITBIS1') itbisPorcentaje = 18;
             if (producto?.tasa_itbis === 'ITBIS2') itbisPorcentaje = 16;
             if (producto?.tasa_itbis === 'ITBIS3' || producto?.tasa_itbis === 'EXENTO') itbisPorcentaje = 0;
@@ -69,7 +65,6 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                 ? precioVenta 
                 : precioVenta * (1 + (itbisPorcentaje / 100));
             
-            // Obtener inventario de la sucursal actual
             const inventarioActual = Array.isArray(producto?.inventarios) 
                 ? producto.inventarios.find(inv => inv.sucursal_id === sucursal_actual?.id)
                 : null;
@@ -83,38 +78,38 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                 valor_inventario: valorInventario,
                 stock_actual: stockActual,
                 stock_minimo_alcanzado: stockActual <= safeNumber(producto?.stock_minimo),
+                ganancia_unitaria: precioVenta - precioCompra,
+                rotacion_dias: 30, // Valor por defecto
             };
         } catch (error) {
-            console.error('Error calculando estadísticas:', error);
             return {
                 margen_ganancia: 0,
                 precio_con_itbis: 0,
                 valor_inventario: 0,
                 stock_actual: 0,
                 stock_minimo_alcanzado: false,
+                ganancia_unitaria: 0,
+                rotacion_dias: 0,
             };
         }
     };
 
     const estadisticas = calcularEstadisticas();
 
-    // Funciones auxiliares seguras
+    // Funciones auxiliares
     const getDescripcionItbis = () => {
         if (!producto?.tasa_itbis) return 'ITBIS 18%';
-        
         const descripciones = {
-            'ITBIS1': 'ITBIS 18%',
-            'ITBIS2': 'ITBIS 16%',
-            'ITBIS3': 'ITBIS 0%',
-            'EXENTO': 'Exento'
+            'ITBIS1': 'ITBIS General (18%)',
+            'ITBIS2': 'ITBIS Reducido (16%)',
+            'ITBIS3': 'ITBIS Mínimo (0%)',
+            'EXENTO': 'Exento de ITBIS'
         };
-        
         return descripciones[producto.tasa_itbis] || 'ITBIS 18%';
     };
 
     const getUnidadMedidaTexto = () => {
         if (!producto?.unidad_medida) return 'Unidad';
-        
         const unidades = {
             'UNIDAD': 'Unidad',
             'KILO': 'Kilogramo',
@@ -124,21 +119,49 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
             'PAQUETE': 'Paquete',
             'SACO': 'Saco'
         };
-        
         return unidades[producto.unidad_medida] || producto.unidad_medida;
     };
 
-    // Verificar si el producto existe
+    // Formatear fecha
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Intl.DateTimeFormat('es-DO', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+        }).format(new Date(dateString));
+    };
+
+    // Formatear moneda
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('es-DO', {
+            style: 'currency',
+            currency: 'DOP',
+            minimumFractionDigits: 2
+        }).format(value || 0);
+    };
+
     if (!producto) {
         return (
             <AuthenticatedLayout user={auth.user}>
                 <Head title="Producto no encontrado" />
                 <div className="py-12">
-                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Producto no encontrado</h2>
-                            <Link href={route('productos.index')} className="text-blue-600 hover:text-blue-800">
-                                ← Volver a la lista de productos
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-800/20 rounded-2xl flex items-center justify-center">
+                                <Package className="w-10 h-10 text-red-600 dark:text-red-400" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                                Producto no encontrado
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                                El producto que intentas ver no existe o ha sido eliminado.
+                            </p>
+                            <Link 
+                                href={route('productos.index')}
+                                className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                                Volver al listado
                             </Link>
                         </div>
                     </div>
@@ -151,346 +174,702 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                        <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                            <Package className="w-6 h-6 text-blue-600" />
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center space-x-4">
+                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-3.5 rounded-xl shadow-lg">
+                            <Package className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                                {producto.nombre || 'Producto'}
-                            </h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Código: {producto.codigo || 'N/A'}</p>
+                            <h1 className="font-bold text-2xl text-gray-900 dark:text-white leading-tight">
+                                {producto.nombre}
+                            </h1>
+                            <div className="flex items-center space-x-3 mt-1">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                    {producto.codigo}
+                                </span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    ID: #{producto.id}
+                                </span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    producto.activo 
+                                        ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-300'
+                                        : 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 text-red-800 dark:text-red-300'
+                                }`}>
+                                    {producto.activo ? (
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                    ) : (
+                                        <XCircle className="w-3 h-3 mr-1" />
+                                    )}
+                                    {producto.activo ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex space-x-2">
+                    
+                    <div className="flex items-center space-x-3">
                         <Link
                             href={route('productos.index')}
-                            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
+                            className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-gray-700 dark:to-gray-800 text-white font-medium rounded-lg hover:from-gray-900 hover:to-gray-950 dark:hover:from-gray-800 dark:hover:to-gray-900 transition-all duration-200 shadow-md hover:shadow-lg"
                         >
-                            <ArrowLeft className="w-4 h-4 mr-1" />
-                            Volver
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Volver al listado
                         </Link>
                     </div>
                 </div>
             }
         >
-            <Head title={`Producto: ${producto.nombre || 'N/A'}`} />
+            <Head title={`${producto.nombre} - Detalles del Producto`} />
 
-            <div className="py-8">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="py-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Pestañas de navegación */}
+                    <div className="mb-6">
+                        <div className="border-b border-gray-200 dark:border-gray-700">
+                            <nav className="-mb-px flex space-x-8">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('overview')}
+                                    className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        activeTab === 'overview'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        Resumen
+                                    </div>
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('inventory')}
+                                    className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        activeTab === 'inventory'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <Warehouse className="w-4 h-4 mr-2" />
+                                        Inventario
+                                    </div>
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('movements')}
+                                    className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        activeTab === 'movements'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <RefreshCw className="w-4 h-4 mr-2" />
+                                        Movimientos
+                                    </div>
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('settings')}
+                                    className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        activeTab === 'settings'
+                                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <FileText className="w-4 h-4 mr-2" />
+                                        Configuración
+                                    </div>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+
                     {/* Acciones rápidas */}
-                    <div className="mb-6 flex justify-between items-center">
-                        <div className="flex space-x-3">
-                            <Link
-                                href={route('productos.edit', producto.id)}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center"
-                            >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                            </Link>
-                            <button
-                                onClick={handleDelete}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center"
-                            >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Eliminar
-                            </button>
-                            <Link
-                                href={route('productos.stock', producto.id)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
-                            >
-                                <Tag className="w-4 h-4 mr-2" />
-                                Gestionar Stock
-                            </Link>
+                    <div className="mb-6 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center space-x-3">
+                                <Link
+                                    href={route('productos.edit', producto.id)}
+                                    className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                                >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Editar Producto
+                                </Link>
+                                <Link
+                                    href={route('productos.stock', producto.id)}
+                                    className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                                >
+                                    <Tag className="w-4 h-4 mr-2" />
+                                    Gestionar Stock
+                                </Link>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => setShowStats(!showStats)}
+                                    className="inline-flex items-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow"
+                                >
+                                    {showStats ? (
+                                        <EyeOff className="w-4 h-4 mr-2" />
+                                    ) : (
+                                        <Eye className="w-4 h-4 mr-2" />
+                                    )}
+                                    {showStats ? 'Ocultar' : 'Mostrar'} Estadísticas
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {/* Estadísticas */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                            <div className="flex items-center">
-                                <Percent className="w-5 h-5 text-blue-600 mr-2" />
-                                <div className="text-sm text-blue-600">Margen de Ganancia</div>
-                            </div>
-                            <div className="text-2xl font-bold mt-2">
-                                {formatNumber(estadisticas.margen_ganancia)}%
-                            </div>
-                        </div>
-                        
-                        <div className="bg-green-50 p-4 rounded-lg">
-                            <div className="flex items-center">
-                                <DollarSign className="w-5 h-5 text-green-600 mr-2" />
-                                <div className="text-sm text-green-600">Precio con ITBIS</div>
-                            </div>
-                            <div className="text-2xl font-bold mt-2">
-                                ${formatNumber(estadisticas.precio_con_itbis)}
-                            </div>
-                        </div>
-                        
-                        <div className="bg-purple-50 p-4 rounded-lg">
-                            <div className="flex items-center">
-                                <BarChart3 className="w-5 h-5 text-purple-600 mr-2" />
-                                <div className="text-sm text-purple-600">Valor Inventario</div>
-                            </div>
-                            <div className="text-2xl font-bold mt-2">
-                                ${formatNumber(estadisticas.valor_inventario)}
-                            </div>
-                        </div>
-                        
-                        <div className={`p-4 rounded-lg ${estadisticas.stock_minimo_alcanzado ? 'bg-red-50' : 'bg-yellow-50'}`}>
-                            <div className="flex items-center">
-                                <Tag className={`w-5 h-5 mr-2 ${estadisticas.stock_minimo_alcanzado ? 'text-red-600' : 'text-yellow-600'}`} />
-                                <div className={`text-sm ${estadisticas.stock_minimo_alcanzado ? 'text-red-600' : 'text-yellow-600'}`}>
-                                    Stock Actual
+                    {showStats && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Stock Actual</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                            {formatNumber(estadisticas.stock_actual)}
+                                        </p>
+                                        <div className="flex items-center mt-2">
+                                            {estadisticas.stock_minimo_alcanzado ? (
+                                                <AlertTriangle className="w-4 h-4 text-red-500 mr-1" />
+                                            ) : (
+                                                <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+                                            )}
+                                            <span className={`text-sm ${
+                                                estadisticas.stock_minimo_alcanzado ? 'text-red-600' : 'text-green-600'
+                                            }`}>
+                                                {estadisticas.stock_minimo_alcanzado ? 'Por debajo del mínimo' : 'Stock normal'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg">
+                                        <Package className="w-6 h-6 text-white" />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="text-2xl font-bold mt-2">
-                                {formatNumber(estadisticas.stock_actual)}
+
+                            <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-green-800 dark:text-green-300">Margen de Ganancia</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                            {formatNumber(estadisticas.margen_ganancia)}%
+                                        </p>
+                                        <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                                            {formatCurrency(estadisticas.ganancia_unitaria)} por unidad
+                                        </p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-lg">
+                                        <TrendingUp className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-xs mt-1">
-                                Mínimo: {formatNumber(producto.stock_minimo)}
+
+                            <div className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-purple-800 dark:text-purple-300">Valor Inventario</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                            {formatCurrency(estadisticas.valor_inventario)}
+                                        </p>
+                                        <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
+                                            Stock × Costo promedio
+                                        </p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-purple-500 to-violet-600 p-3 rounded-lg">
+                                        <BarChart3 className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-orange-800 dark:text-orange-300">Precio con ITBIS</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                            {formatCurrency(estadisticas.precio_con_itbis)}
+                                        </p>
+                                        <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
+                                            {getDescripcionItbis()}
+                                        </p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-3 rounded-lg">
+                                        <DollarSign className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Información principal */}
-                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    {/* Contenido de las pestañas */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <div className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Columna izquierda - Información básica */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                                            <Package className="w-5 h-5 mr-2 text-gray-400" />
-                                            Información Básica
-                                        </h3>
-                                        
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">
-                                                    Descripción
-                                                </label>
-                                                <p className="text-gray-900 dark:text-gray-200">
-                                                    {producto.descripcion || 'Sin descripción'}
-                                                </p>
-                                            </div>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">
-                                                    Categoría
-                                                </label>
-                                                <div className="flex items-center">
-                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                        {producto.categoria?.nombre || 'Sin categoría'}
-                                                    </span>
-                                                    {producto.categoria?.codigo && (
-                                                        <span className="ml-2 text-sm text-gray-500">
-                                                            ({producto.categoria.codigo})
+                            {/* Resumen */}
+                            <div className={`space-y-6 ${activeTab !== 'overview' ? 'hidden' : ''}`}>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="lg:col-span-2 space-y-6">
+                                        {/* Información básica */}
+                                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                                <Package className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                                Información Básica
+                                            </h3>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                        Descripción
+                                                    </label>
+                                                    <p className="text-gray-900 dark:text-gray-200">
+                                                        {producto.descripcion || 'Sin descripción'}
+                                                    </p>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Categoría
+                                                        </label>
+                                                        <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 font-medium">
+                                                            <Layers className="w-4 h-4 mr-2" />
+                                                            {producto.categoria?.nombre || 'Sin categoría'}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Unidad de Medida
+                                                        </label>
+                                                        <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 font-medium">
+                                                            {getUnidadMedidaTexto()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                        Código de Barras
+                                                    </label>
+                                                    <div className="flex items-center space-x-2">
+                                                        <Barcode className="w-5 h-5 text-gray-400" />
+                                                        <span className="font-mono text-gray-900 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded">
+                                                            {producto.codigo_barras || 'No asignado'}
                                                         </span>
-                                                    )}
+                                                        {producto.codigo_barras && (
+                                                            <button className="text-blue-600 hover:text-blue-800">
+                                                                <Copy className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">
-                                                    Unidad de Medida
-                                                </label>
-                                                <p className="text-gray-900 dark:text-gray-200">
-                                                    {getUnidadMedidaTexto()}
-                                                </p>
+                                        </div>
+
+                                        {/* Precios */}
+                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+                                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                                <DollarSign className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                                Precios y Ganancia
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Compra</p>
+                                                    <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                                                        {formatCurrency(producto.precio_compra)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">Costo unitario</p>
+                                                </div>
+                                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                                                    <p className="text-sm text-green-600 dark:text-green-400">Venta</p>
+                                                    <p className="text-xl font-bold text-green-700 dark:text-green-300 mt-1">
+                                                        {formatCurrency(producto.precio_venta)}
+                                                    </p>
+                                                    <p className="text-xs text-green-500 mt-1">Público general</p>
+                                                </div>
+                                                {producto.precio_mayor && (
+                                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                                                        <p className="text-sm text-blue-600 dark:text-blue-400">Mayorista</p>
+                                                        <p className="text-xl font-bold text-blue-700 dark:text-blue-300 mt-1">
+                                                            {formatCurrency(producto.precio_mayor)}
+                                                        </p>
+                                                        <p className="text-xs text-blue-500 mt-1">Venta por volumen</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">
-                                                    Código de Barras
-                                                </label>
-                                                <div className="flex items-center">
-                                                    <Barcode className="w-4 h-4 mr-2 text-gray-400" />
-                                                    <span className="font-mono text-gray-900 dark:text-gray-200">
-                                                        {producto.codigo_barras || 'No asignado'}
+                                        </div>
+                                    </div>
+
+                                    {/* Panel lateral */}
+                                    <div className="space-y-6">
+                                        {/* Impuestos */}
+                                        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200 dark:border-orange-800 rounded-xl p-5">
+                                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                                <Percent className="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" />
+                                                Impuestos
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Tasa ITBIS</span>
+                                                    <span className="font-medium">{getDescripcionItbis()}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Estado</span>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        producto.exento_itbis 
+                                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-300'
+                                                            : 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-300'
+                                                    }`}>
+                                                        {producto.exento_itbis ? 'Exento' : 'Aplica ITBIS'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-lg">
+                                                    <span className="text-sm text-green-600 dark:text-green-400">Precio con ITBIS</span>
+                                                    <span className="font-bold text-green-700 dark:text-green-300">
+                                                        {formatCurrency(estadisticas.precio_con_itbis)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Información técnica */}
+                                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                                <Calendar className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
+                                                Información Técnica
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Creado</span>
+                                                    <span className="text-sm font-medium">{formatDate(producto.created_at)}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Actualizado</span>
+                                                    <span className="text-sm font-medium">{formatDate(producto.updated_at)}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Control Stock</span>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        producto.control_stock 
+                                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-300'
+                                                            : 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-300'
+                                                    }`}>
+                                                        {producto.control_stock ? 'Activado' : 'Desactivado'}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                                            <Tag className="w-5 h-5 mr-2 text-gray-400" />
+                                </div>
+                            </div>
+
+                            {/* Inventario */}
+                            <div className={`space-y-6 ${activeTab !== 'inventory' ? 'hidden' : ''}`}>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white flex items-center">
+                                        <Warehouse className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                        Inventario por Sucursal
+                                    </h3>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {Array.isArray(producto.inventarios) ? producto.inventarios.length : 0} sucursales
+                                    </span>
+                                </div>
+
+                                {Array.isArray(producto.inventarios) && producto.inventarios.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {producto.inventarios.map((inventario, index) => (
+                                            <div key={inventario.id || index} 
+                                                 className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900/10 dark:to-gray-800/10 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-md transition-shadow">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900 dark:text-white">
+                                                            {inventario.sucursal?.nombre || 'Sucursal'}
+                                                        </h4>
+                                                        {sucursal_actual?.id === inventario.sucursal_id && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-300 mt-1">
+                                                                <CheckCircle className="w-3 h-3 mr-1" />
+                                                                Actual
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg">
+                                                        <Truck className="w-5 h-5 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">Stock Actual</p>
+                                                        <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                                            {formatNumber(inventario.stock_actual)}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">Disponible</p>
+                                                        <p className={`text-lg font-bold ${
+                                                            safeNumber(inventario.stock_disponible) <= safeNumber(producto.stock_minimo)
+                                                                ? 'text-red-600'
+                                                                : 'text-green-600'
+                                                        }`}>
+                                                            {formatNumber(inventario.stock_disponible)}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">Costo Promedio</p>
+                                                        <p className="text-lg font-medium text-gray-900 dark:text-white">
+                                                            {formatCurrency(inventario.costo_promedio)}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">Valor Total</p>
+                                                        <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                                            {formatCurrency(inventario.valor_inventario)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <Warehouse className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                                            No hay inventarios registrados
+                                        </h4>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                            Este producto no tiene inventarios registrados en ninguna sucursal.
+                                        </p>
+                                        <Link
+                                            href={route('productos.stock', producto.id)}
+                                            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+                                        >
+                                            <Tag className="w-4 h-4 mr-2" />
+                                            Gestionar Stock
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Movimientos */}
+                            <div className={`space-y-6 ${activeTab !== 'movements' ? 'hidden' : ''}`}>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white flex items-center">
+                                        <RefreshCw className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                        Historial de Movimientos
+                                    </h3>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {Array.isArray(movimientos) ? movimientos.length : 0} movimientos
+                                    </span>
+                                </div>
+
+                                {Array.isArray(movimientos) && movimientos.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {movimientos.slice(0, 10).map((movimiento, index) => (
+                                            <div key={movimiento.id || index} 
+                                                 className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/10 dark:to-blue-800/10 p-4 rounded-r-lg">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center mb-2">
+                                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white mr-3">
+                                                                {movimiento.tipo === 'entrada' ? (
+                                                                    <span className="text-sm font-bold">+</span>
+                                                                ) : (
+                                                                    <span className="text-sm font-bold">-</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-semibold text-gray-900 dark:text-white">
+                                                                    {movimiento.motivo || 'Movimiento'}
+                                                                </h4>
+                                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                                    <Clock className="w-3 h-3 mr-1" />
+                                                                    {formatDate(movimiento.created_at)}
+                                                                    <span className="mx-2">•</span>
+                                                                    <Truck className="w-3 h-3 mr-1" />
+                                                                    {movimiento.sucursal?.nombre || 'Sucursal'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {movimiento.descripcion && (
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                                                {movimiento.descripcion}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className={`text-xl font-bold ${
+                                                            movimiento.tipo === 'entrada' 
+                                                                ? 'text-green-600' 
+                                                                : 'text-red-600'
+                                                        }`}>
+                                                            {movimiento.tipo === 'entrada' ? '+' : '-'}{formatNumber(movimiento.cantidad)}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                            De {formatNumber(movimiento.cantidad_anterior)} a {formatNumber(movimiento.cantidad_nueva)}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            Por: {movimiento.usuario?.name || 'Sistema'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <RefreshCw className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                                            No hay movimientos registrados
+                                        </h4>
+                                        <p className="text-gray-600 dark:text-gray-400">
+                                            Este producto aún no tiene movimientos de stock.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Configuración */}
+                            <div className={`space-y-6 ${activeTab !== 'settings' ? 'hidden' : ''}`}>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Configuración de stock */}
+                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <Tag className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
                                             Configuración de Stock
                                         </h3>
-                                        
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm text-gray-600">Control de Stock:</span>
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg">
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        Control de Stock
+                                                    </span>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        Seguimiento de inventario
+                                                    </p>
+                                                </div>
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                                     producto.control_stock 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                                                        ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-300'
+                                                        : 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-300'
                                                 }`}>
                                                     {producto.control_stock ? (
-                                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                                        <CheckCircle className="w-4 h-4 mr-1" />
                                                     ) : (
-                                                        <XCircle className="w-3 h-3 mr-1" />
+                                                        <XCircle className="w-4 h-4 mr-1" />
                                                     )}
                                                     {producto.control_stock ? 'Activado' : 'Desactivado'}
                                                 </span>
                                             </div>
                                             
                                             {producto.control_stock && (
-                                                <>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm text-gray-600">Stock Mínimo:</span>
-                                                        <span className="font-medium">{formatNumber(producto.stock_minimo)}</span>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-lg p-4">
+                                                        <p className="text-sm text-blue-600 dark:text-blue-400">Stock Mínimo</p>
+                                                        <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                                                            {formatNumber(producto.stock_minimo)}
+                                                        </p>
                                                     </div>
-                                                    
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm text-gray-600">Estado Stock:</span>
-                                                        <span className={`font-medium ${
-                                                            estadisticas.stock_minimo_alcanzado 
-                                                                ? 'text-red-600' 
-                                                                : 'text-green-600'
-                                                        }`}>
-                                                            {estadisticas.stock_minimo_alcanzado 
-                                                                ? '⚠️ Por debajo del mínimo' 
-                                                                : '✅ Normal'}
-                                                        </span>
+                                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-lg p-4">
+                                                        <p className="text-sm text-green-600 dark:text-green-400">Stock Inicial</p>
+                                                        <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                                                            {formatNumber(producto.stock_inicial)}
+                                                        </p>
                                                     </div>
-                                                </>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                                
-                                {/* Columna derecha - Precios e impuestos */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                                            <DollarSign className="w-5 h-5 mr-2 text-gray-400" />
-                                            Precios
+
+                                    {/* Configuración de precios */}
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <DollarSign className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                            Configuración de Precios
                                         </h3>
-                                        
                                         <div className="space-y-3">
-                                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                <div>
-                                                    <div className="text-sm text-gray-600">Precio Compra</div>
-                                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-200">
-                                                        ${formatNumber(producto.precio_compra)}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm text-gray-600">Costo unitario</div>
-                                                </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Precio de Compra</span>
+                                                <span className="font-medium">{formatCurrency(producto.precio_compra)}</span>
                                             </div>
-                                            
-                                            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                                <div>
-                                                    <div className="text-sm text-green-600">Precio Venta</div>
-                                                    <div className="text-lg font-medium text-green-700">
-                                                        ${formatNumber(producto.precio_venta)}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm text-green-600">Público general</div>
-                                                </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Precio de Venta</span>
+                                                <span className="font-medium text-green-600 dark:text-green-400">
+                                                    {formatCurrency(producto.precio_venta)}
+                                                </span>
                                             </div>
-                                            
                                             {producto.precio_mayor && (
-                                                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                                    <div>
-                                                        <div className="text-sm text-blue-600">Precio Mayorista</div>
-                                                        <div className="text-lg font-medium text-blue-700">
-                                                            ${formatNumber(producto.precio_mayor)}
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="text-sm text-blue-600">Venta al por mayor</div>
-                                                    </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-gray-600 dark:text-gray-400">Precio Mayorista</span>
+                                                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                                                        {formatCurrency(producto.precio_mayor)}
+                                                    </span>
                                                 </div>
                                             )}
+                                            <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                                                <span className="text-gray-600 dark:text-gray-400">Ganancia Unitaria</span>
+                                                <span className="font-bold text-green-600 dark:text-green-400">
+                                                    {formatCurrency(estadisticas.ganancia_unitaria)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                                            <Percent className="w-5 h-5 mr-2 text-gray-400" />
-                                            Impuestos (ITBIS)
+
+                                    {/* Configuración de impuestos */}
+                                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200 dark:border-orange-800 rounded-xl p-5">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <Percent className="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" />
+                                            Configuración de Impuestos
                                         </h3>
-                                        
                                         <div className="space-y-3">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600">Tasa ITBIS:</span>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Tasa ITBIS</span>
                                                 <span className="font-medium">{getDescripcionItbis()}</span>
                                             </div>
-                                            
-                                            {!producto.exento_itbis && (
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm text-gray-600">Porcentaje:</span>
-                                                    <span className="font-medium">{formatNumber(producto.itbis_porcentaje)}%</span>
-                                                </div>
-                                            )}
-                                            
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600">Estado:</span>
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                    producto.exento_itbis 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-blue-100 text-blue-800'
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Exento</span>
+                                                <span className={`font-medium ${
+                                                    producto.exento_itbis ? 'text-green-600' : 'text-gray-600'
                                                 }`}>
-                                                    {producto.exento_itbis ? 'Exento' : 'Aplica ITBIS'}
+                                                    {producto.exento_itbis ? 'Sí' : 'No'}
                                                 </span>
                                             </div>
-                                            
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600">Precio con ITBIS:</span>
-                                                <span className="font-medium text-green-600">
-                                                    ${formatNumber(estadisticas.precio_con_itbis)}
-                                                </span>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Porcentaje ITBIS</span>
+                                                <span className="font-medium">{formatNumber(producto.itbis_porcentaje)}%</span>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                                            <Calendar className="w-5 h-5 mr-2 text-gray-400" />
-                                            Información Técnica
+
+                                    {/* Estado del producto */}
+                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center">
+                                            <CheckCircle className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                            Estado del Producto
                                         </h3>
-                                        
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Creado:</span>
-                                                <span className="font-medium">
-                                                    {producto.created_at ? new Date(producto.created_at).toLocaleDateString('es-ES', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    }) : 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Última actualización:</span>
-                                                <span className="font-medium">
-                                                    {producto.updated_at ? new Date(producto.updated_at).toLocaleDateString('es-ES', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    }) : 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Estado:</span>
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Activo</span>
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                                     producto.activo 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-red-100 text-red-800'
+                                                        ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-300'
+                                                        : 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 text-red-800 dark:text-red-300'
                                                 }`}>
                                                     {producto.activo ? 'Activo' : 'Inactivo'}
                                                 </span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Creado</span>
+                                                <span className="text-sm">{formatDate(producto.created_at)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 dark:text-gray-400">Última actualización</span>
+                                                <span className="text-sm">{formatDate(producto.updated_at)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -498,125 +877,6 @@ export default function Show({ auth, producto, movimientos = [], sucursales = []
                             </div>
                         </div>
                     </div>
-
-                    {/* Inventario por sucursal - Solo si hay inventarios */}
-                    {Array.isArray(producto.inventarios) && producto.inventarios.length > 0 && (
-                        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                            <div className="p-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                                    <Truck className="w-5 h-5 mr-2 text-gray-400" />
-                                    Inventario por Sucursal
-                                </h3>
-                                
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead>
-                                            <tr>
-                                                <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Sucursal
-                                                </th>
-                                                <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Stock Actual
-                                                </th>
-                                                <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Stock Disponible
-                                                </th>
-                                                <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Costo Promedio
-                                                </th>
-                                                <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Valor Inventario
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                            {producto.inventarios.map((inventario, index) => (
-                                                <tr key={inventario.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                    <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                                            {inventario.sucursal?.nombre || 'Sucursal'}
-                                                            {sucursal_actual?.id === inventario.sucursal_id && (
-                                                                <span className="ml-2 text-xs text-blue-600">(Actual)</span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900 dark:text-gray-200">
-                                                            {formatNumber(inventario.stock_actual)}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className={`text-sm font-medium ${
-                                                            safeNumber(inventario.stock_disponible) <= safeNumber(producto.stock_minimo)
-                                                                ? 'text-red-600'
-                                                                : 'text-green-600'
-                                                        }`}>
-                                                            {formatNumber(inventario.stock_disponible)}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900 dark:text-gray-200">
-                                                            ${formatNumber(inventario.costo_promedio)}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 whitespace-nowrap">
-                                                        <div className="text-sm font-medium text-purple-600">
-                                                            ${formatNumber(inventario.valor_inventario)}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Movimientos recientes - Solo si hay movimientos */}
-                    {Array.isArray(movimientos) && movimientos.length > 0 && (
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                            <div className="p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                                        <BarChart3 className="w-5 h-5 mr-2 text-gray-400" />
-                                        Movimientos Recientes
-                                    </h3>
-                                </div>
-                                
-                                <div className="space-y-4">
-                                    {movimientos.slice(0, 5).map((movimiento, index) => (
-                                        <div key={movimiento.id || index} className="border-l-4 border-blue-500 pl-4 py-2">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">
-                                                        {movimiento.motivo || 'Movimiento'}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 mt-1">
-                                                        {movimiento.sucursal?.nombre || 'Sucursal'} • 
-                                                        {movimiento.usuario?.name || 'Usuario'} • 
-                                                        {movimiento.created_at ? new Date(movimiento.created_at).toLocaleDateString() : 'Fecha desconocida'}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className={`font-medium ${
-                                                        movimiento.tipo === 'entrada' 
-                                                            ? 'text-green-600' 
-                                                            : 'text-red-600'
-                                                    }`}>
-                                                        {movimiento.tipo === 'entrada' ? '+' : '-'}{formatNumber(movimiento.cantidad)}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        De {formatNumber(movimiento.cantidad_anterior)} a {formatNumber(movimiento.cantidad_nueva)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

@@ -37,13 +37,13 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
     const getEstadoColor = (estado) => {
         switch (estado) {
             case 'PROCESADA':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
             case 'PENDIENTE':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
             case 'ANULADA':
-                return 'bg-red-100 text-red-800';
+                return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
         }
     };
 
@@ -67,7 +67,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                             <FileText className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Editar Venta #{venta.numero_factura}
                             </h2>
                             <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -75,11 +75,11 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                     <Calendar className="w-4 h-4 mr-1" />
                                     {formatDate(venta.fecha_venta)}
                                 </div>
-                                <span className="text-gray-400">•</span>
+                                <span className="text-gray-400 dark:text-gray-600">•</span>
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(venta.estado)}`}>
                                     {venta.estado}
                                 </span>
-                                <span className="text-gray-400">•</span>
+                                <span className="text-gray-400 dark:text-gray-600">•</span>
                                 <div className="flex items-center text-sm text-gray-600">
                                     <DollarSign className="w-4 h-4 mr-1" />
                                     {formatCurrency(venta.total)}
@@ -91,7 +91,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                     <div className="flex items-center space-x-3">
                         <Link
                             href={route('ventas.show', venta.id)}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Volver
@@ -108,14 +108,14 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                         <div className="space-y-6">
                             {/* Información de la venta */}
                             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
                                     <div className="flex items-center">
                                         <div className="bg-blue-100 p-2 rounded-lg mr-3">
                                             <FileText className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-800">Información de la Venta</h3>
-                                            <p className="text-sm text-gray-600">Datos básicos de la transacción</p>
+                                            <h3 className="font-bold text-gray-800 dark:text-gray-200">Información de la Venta</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">Datos básicos de la transacción</p>
                                         </div>
                                     </div>
                                 </div>
@@ -123,24 +123,24 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                 <div className="p-6 space-y-6">
                                     {/* Cliente */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-700 flex items-center">
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                             <User className="w-4 h-4 mr-2 text-blue-600" />
                                             Cliente
                                         </label>
-                                        <div className="p-4 bg-gray-50 rounded-xl">
+                                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                                             <div className="flex items-center">
                                                 <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-lg mr-4">
                                                     <User className="w-5 h-5 text-blue-600" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-gray-800">
+                                                    <h4 className="font-bold text-gray-800 dark:text-gray-200">
                                                         {venta.cliente?.nombre_completo}
                                                     </h4>
                                                     <div className="flex items-center mt-1 space-x-3">
-                                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
+                                                        <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded">
                                                             {venta.cliente?.cedula}
                                                         </span>
-                                                        <span className="text-xs text-gray-600">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
                                                             {venta.cliente?.email}
                                                         </span>
                                                     </div>
@@ -151,58 +151,58 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                     {/* Productos vendidos */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-700 flex items-center">
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                             <Package className="w-4 h-4 mr-2 text-blue-600" />
                                             Productos Vendidos
                                         </label>
-                                        <div className="overflow-hidden rounded-xl border border-gray-200">
+                                        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
                                             <div className="overflow-x-auto">
                                                 <table className="w-full">
                                                     <thead>
-                                                        <tr className="bg-gray-50">
-                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Producto</th>
-                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Cantidad</th>
-                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Precio</th>
-                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>
+                                                        <tr className="bg-gray-50 dark:bg-gray-700">
+                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Producto</th>
+                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Cantidad</th>
+                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Precio</th>
+                                                            <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Total</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {venta.detalles?.map((detalle, index) => (
-                                                            <tr key={index} className="border-b border-gray-100 last:border-b-0">
+                                                            <tr key={index} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                                                                 <td className="py-3 px-4">
                                                                     <div className="flex items-center">
                                                                         <div className="bg-gradient-to-r from-green-100 to-green-200 p-1.5 rounded-lg mr-3">
                                                                             <Package className="w-4 h-4 text-green-600" />
                                                                         </div>
                                                                         <div>
-                                                                            <p className="font-medium text-gray-800">
+                                                                            <p className="font-medium text-gray-800 dark:text-gray-200">
                                                                                 {detalle.producto?.nombre}
                                                                             </p>
-                                                                            <p className="text-xs text-gray-500">
+                                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
                                                                                 Código: {detalle.producto?.codigo}
                                                                             </p>
                                                                         </div>
                                                                     </div>
                                                                 </td>
                                                                 <td className="py-3 px-4">
-                                                                    <p className="text-gray-800">{detalle.cantidad}</p>
+                                                                    <p className="text-gray-800 dark:text-gray-200">{detalle.cantidad}</p>
                                                                 </td>
                                                                 <td className="py-3 px-4">
-                                                                    <p className="text-gray-800">{formatCurrency(detalle.precio_unitario)}</p>
+                                                                    <p className="text-gray-800 dark:text-gray-200">{formatCurrency(detalle.precio_unitario)}</p>
                                                                 </td>
                                                                 <td className="py-3 px-4">
-                                                                    <p className="font-bold text-gray-800">{formatCurrency(detalle.total)}</p>
+                                                                    <p className="font-bold text-gray-800 dark:text-gray-200">{formatCurrency(detalle.total)}</p>
                                                                 </td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
-                                                    <tfoot className="bg-gray-50">
+                                                    <tfoot className="bg-gray-50 dark:bg-gray-700">
                                                         <tr>
                                                             <td colSpan="3" className="py-3 px-4 text-right font-bold">
                                                                 Total:
                                                             </td>
                                                             <td className="py-3 px-4">
-                                                                <p className="text-xl font-bold text-blue-700">
+                                                                <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
                                                                     {formatCurrency(venta.total)}
                                                                 </p>
                                                             </td>
@@ -217,12 +217,12 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* Tipo de comprobante */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <FileText className="w-4 h-4 mr-2 text-blue-600" />
                                                 Tipo de Comprobante
                                             </label>
                                             <select
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
                                                 value={data.tipo_comprobante}
                                                 onChange={(e) => setData('tipo_comprobante', e.target.value)}
                                             >
@@ -239,7 +239,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                         {/* Fecha de venta */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <Calendar className="w-4 h-4 mr-2 text-blue-600" />
                                                 Fecha de Venta
                                             </label>
@@ -260,12 +260,12 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                         {/* Condición de pago */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
                                                 Condición de Pago
                                             </label>
                                             <select
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
                                                 value={data.condicion_pago}
                                                 onChange={(e) => {
                                                     setData('condicion_pago', e.target.value);
@@ -288,7 +288,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                         {/* Días de crédito (si aplica) */}
                                         {data.condicion_pago === 'CREDITO' && (
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-700 flex items-center">
+                                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                     <Clock className="w-4 h-4 mr-2 text-blue-600" />
                                                     Días de Crédito
                                                 </label>
@@ -311,12 +311,12 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                         {/* Estado */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <FileText className="w-4 h-4 mr-2 text-blue-600" />
                                                 Estado
                                             </label>
                                             <select
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
                                                 value={data.estado}
                                                 onChange={(e) => setData('estado', e.target.value)}
                                             >
@@ -333,12 +333,12 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                         {/* Notas */}
                                         <div className="md:col-span-2 space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <FileText className="w-4 h-4 mr-2 text-blue-600" />
                                                 Notas (Opcional)
                                             </label>
                                             <textarea
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
                                                 rows="3"
                                                 value={data.notas}
                                                 onChange={(e) => setData('notas', e.target.value)}
@@ -354,14 +354,14 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                             {/* Acciones */}
                             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
                                     <div className="flex items-center">
                                         <div className="bg-gray-100 p-2 rounded-lg mr-3">
                                             <FileText className="w-5 h-5 text-gray-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-800">Acciones</h3>
-                                            <p className="text-sm text-gray-600">Gestionar esta venta</p>
+                                            <h3 className="font-bold text-gray-800 dark:text-gray-200">Acciones</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">Gestionar esta venta</p>
                                         </div>
                                     </div>
                                 </div>
@@ -370,12 +370,12 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                     <div className="space-y-4">
                                         {/* Mensaje de advertencia */}
                                         {venta.estado === 'ANULADA' && (
-                                            <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-r-xl">
+                                            <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 border-l-4 border-red-500 dark:border-red-600 p-4 rounded-r-xl">
                                                 <div className="flex items-start">
                                                     <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
                                                     <div>
-                                                        <h4 className="font-bold text-red-800">Venta Anulada</h4>
-                                                        <p className="text-sm text-red-700 mt-1">
+                                                        <h4 className="font-bold text-red-800 dark:text-red-200">Venta Anulada</h4>
+                                                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                                                             Esta venta ha sido anulada. No se pueden realizar modificaciones.
                                                         </p>
                                                     </div>
@@ -405,7 +405,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                             <Link
                                                 href={route('ventas.show', venta.id)}
-                                                className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition"
+                                                className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                             >
                                                 <X className="w-5 h-5 mr-3" />
                                                 Cancelar
@@ -425,7 +425,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
                                         {/* Advertencia sobre anulación */}
                                         {venta.estado !== 'ANULADA' && (
-                                            <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-xl">
+                                            <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900 dark:to-amber-800 border border-amber-200 dark:border-amber-700 rounded-xl">
                                                 <div className="flex items-start">
                                                     <AlertCircle className="w-5 h-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
                                                     <div className="flex-1">

@@ -463,21 +463,21 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                             <ShoppingCart className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-2xl text-gray-800 leading-tight">
+                            <h2 className="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                                 Nueva Venta
                             </h2>
                             <div className="flex flex-wrap items-center gap-2 mt-1">
-                                <div className="flex items-center text-sm text-gray-600">
+                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                     <Calendar className="w-4 h-4 mr-1" />
                                     {formatDate(data.fecha_venta)}
                                 </div>
-                                <span className="text-gray-400">•</span>
-                                <div className="flex items-center text-sm text-gray-600">
+                                <span className="text-gray-400 dark:text-gray-600">•</span>
+                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                     <FileText className="w-4 h-4 mr-1" />
                                     {data.tipo_comprobante}
                                 </div>
-                                <span className="text-gray-400">•</span>
-                                <div className="flex items-center text-sm text-gray-600">
+                                <span className="text-gray-400 dark:text-gray-600">•</span>
+                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                     <CreditCard className="w-4 h-4 mr-1" />
                                     {data.condicion_pago}
                                 </div>
@@ -486,18 +486,18 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                        <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 px-4 py-2 rounded-xl">
+                        <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border border-green-200 dark:border-green-700 px-4 py-2 rounded-xl">
                             <div className="flex items-center">
-                                <DollarSign className="w-4 h-4 text-green-600 mr-2" />
-                                <span className="font-bold text-green-700">
+                                <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                                <span className="font-bold text-green-700 dark:text-green-300">
                                     {formatCurrency(caja?.efectivo || 0)}
                                 </span>
                             </div>
-                            <p className="text-xs text-green-600 mt-1">Efectivo en caja</p>
+                            <p className="text-xs text-green-600 dark:text-green-400 mt-1">Efectivo en caja</p>
                         </div>
                         <Link
                             href={route('caja.index')}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Volver
@@ -513,11 +513,11 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                     {/* Alertas de error */}
                     {error && (
                         <div className="mb-6">
-                            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
+                            <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:border-red-600 p-4 rounded-r-xl">
                                 <div className="flex items-center">
-                                    <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3" />
                                     <div>
-                                        <p className="text-red-800 font-medium">{error}</p>
+                                        <p className="text-red-800 dark:text-red-200 font-medium">{error}</p>
                                     </div>
                                 </div>
                             </div>
@@ -527,12 +527,12 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                     {/* Alertas de caja cerrada */}
                     {!caja && (
                         <div className="mb-6 animate-pulse">
-                            <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm">
+                            <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 border-l-4 border-red-500 dark:border-red-600 p-4 rounded-r-xl shadow-sm">
                                 <div className="flex items-start">
-                                    <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+                                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" />
                                     <div className="flex-1">
-                                        <h4 className="font-bold text-red-800">Caja cerrada</h4>
-                                        <p className="text-sm text-red-700 mt-1">
+                                        <h4 className="font-bold text-red-800 dark:text-red-200">Caja cerrada</h4>
+                                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                                             Debes abrir caja para registrar ventas. No podrás procesar ninguna transacción sin caja abierta.
                                         </p>
                                         <div className="mt-3">
@@ -555,22 +555,22 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                             {/* Panel izquierdo: Información de cliente y venta (4 columnas) */}
                             <div className="lg:col-span-4 space-y-6">
                                 {/* Tarjeta de información del cliente */}
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                                                    <User className="w-5 h-5 text-blue-600" />
+                                                <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg mr-3">
+                                                    <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-800">Cliente</h3>
-                                                    <p className="text-sm text-gray-600">Información del comprador</p>
+                                                    <h3 className="font-bold text-gray-800 dark:text-gray-200">Cliente</h3>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Información del comprador</p>
                                                 </div>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => setMostrarModalClientes(true)}
-                                                className="inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition text-sm font-medium"
+                                                className="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-800 transition text-sm font-medium"
                                             >
                                                 <Edit2 className="w-4 h-4 mr-2" />
                                                 Cambiar
@@ -582,18 +582,18 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         {clienteInfo ? (
                                             <div className="space-y-4">
                                                 <div className="flex items-start">
-                                                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-3 rounded-xl mr-4">
-                                                        <Users className="w-6 h-6 text-blue-600" />
+                                                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-3 rounded-xl mr-4">
+                                                        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="font-bold text-gray-800 text-lg">
+                                                        <h4 className="font-bold text-gray-800 dark:text-gray-200 text-lg">
                                                             {clienteInfo.nombre_completo}
                                                         </h4>
                                                         <div className="flex items-center mt-2 space-x-4">
-                                                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
                                                                 {clienteInfo.tipo}
                                                             </span>
-                                                            <span className="text-sm text-gray-600">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400">
                                                                 {clienteInfo.cedula}
                                                             </span>
                                                         </div>
@@ -602,20 +602,20 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                                                 <div className="space-y-3">
                                                     {clienteInfo.email && (
-                                                        <div className="flex items-center text-sm text-gray-700">
-                                                            <Mail className="w-4 h-4 text-gray-500 mr-3" />
+                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                            <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
                                                             <span>{clienteInfo.email}</span>
                                                         </div>
                                                     )}
                                                     {clienteInfo.telefono && (
-                                                        <div className="flex items-center text-sm text-gray-700">
-                                                            <Phone className="w-4 h-4 text-gray-500 mr-3" />
+                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                            <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
                                                             <span>{clienteInfo.telefono}</span>
                                                         </div>
                                                     )}
                                                     {clienteInfo.direccion && (
-                                                        <div className="flex items-center text-sm text-gray-700">
-                                                            <MapPin className="w-4 h-4 text-gray-500 mr-3" />
+                                                        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                            <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-3" />
                                                             <span className="truncate">{clienteInfo.direccion}</span>
                                                         </div>
                                                     )}
@@ -623,8 +623,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             </div>
                                         ) : (
                                             <div className="text-center py-6">
-                                                <User className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                                <p className="text-gray-600">No hay cliente seleccionado</p>
+                                                <User className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                                <p className="text-gray-600 dark:text-gray-400">No hay cliente seleccionado</p>
                                                 <button
                                                     type="button"
                                                     onClick={() => setMostrarModalClientes(true)}
@@ -639,15 +639,15 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                 </div>
 
                                 {/* Configuración de la venta */}
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
+                                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800">
                                         <div className="flex items-center">
-                                            <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                                                <Settings className="w-5 h-5 text-purple-600" />
+                                            <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg mr-3">
+                                                <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-gray-800">Configuración</h3>
-                                                <p className="text-sm text-gray-600">Parámetros de la venta</p>
+                                                <h3 className="font-bold text-gray-800 dark:text-gray-200">Configuración</h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">Parámetros de la venta</p>
                                             </div>
                                         </div>
                                     </div>
@@ -655,8 +655,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                     <div className="p-6 space-y-6">
                                         {/* Tipo de comprobante */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                <FileText className="w-4 h-4 mr-2 text-purple-600" />
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                <FileText className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                                                 Tipo de Comprobante
                                             </label>
                                             <div className="grid grid-cols-2 gap-2">
@@ -667,8 +667,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                         onClick={() => setData('tipo_comprobante', tipo)}
                                                         className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                                                             data.tipo_comprobante === tipo
-                                                                ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
-                                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 shadow-sm'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                                                         }`}
                                                     >
                                                         <div className="text-sm font-medium">
@@ -681,26 +681,26 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                                         {/* Fecha de venta */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                <Calendar className="w-4 h-4 mr-2 text-purple-600" />
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                <Calendar className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                                                 Fecha de Venta
                                             </label>
                                             <div className="relative">
                                                 <input
                                                     type="date"
-                                                    className="w-full px-4 py-3 pl-11 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                                                    className="w-full px-4 py-3 pl-11 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition"
                                                     value={data.fecha_venta}
                                                     onChange={(e) => setData('fecha_venta', e.target.value)}
                                                     required
                                                 />
-                                                <Calendar className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                                                <Calendar className="absolute left-3 top-3.5 w-5 h-5 text-gray-400 dark:text-gray-500" />
                                             </div>
                                         </div>
 
                                         {/* Condición de pago */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                <CreditCard className="w-4 h-4 mr-2 text-purple-600" />
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                <CreditCard className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                                                 Condición de Pago
                                             </label>
                                             <div className="grid grid-cols-2 gap-2">
@@ -717,9 +717,9 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                         className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                                                             data.condicion_pago === condicion
                                                                 ? condicion === 'CREDITO'
-                                                                    ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm'
-                                                                    : 'border-green-500 bg-green-50 text-green-700 shadow-sm'
-                                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-300 shadow-sm'
+                                                                    : 'border-green-500 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 shadow-sm'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                                                         }`}
                                                     >
                                                         <div className="text-sm font-medium">{condicion}</div>
@@ -730,32 +730,32 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                                         {data.condicion_pago === 'CREDITO' && (
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                    <Clock className="w-4 h-4 mr-2 text-amber-600" />
+                                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                    <Clock className="w-4 h-4 mr-2 text-amber-600 dark:text-amber-400" />
                                                     Días de Crédito
                                                 </label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
                                                         min="0"
-                                                        className="w-full px-4 py-3 pl-11 border-2 border-amber-200 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition"
+                                                        className="w-full px-4 py-3 pl-11 border-2 border-amber-200 dark:border-amber-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800 transition"
                                                         value={data.dias_credito}
                                                         onChange={(e) => setData('dias_credito', parseInt(e.target.value) || 0)}
                                                         required
                                                     />
-                                                    <Clock className="absolute left-3 top-3.5 w-5 h-5 text-amber-400" />
+                                                    <Clock className="absolute left-3 top-3.5 w-5 h-5 text-amber-400 dark:text-amber-500" />
                                                 </div>
                                             </div>
                                         )}
 
                                         {/* Notas */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                <FileText className="w-4 h-4 mr-2 text-purple-600" />
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                <FileText className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                                                 Notas (Opcional)
                                             </label>
                                             <textarea
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition"
                                                 rows="3"
                                                 value={data.notas}
                                                 onChange={(e) => setData('notas', e.target.value)}
@@ -769,19 +769,19 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                             {/* Panel central: Productos (5 columnas) */}
                             <div className="lg:col-span-5 space-y-6">
                                 {/* Buscador de productos */}
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden sticky top-0 z-40">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-green-100">
+                                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden sticky top-0 z-40">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="bg-green-100 p-2 rounded-lg mr-3">
-                                                    <Search className="w-5 h-5 text-green-600" />
+                                                <div className="bg-green-100 dark:bg-green-800 p-2 rounded-lg mr-3">
+                                                    <Search className="w-5 h-5 text-green-600 dark:text-green-400" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-800">Buscar Productos</h3>
-                                                    <p className="text-sm text-gray-600">Agrega productos a la venta</p>
+                                                    <h3 className="font-bold text-gray-800 dark:text-gray-200">Buscar Productos</h3>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Agrega productos a la venta</p>
                                                 </div>
                                             </div>
-                                            <div className="text-sm text-gray-600">
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
                                                 {data.productos.length} productos
                                             </div>
                                         </div>
@@ -792,7 +792,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             <div className="relative">
                                                 <input
                                                     type="text"
-                                                    className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition text-lg"
+                                                    className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-green-500 dark:focus:border-green-400 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition text-lg"
                                                     placeholder="🔍 Buscar por nombre, código o código de barras..."
                                                     value={busqueda}
                                                     onChange={(e) => {
@@ -801,10 +801,10 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                     }}
                                                     onFocus={() => setMostrarResultados(true)}
                                                 />
-                                                <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+                                                <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400 dark:text-gray-500" />
                                                 
                                                 {cargandoBusqueda && (
-                                                    <RefreshCw className="absolute right-4 top-4 w-5 h-5 text-gray-400 animate-spin" />
+                                                    <RefreshCw className="absolute right-4 top-4 w-5 h-5 text-gray-400 dark:text-gray-500 animate-spin" />
                                                 )}
                                                 
                                                 {!cargandoBusqueda && busqueda && (
@@ -814,7 +814,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                             setBusqueda('');
                                                             setResultadosBusqueda([]);
                                                         }}
-                                                        className="absolute right-12 top-4 w-5 h-5 text-gray-400 hover:text-gray-600"
+                                                        className="absolute right-12 top-4 w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                                                     >
                                                         <X className="w-5 h-5" />
                                                     </button>
@@ -823,32 +823,32 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                                             {/* Resultados de búsqueda */}
                                             {mostrarResultados && resultadosBusqueda.length > 0 && (
-                                                <div className="absolute z-[9999] w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+                                                <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
                                                     {resultadosBusqueda.map((producto) => (
                                                         <div
                                                             key={producto.id}
-                                                            className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition group"
+                                                            className="px-4 py-3 hover:bg-green-50 dark:hover:bg-green-900 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition group"
                                                             onClick={() => seleccionarProducto(producto)}
                                                         >
                                                             <div className="flex justify-between items-center">
                                                                 <div className="flex items-center">
-                                                                    <div className="bg-green-100 p-2 rounded-lg mr-3">
-                                                                        <Package className="w-4 h-4 text-green-600" />
+                                                                    <div className="bg-green-100 dark:bg-green-800 p-2 rounded-lg mr-3">
+                                                                        <Package className="w-4 h-4 text-green-600 dark:text-green-400" />
                                                                     </div>
                                                                     <div>
-                                                                        <p className="font-medium text-gray-800 group-hover:text-green-800">
+                                                                        <p className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-300">
                                                                             {producto.nombre}
                                                                         </p>
                                                                         <div className="flex items-center mt-1 space-x-3">
-                                                                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
+                                                                            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
                                                                                 {producto.codigo}
                                                                             </span>
                                                                             <span className={`text-xs px-2 py-1 rounded ${
                                                                                 producto.stock_disponible > 10 
-                                                                                    ? 'bg-green-100 text-green-800'
+                                                                                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
                                                                                     : producto.stock_disponible > 0
-                                                                                    ? 'bg-amber-100 text-amber-800'
-                                                                                    : 'bg-red-100 text-red-800'
+                                                                                    ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200'
+                                                                                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                                                                             }`}>
                                                                                 Stock: {producto.stock_disponible}
                                                                             </span>
@@ -856,10 +856,10 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    <p className="font-bold text-green-700">
+                                                                    <p className="font-bold text-green-700 dark:text-green-400">
                                                                         {formatCurrency(producto.precio_venta)}
                                                                     </p>
-                                                                    <p className="text-sm text-gray-600">
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
                                                                         +ITBIS {producto.itbis_porcentaje}%
                                                                     </p>
                                                                 </div>
@@ -871,32 +871,32 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             
                                             {/* Mensaje de no resultados */}
                                             {mostrarResultados && busqueda.length >= 2 && resultadosBusqueda.length === 0 && !cargandoBusqueda && (
-                                                <div className="absolute z-[9999] w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-2xl p-4">
-                                                    <p className="text-gray-600 text-center">No se encontraron productos</p>
+                                                <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-4">
+                                                    <p className="text-gray-600 dark:text-gray-400 text-center">No se encontraron productos</p>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Producto seleccionado */}
                                         {productoSeleccionado && (
-                                            <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-100 border-2 border-green-200 rounded-2xl p-6 animate-fadeIn">
+                                            <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900 dark:to-green-800 border-2 border-green-200 dark:border-green-700 rounded-2xl p-6 animate-fadeIn">
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="flex items-start">
-                                                        <div className="bg-green-200 p-3 rounded-xl mr-4">
-                                                            <PackageCheck className="w-6 h-6 text-green-700" />
+                                                        <div className="bg-green-200 dark:bg-green-700 p-3 rounded-xl mr-4">
+                                                            <PackageCheck className="w-6 h-6 text-green-700 dark:text-green-300" />
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-bold text-gray-800 text-lg">
+                                                            <h4 className="font-bold text-gray-800 dark:text-gray-200 text-lg">
                                                                 {productoSeleccionado.nombre}
                                                             </h4>
                                                             <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                                <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
+                                                                <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded">
                                                                     {productoSeleccionado.codigo}
                                                                 </span>
-                                                                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                                                                <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded">
                                                                     Stock: {productoSeleccionado.stock_disponible}
                                                                 </span>
-                                                                <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">
+                                                                <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded">
                                                                     ITBIS {productoSeleccionado.itbis_porcentaje}%
                                                                 </span>
                                                             </div>
@@ -914,8 +914,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                 
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                            <Calculator className="w-4 h-4 mr-2 text-green-600" />
+                                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                            <Calculator className="w-4 h-4 mr-2 text-green-600 dark:text-green-400" />
                                                             Cantidad
                                                         </label>
                                                         <div className="relative">
@@ -924,28 +924,28 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                                 step="0.01"
                                                                 min="0.01"
                                                                 max={productoSeleccionado.stock_disponible}
-                                                                className="w-full px-4 py-3 pl-11 border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition"
+                                                                className="w-full px-4 py-3 pl-11 border-2 border-green-200 dark:border-green-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-green-500 dark:focus:border-green-400 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition"
                                                                 value={productoSeleccionado.cantidad}
                                                                 onChange={(e) => setProductoSeleccionado({
                                                                     ...productoSeleccionado,
                                                                     cantidad: parseFloat(e.target.value) || 0
                                                                 })}
                                                             />
-                                                            <Package className="absolute left-3 top-3.5 w-5 h-5 text-green-500" />
+                                                            <Package className="absolute left-3 top-3.5 w-5 h-5 text-green-500 dark:text-green-400" />
                                                         </div>
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <label className="text-sm font-medium text-gray-700 flex items-center">
-                                                            <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                                            <DollarSign className="w-4 h-4 mr-2 text-green-600 dark:text-green-400" />
                                                             Precio Unitario
                                                         </label>
                                                         <div className="relative">
                                                             <div className="flex items-center justify-center h-full pl-3">
-                                                                <span className="text-lg font-bold text-green-700">
+                                                                <span className="text-lg font-bold text-green-700 dark:text-green-400">
                                                                     {formatCurrency(productoSeleccionado.precio_venta)}
                                                                 </span>
                                                             </div>
-                                                            <div className="text-sm text-gray-500 mt-2 text-center">
+                                                            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
                                                                 Precio fijo del producto
                                                             </div>
                                                         </div>
@@ -957,21 +957,21 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                 </div>
 
                                 {/* Lista de productos en la venta */}
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                                                    <ClipboardList className="w-5 h-5 text-blue-600" />
+                                                <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg mr-3">
+                                                    <ClipboardList className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-800">Productos en la Venta</h3>
-                                                    <p className="text-sm text-gray-600">
+                                                    <h3 className="font-bold text-gray-800 dark:text-gray-200">Productos en la Venta</h3>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
                                                         {data.productos.length} productos agregados
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="text-sm font-medium text-blue-700">
+                                            <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
                                                 Total: {formatCurrency(totales.total)}
                                             </div>
                                         </div>
@@ -982,13 +982,13 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             <div className="overflow-x-auto">
                                                 <table className="w-full">
                                                     <thead>
-                                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Producto</th>
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Cantidad</th>
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Precio</th>
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Descuento %</th>
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Subtotal</th>
-                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Acciones</th>
+                                                        <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Producto</th>
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Cantidad</th>
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Precio</th>
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Descuento %</th>
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Subtotal</th>
+                                                            <th className="py-4 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Acciones</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1005,19 +1005,19 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                             const total = subtotalConDescuento + itbis;
                                                             
                                                             return (
-                                                                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                                                                <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                                                     <td className="py-4 px-4">
                                                                         <div className="flex items-start">
-                                                                            <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-lg mr-3">
-                                                                                <Package className="w-4 h-4 text-blue-600" />
+                                                                            <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-2 rounded-lg mr-3">
+                                                                                <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                                                             </div>
                                                                             <div>
-                                                                                <p className="font-medium text-gray-800">{producto.nombre}</p>
+                                                                                <p className="font-medium text-gray-800 dark:text-gray-200">{producto.nombre}</p>
                                                                                 <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+                                                                                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
                                                                                         {producto.codigo}
                                                                                     </span>
-                                                                                    <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded">
+                                                                                    <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded">
                                                                                         ITBIS {producto.itbis_porcentaje}%
                                                                                     </span>
                                                                                 </div>
@@ -1031,17 +1031,17 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                                                 step="0.01"
                                                                                 min="0.01"
                                                                                 max={producto.stock_disponible}
-                                                                                className="w-24 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-center"
+                                                                                className="w-24 px-3 py-2 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition text-center"
                                                                                 value={producto.cantidad}
                                                                                 onChange={(e) => actualizarCantidad(index, e.target.value)}
                                                                             />
                                                                         </div>
                                                                     </td>
                                                                     <td className="py-4 px-4">
-                                                                        <div className="font-medium text-gray-800">
+                                                                        <div className="font-medium text-gray-800 dark:text-gray-200">
                                                                             {formatCurrency(producto.precio_unitario)}
                                                                         </div>
-                                                                        <div className="text-xs text-gray-500">
+                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
                                                                             Precio fijo
                                                                         </div>
                                                                     </td>
@@ -1052,27 +1052,27 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                                                 step="0.01"
                                                                                 min="0"
                                                                                 max="100"
-                                                                                className="w-20 px-3 py-2 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition text-center"
+                                                                                className="w-20 px-3 py-2 border-2 border-amber-200 dark:border-amber-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800 transition text-center"
                                                                                 value={producto.descuento || 0}
                                                                                 onChange={(e) => actualizarDescuentoProducto(index, e.target.value)}
                                                                                 placeholder="0%"
                                                                             />
-                                                                            <span className="ml-1 text-gray-600">%</span>
+                                                                            <span className="ml-1 text-gray-600 dark:text-gray-400">%</span>
                                                                         </div>
                                                                         {descuentoProducto > 0 && (
-                                                                            <div className="text-xs text-green-600 mt-1">
+                                                                            <div className="text-xs text-green-600 dark:text-green-400 mt-1">
                                                                                 -{formatCurrency(descuentoProducto)}
                                                                             </div>
                                                                         )}
                                                                     </td>
                                                                     <td className="py-4 px-4">
                                                                         <div>
-                                                                            <div className="font-medium text-gray-800">
+                                                                            <div className="font-medium text-gray-800 dark:text-gray-200">
                                                                                 {formatCurrency(total)}
                                                                             </div>
-                                                                            <div className="text-xs text-gray-500">
+                                                                            <div className="text-xs text-gray-500 dark:text-gray-400">
                                                                                 {descuentoProducto > 0 && (
-                                                                                    <span className="text-red-600">
+                                                                                    <span className="text-red-600 dark:text-red-400">
                                                                                         -{formatCurrency(descuentoProducto)} desc.
                                                                                     </span>
                                                                                 )}
@@ -1085,7 +1085,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => eliminarProducto(index)}
-                                                                            className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition"
+                                                                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 rounded-lg transition"
                                                                             title="Eliminar producto"
                                                                         >
                                                                             <Trash2 className="w-4 h-4" />
@@ -1102,12 +1102,12 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         <div className="py-12 text-center">
                                             <div className="mb-4">
                                                 <div className="relative mx-auto w-16 h-16">
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl opacity-50"></div>
-                                                    <Package className="relative w-8 h-8 mx-auto mt-4 text-gray-400" />
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-2xl opacity-50"></div>
+                                                    <Package className="relative w-8 h-8 mx-auto mt-4 text-gray-400 dark:text-gray-500" />
                                                 </div>
                                             </div>
-                                            <p className="text-gray-600 mb-2">No hay productos agregados</p>
-                                            <p className="text-sm text-gray-500 mb-6">
+                                            <p className="text-gray-600 dark:text-gray-400 mb-2">No hay productos agregados</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                                                 Busca y agrega productos usando el buscador superior
                                             </p>
                                         </div>
@@ -1118,15 +1118,15 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                             {/* Panel derecho: Resumen y acciones (3 columnas) */}
                             <div className="lg:col-span-3 space-y-6">
                                 {/* Resumen de la venta */}
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden sticky top-6">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
+                                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden sticky top-6">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800">
                                         <div className="flex items-center">
-                                            <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                                                <FileBarChart className="w-5 h-5 text-purple-600" />
+                                            <div className="bg-purple-100 dark:bg-purple-800 p-2 rounded-lg mr-3">
+                                                <FileBarChart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-gray-800">Resumen</h3>
-                                                <p className="text-sm text-gray-600">Totales de la venta</p>
+                                                <h3 className="font-bold text-gray-800 dark:text-gray-200">Resumen</h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">Totales de la venta</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1134,8 +1134,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                     <div className="p-6">
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Subtotal</span>
-                                                <span className="font-medium text-gray-800">
+                                                <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                                                <span className="font-medium text-gray-800 dark:text-gray-200">
                                                     {formatCurrency(totales.subtotal)}
                                                 </span>
                                             </div>
@@ -1143,8 +1143,8 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             {/* Descuento por productos */}
                                             {totales.descuentoProductos > 0 && (
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">Descuento productos</span>
-                                                    <span className="font-medium text-red-600">
+                                                    <span className="text-gray-600 dark:text-gray-400">Descuento productos</span>
+                                                    <span className="font-medium text-red-600 dark:text-red-400">
                                                         -{formatCurrency(totales.descuentoProductos)}
                                                     </span>
                                                 </div>
@@ -1153,50 +1153,50 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             {/* Descuento global */}
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center space-x-2">
-                                                    <span className="text-gray-600">Descuento global</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">Descuento global</span>
                                                     <div className="flex items-center">
                                                         <input
                                                             type="number"
                                                             step="0.01"
                                                             min="0"
                                                             max="100"
-                                                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                                            className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded text-sm"
                                                             value={descuentoGlobal}
                                                             onChange={(e) => actualizarDescuentoGlobal(e.target.value)}
                                                             placeholder="0%"
                                                         />
-                                                        <span className="ml-1 text-gray-600 text-sm">%</span>
+                                                        <span className="ml-1 text-gray-600 dark:text-gray-400 text-sm">%</span>
                                                     </div>
                                                 </div>
-                                                <span className="font-medium text-red-600">
+                                                <span className="font-medium text-red-600 dark:text-red-400">
                                                     -{formatCurrency(totales.descuentoGlobal)}
                                                 </span>
                                             </div>
                                             
                                             {/* Subtotal después de descuentos */}
-                                            <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                                                <span className="text-gray-700 font-medium">Subtotal con descuentos</span>
-                                                <span className="font-medium text-gray-800">
+                                            <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                <span className="text-gray-700 dark:text-gray-300 font-medium">Subtotal con descuentos</span>
+                                                <span className="font-medium text-gray-800 dark:text-gray-200">
                                                     {formatCurrency(totales.subtotal - totales.descuentoTotal)}
                                                 </span>
                                             </div>
                                             
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">ITBIS</span>
-                                                <span className="font-medium text-gray-800">
+                                                <span className="text-gray-600 dark:text-gray-400">ITBIS</span>
+                                                <span className="font-medium text-gray-800 dark:text-gray-200">
                                                     {formatCurrency(totales.itbis)}
                                                 </span>
                                             </div>
                                             
-                                            <div className="border-t border-gray-200 pt-4">
+                                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-lg font-bold text-gray-800">Total</span>
-                                                    <span className="text-2xl font-bold text-purple-700">
+                                                    <span className="text-lg font-bold text-gray-800 dark:text-gray-200">Total</span>
+                                                    <span className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                                                         {formatCurrency(totales.total)}
                                                     </span>
                                                 </div>
                                                 {totales.descuentoTotal > 0 && (
-                                                    <div className="text-sm text-green-600 mt-2 text-right">
+                                                    <div className="text-sm text-green-600 dark:text-green-400 mt-2 text-right">
                                                         Ahorro total: {formatCurrency(totales.descuentoTotal)}
                                                     </div>
                                                 )}
@@ -1204,25 +1204,25 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         </div>
 
                                         {/* Información adicional */}
-                                        <div className="mt-6 pt-6 border-t border-gray-200">
+                                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                                             <div className="space-y-3">
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Shield className="w-4 h-4 mr-2 text-green-600" />
+                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                    <Shield className="w-4 h-4 mr-2 text-green-600 dark:text-green-400" />
                                                     <span>Venta garantizada</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Truck className="w-4 h-4 mr-2 text-blue-600" />
+                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                    <Truck className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                                                     <span>Entrega inmediata</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <FileCheck className="w-4 h-4 mr-2 text-purple-600" />
+                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                    <FileCheck className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                                                     <span>Factura electrónica</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                                    <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                                         <div className="space-y-3">
                                             <button
                                                 type="submit"
@@ -1256,7 +1256,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                                     }
                                                 }}
                                                 disabled={data.productos.length === 0}
-                                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-amber-300 text-amber-700 rounded-xl hover:bg-amber-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <RotateCcw className="w-5 h-5 mr-3" />
                                                 <div className="text-left">
@@ -1266,7 +1266,7 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             
                                             <Link
                                                 href={route('caja.index')}
-                                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition"
+                                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                             >
                                                 <ArrowLeft className="w-5 h-5 mr-3" />
                                                 <div className="text-left">
@@ -1279,15 +1279,15 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                                 {/* Información de la caja */}
                                 {caja && (
-                                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                                        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
                                             <div className="flex items-center">
-                                                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                                                    <Wallet className="w-5 h-5 text-blue-600" />
+                                                <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg mr-3">
+                                                    <Wallet className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-800">Estado de Caja</h3>
-                                                    <p className="text-sm text-gray-600">Información actual</p>
+                                                    <h3 className="font-bold text-gray-800 dark:text-gray-200">Estado de Caja</h3>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Información actual</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1295,30 +1295,30 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                         <div className="p-6">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">Monto inicial</span>
-                                                    <span className="font-medium text-green-700">
+                                                    <span className="text-gray-600 dark:text-gray-400">Monto inicial</span>
+                                                    <span className="font-medium text-green-700 dark:text-green-400">
                                                         {formatCurrency(caja.monto_inicial || 0)}
                                                     </span>
                                                 </div>
                                                 
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">Efectivo actual</span>
-                                                    <span className="font-bold text-blue-700">
+                                                    <span className="text-gray-600 dark:text-gray-400">Efectivo actual</span>
+                                                    <span className="font-bold text-blue-700 dark:text-blue-400">
                                                         {formatCurrency(caja.efectivo || 0)}
                                                     </span>
                                                 </div>
                                                 
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">Nueva venta</span>
-                                                    <span className="font-bold text-purple-700">
+                                                    <span className="text-gray-600 dark:text-gray-400">Nueva venta</span>
+                                                    <span className="font-bold text-purple-700 dark:text-purple-400">
                                                         +{formatCurrency(totales.total)}
                                                     </span>
                                                 </div>
                                                 
-                                                <div className="border-t border-gray-200 pt-4">
+                                                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                                                     <div className="flex justify-between items-center">
-                                                        <span className="font-bold text-gray-800">Total después</span>
-                                                        <span className="text-xl font-bold text-green-700">
+                                                        <span className="font-bold text-gray-800 dark:text-gray-200">Total después</span>
+                                                        <span className="text-xl font-bold text-green-700 dark:text-green-400">
                                                             {formatCurrency((parseFloat(caja.efectivo) || 0) + (parseFloat(totales.total) || 0))}
                                                         </span>
                                                     </div>
@@ -1336,21 +1336,21 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
             {/* Modal de selección de cliente */}
             {mostrarModalClientes && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    <Users className="w-6 h-6 text-blue-600 mr-3" />
+                                    <Users className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3" />
                                     <div>
-                                        <h3 className="font-bold text-gray-800 text-lg">Seleccionar Cliente</h3>
-                                        <p className="text-sm text-gray-600">Busca o crea un nuevo cliente</p>
+                                        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-lg">Seleccionar Cliente</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Busca o crea un nuevo cliente</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setMostrarModalClientes(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition"
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition"
                                 >
-                                    <X className="w-5 h-5 text-gray-600" />
+                                    <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                                 </button>
                             </div>
                         </div>
@@ -1362,15 +1362,15 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                     <div className="relative flex-1">
                                         <input
                                             type="text"
-                                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition"
                                             placeholder="Buscar cliente por nombre, cédula o email..."
                                             value={busquedaCliente}
                                             onChange={(e) => setBusquedaCliente(e.target.value)}
                                         />
-                                        <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                                        <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400 dark:text-gray-500" />
                                     </div>
                                     <select
-                                        className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                        className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition"
                                         value={modoBusquedaCliente}
                                         onChange={(e) => setModoBusquedaCliente(e.target.value)}
                                     >
@@ -1392,17 +1392,17 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
 
                             {/* Formulario para nuevo cliente */}
                             {mostrarFormCliente && (
-                                <div className="mb-8 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 rounded-2xl p-6">
-                                    <h4 className="font-bold text-gray-800 mb-4 flex items-center">
-                                        <UserPlus className="w-5 h-5 mr-2 text-green-600" />
+                                <div className="mb-8 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-2 border-green-200 dark:border-green-700 rounded-2xl p-6">
+                                    <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                                        <UserPlus className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
                                         Nuevo Cliente
                                     </h4>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
                                             <select
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 value={nuevoCliente.tipo}
                                                 onChange={(e) => setNuevoCliente({...nuevoCliente, tipo: e.target.value})}
                                             >
@@ -1411,20 +1411,20 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Cédula/RNC</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cédula/RNC</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 placeholder="000-0000000-0"
                                                 value={nuevoCliente.cedula}
                                                 onChange={(e) => setNuevoCliente({...nuevoCliente, cedula: e.target.value})}
                                             />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre Completo *</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 placeholder="Nombre del cliente"
                                                 value={nuevoCliente.nombre_completo}
                                                 onChange={(e) => setNuevoCliente({...nuevoCliente, nombre_completo: e.target.value})}
@@ -1432,29 +1432,29 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                                             <input
                                                 type="email"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 placeholder="email@ejemplo.com"
                                                 value={nuevoCliente.email}
                                                 onChange={(e) => setNuevoCliente({...nuevoCliente, email: e.target.value})}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
                                             <input
                                                 type="tel"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 placeholder="(809) 000-0000"
                                                 value={nuevoCliente.telefono}
                                                 onChange={(e) => setNuevoCliente({...nuevoCliente, telefono: e.target.value})}
                                             />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
                                             <textarea
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                                                 rows="2"
                                                 placeholder="Dirección completa"
                                                 value={nuevoCliente.direccion}
@@ -1483,52 +1483,52 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                                             <div
                                                 key={cliente.id}
                                                 onClick={() => seleccionarCliente(cliente)}
-                                                className="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition"
+                                                className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 cursor-pointer transition"
                                             >
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex items-start">
-                                                        <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-lg mr-4">
-                                                            <User className="w-5 h-5 text-blue-600" />
+                                                        <div className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-2 rounded-lg mr-4">
+                                                            <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-bold text-gray-800">{cliente.nombre_completo}</h4>
+                                                            <h4 className="font-bold text-gray-800 dark:text-gray-200">{cliente.nombre_completo}</h4>
                                                             <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                                <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
+                                                                <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
                                                                     {cliente.cedula}
                                                                 </span>
                                                                 {cliente.email && (
-                                                                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
+                                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">
                                                                         {cliente.email}
                                                                     </span>
                                                                 )}
                                                                 <span className={`text-xs px-2 py-1 rounded ${
                                                                     cliente.tipo === 'FISICA' 
-                                                                        ? 'bg-purple-100 text-purple-800'
-                                                                        : 'bg-amber-100 text-amber-800'
+                                                                        ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
+                                                                        : 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200'
                                                                 }`}>
                                                                     {cliente.tipo}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                                    <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : busquedaCliente ? (
                                     <div className="text-center py-12">
-                                        <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                        <p className="text-gray-600">No se encontraron clientes</p>
-                                        <p className="text-sm text-gray-500 mt-2">
+                                        <Users className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                        <p className="text-gray-600 dark:text-gray-400">No se encontraron clientes</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                             Intenta con otros términos de búsqueda
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="text-center py-12">
-                                        <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                        <p className="text-gray-600">Comienza a buscar clientes</p>
-                                        <p className="text-sm text-gray-500 mt-2">
+                                        <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                        <p className="text-gray-600 dark:text-gray-400">Comienza a buscar clientes</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                             Escribe el nombre, cédula o email del cliente
                                         </p>
                                     </div>
@@ -1536,10 +1536,10 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
                             </div>
                         </div>
 
-                        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                             <button
                                 onClick={() => setMostrarModalClientes(false)}
-                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition"
+                                className="w-full inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition"
                             >
                                 <X className="w-5 h-5 mr-2" />
                                 Cerrar

@@ -106,10 +106,13 @@ class Caja extends Model
      */
     public function calcularTotalVentas()
     {
-        return $this->ventas()
+        return Venta::where('sucursal_id', $this->sucursal_id)
+            ->where('user_id', $this->user_id)
+            ->whereDate('fecha_venta', $this->fecha_apertura->toDateString())
             ->where('estado', Venta::ESTADO_PROCESADA)
             ->sum('total');
     }
+     
 
     public function calcularEfectivoTeorico()
     {
@@ -140,14 +143,16 @@ class Caja extends Model
             ->sum('monto');
     }
     public function recalcularVentas()
-    {
-        $this->total_ventas = Venta::where('caja_id', $this->id)
-            ->where('estado', 'PROCESADA')
-            ->sum('total');
-        
-        $this->save();
-        return $this;
-    }
+{
+    $this->total_ventas = Venta::where('sucursal_id', $this->sucursal_id)
+        ->where('user_id', $this->user_id)
+        ->whereDate('fecha_venta', $this->fecha_apertura->toDateString())
+        ->where('estado', Venta::ESTADO_PROCESADA)
+        ->sum('total');
+    
+    $this->save();
+    return $this;
+}
     public function puedeCerrarse(): bool
     {
         return $this->estado === self::ESTADO_ABIERTA && 

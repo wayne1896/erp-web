@@ -54,7 +54,10 @@ class VentaController extends Controller
             'estados' => ['PENDIENTE', 'PROCESADA', 'ANULADA'],
         ]);
     }
-    
+    public function export(Request $request)
+{
+    return Excel::download(new VentasExport, 'ventas-' . now()->format('Y-m-d') . '.xlsx');
+}
     /**
  * Formulario para crear venta
  */
@@ -549,13 +552,13 @@ public function store(Request $request)
      * Imprimir factura
      */
     public function imprimir(Venta $venta)
-    {
-        $venta->load(['cliente', 'usuario', 'sucursal', 'detalles.producto']);
-        
-        return Inertia::render('Ventas/Imprimir', [
-            'venta' => $venta,
-        ]);
-    }
+{
+    $venta->load(['cliente', 'vendedor', 'detalles.producto']);
+    
+    return Inertia::render('Ventas/Imprimir', [
+        'venta' => $venta
+    ]);
+}
     
     /**
      * Generar PDF de factura
