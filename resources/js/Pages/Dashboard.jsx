@@ -306,7 +306,7 @@ export default function Dashboard({
                             prefix=""
                             suffix=""
                             subtext={metrics.caja?.abierta 
-                                ? `Abierta desde ${formatTime(metrics.caja?.fecha_apertura)}`
+                                ? `Abierta desde ${metrics.caja?.fecha_apertura || 'Hoy'}`
                                 : 'Caja cerrada • Inicial: ' + formatCurrency(metrics.caja?.monto_inicial || 0)
                             }
                         />
@@ -345,7 +345,7 @@ export default function Dashboard({
                                                         </div>
                                                         <div>
                                                             <h4 className="font-semibold text-gray-900 dark:text-gray-100">{day.dia}</h4>
-                                                            <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(day.fecha)}</p>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400">{day.fecha}</p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">

@@ -93,6 +93,16 @@ export default function VentasShow({ venta }) {
         }).format(num);
     };
 
+    const formatDateShort = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'No disponible';
         const date = new Date(dateString);
@@ -103,16 +113,6 @@ export default function VentasShow({ venta }) {
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
-        });
-    };
-
-    const formatDateShort = (dateString) => {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
         });
     };
 
@@ -496,7 +496,6 @@ export default function VentasShow({ venta }) {
         `;
 
         const PaymentIcon = getPaymentIcon(venta.tipo_pago);
-        const paymentIconName = PaymentIcon.displayName || PaymentIcon.name || 'Wallet';
         
         const printHTML = `
             <!DOCTYPE html>
@@ -1433,7 +1432,7 @@ export default function VentasShow({ venta }) {
             </AuthenticatedLayout>
 
             {/* Estilos para impresión */}
-            <style jsx>{`
+            <style jsx="true">{`
                 @media print {
                     body * {
                         visibility: hidden;

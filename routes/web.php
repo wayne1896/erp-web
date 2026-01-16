@@ -28,6 +28,7 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // ==================== PROFILE ====================
@@ -133,6 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{venta}', [VentaController::class, 'show'])->name('ventas.show');
         Route::get('/{venta}/editar', [VentaController::class, 'edit'])->name('ventas.edit');
         Route::put('/{venta}', [VentaController::class, 'update'])->name('ventas.update');
+        Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('ventas.destroy');
         
         // Acciones específicas
         Route::post('/{venta}/anular', [VentaController::class, 'anular'])->name('ventas.anular');
@@ -150,7 +152,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reportes/mensual', [VentaController::class, 'reporteMensual'])->name('ventas.reporte-mensual');
         Route::get('/reportes/productos', [VentaController::class, 'reporteProductos'])->name('ventas.reporte-productos');
         Route::get('/reportes/general', [VentaController::class, 'reporteVentas'])->name('ventas.reporte-general');
-        Route::get('/ventas/{venta}/imprimir', [VentaController::class, 'imprimir']) ->name('ventas.imprimir');
     });
 
     // ==================== REPORTES GENERALES ====================
@@ -212,5 +213,176 @@ Route::get('/health', function () {
         'timestamp' => now()->toDateTimeString(),
     ]);
 })->name('health');
+
+// ==================== RUTAS TEMPORALES (ELIMINAR DESPUÉS) ====================
+Route::get('/crear-cliente-generico', function() {
+    try {
+        // Verificar si ya existe
+        $cliente = Cliente::where('cedula_rnc', '000-0000000-0')->first();
+        
+        if (!$cliente) {
+            // Generar código
+            $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
+            $codigo = $ultimoCliente ? 'CLI' . str_pad($ultimoCliente->id + 1, 6, '0', STR_PAD_LEFT) : 'CLI000001';
+            
+            $cliente = Cliente::create([
+                'codigo' => $codigo,
+                'tipo_cliente' => 'NATURAL',
+                'cedula_rnc' => '000-0000000-0',
+                'nombre_completo' => 'CONSUMIDOR FINAL',
+                'email' => '',
+                'telefono' => '',
+                'direccion' => 'No especificada',
+                // --- CAMPOS FALTANTES ---
+                'provincia' => 'Distrito Nacional', // O el valor que necesites
+                'municipio' => 'Santo Domingo', // O 'No especificado'
+                'sector' => 'Centro', // O 'No especificado'
+                'tipo_contribuyente' => 'CONSUMIDOR_FINAL',
+                'dias_credito' => 0,
+                'descuento' => 0.00,
+                // --- FIN CAMPOS FALTANTES ---
+                'activo' => true,
+                'limite_credito' => 0,
+                'saldo_pendiente' => 0,
+            ]);
+            
+            $mensaje = 'Cliente genérico creado exitosamente';
+        } else {
+            // Si existe pero no tiene código, asignarle uno
+            if (empty($cliente->codigo)) {
+                $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
+                $codigo = $ultimoCliente ? 'CLI' . str_pad($ultimoCliente->id + 1, 6, '0', STR_PAD_LEFT) : 'CLI000001';
+                $cliente->codigo = $codigo;
+                $cliente->save();
+            }
+            
+            $mensaje = 'Cliente genérico ya existía';
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => $mensaje,
+            'cliente' => $cliente
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
+// Ruta para probar conexión y mostrar datos de prueba
+Route::get('/debug/ventas', function() {
+    try {
+        $user = auth()->user();
+        $sucursalId = $user->sucursal_id;
+        
+        $data = [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'sucursal_id' => $sucursalId,
+            ],
+            'caja_abierta' => \App\Models\Caja::where('sucursal_id', $sucursalId)
+                ->where('user_id', $user->id)
+                ->where('estado', 'abierta')
+                ->whereNull('fecha_cierre')
+                ->exists(),
+            'cliente_generico' => \App\Models\Cliente::where('cedula_rnc', '000-0000000-0')->first(),
+            'productos_disponibles' => \App\Models\Producto::count(),
+            'inventario_sucursal' => \App\Models\InventarioSucursal::where('sucursal_id', $sucursalId)->count(),
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+    Route::get('/corregir-inventario-definitivo', function() {
+        $productoId = 1;
+        
+        // Calcular ventas REALES
+        $ventasTotales = DB::table('detalle_ventas')
+            ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
+            ->where('detalle_ventas.producto_id', $productoId)
+            ->where('ventas.sucursal_id', 1)
+            ->sum('detalle_ventas.cantidad');
+        
+        Log::info("Ventas totales del producto {$productoId}: {$ventasTotales}");
+        
+        // Stock inicial: 50
+        $stockCorrecto = 50 - $ventasTotales;
+        
+        Log::info("Stock CORRECTO: {$stockCorrecto}");
+        
+        // Actualizar inventario
+        $inventario = \App\Models\InventarioSucursal::where('producto_id', $productoId)
+            ->where('sucursal_id', 1)
+            ->first();
+        
+        if ($inventario) {
+            Log::info("Stock actual en BD: {$inventario->stock_actual}");
+            
+            if ($inventario->stock_actual != $stockCorrecto) {
+                // Actualizar directamente
+                DB::table('inventario_sucursal')
+                    ->where('id', $inventario->id)
+                    ->update([
+                        'stock_actual' => $stockCorrecto,
+                        'updated_at' => now()
+                    ]);
+                
+                Log::info("✓ Inventario corregido a {$stockCorrecto}");
+            } else {
+                Log::info("✓ Inventario ya está correcto");
+            }
+        }
+        
+        return response()->json([
+            'ventas_totales' => $ventasTotales,
+            'stock_correcto' => $stockCorrecto,
+            'stock_anterior' => $inventario->stock_actual ?? null
+        ]);
+    });
+    Route::get('/verificar-ventas', function() {
+        $ventas = DB::table('detalle_ventas')
+            ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
+            ->join('productos', 'detalle_ventas.producto_id', '=', 'productos.id')
+            ->where('detalle_ventas.producto_id', 1)
+            ->where('ventas.sucursal_id', 1)
+            ->select(
+                'ventas.id as venta_id',
+                'ventas.numero_factura',
+                'ventas.created_at',
+                'productos.nombre',
+                'detalle_ventas.cantidad',
+                'detalle_ventas.precio_unitario'
+            )
+            ->orderBy('ventas.id', 'asc')
+            ->get();
+        
+        $totalVendido = $ventas->sum('cantidad');
+        
+        return response()->json([
+            'ventas' => $ventas,
+            'total_vendido' => $totalVendido,
+            'stock_inicial' => 50,
+            'stock_actual_deberia_ser' => 50 - $totalVendido,
+            'stock_actual_en_bd' => DB::table('inventario_sucursal')
+                ->where('producto_id', 1)
+                ->where('sucursal_id', 1)
+                ->value('stock_actual')
+        ]);
+    });
+})->middleware(['auth', 'verified']);
 
 require __DIR__ . '/auth.php';

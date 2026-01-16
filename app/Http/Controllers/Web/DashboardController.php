@@ -47,7 +47,7 @@ class DashboardController extends Controller
                 'user' => [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role ?? 'usuario', // CAMBIO: Usa campo 'role'
+                    'role' => $user->role ?? 'usuario',
                 ],
             ]);
         }
@@ -180,7 +180,6 @@ class DashboardController extends Controller
                         ];
                     });
             } else {
-                // Si la tabla no existe, usar datos de prueba
                 $topProducts = collect([
                     [
                         'id' => 1,
@@ -206,7 +205,6 @@ class DashboardController extends Controller
                 ]);
             }
         } catch (\Exception $e) {
-            // Si hay error, retornar array vacío
             $topProducts = collect([]);
         }
         
@@ -239,7 +237,7 @@ class DashboardController extends Controller
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role ?? 'usuario', // CAMBIO: Usa campo 'role' directamente
+                'role' => $user->role ?? 'usuario',
                 'avatar' => $user->profile_photo_path 
                     ? asset('storage/' . $user->profile_photo_path)
                     : null,
@@ -317,13 +315,11 @@ class DashboardController extends Controller
                 ];
             }
             
-            // Calcular ventas desde la apertura de la caja
             $ventasDesdeApertura = Venta::where('sucursal_id', $sucursalId)
                 ->where('caja_id', $caja->id)
                 ->where('estado', 'PROCESADA')
                 ->sum('total');
                 
-            // Usar el efectivo actual de la caja o calcularlo
             $efectivoActual = $caja->efectivo ?: ($caja->monto_inicial + $ventasDesdeApertura);
             
             return [
@@ -335,7 +331,6 @@ class DashboardController extends Controller
                 'caja_id' => $caja->id,
             ];
         } catch (\Exception $e) {
-            // Si hay error con la caja, retornar caja cerrada
             return [
                 'abierta' => false,
                 'monto_inicial' => 0,
@@ -348,13 +343,12 @@ class DashboardController extends Controller
     
     private function calcularMetaDiaria($sucursalId)
     {
-        // Promedio de ventas de los últimos 30 días
         $promedio30Dias = Venta::where('sucursal_id', $sucursalId)
             ->where('estado', 'PROCESADA')
             ->whereDate('fecha_venta', '>=', now()->subDays(30))
             ->avg('total') ?? 0;
             
-        $meta = $promedio30Dias * 1.15; // 15% más que el promedio
+        $meta = $promedio30Dias * 1.15;
             
         $ventasHoy = Venta::where('sucursal_id', $sucursalId)
             ->whereDate('fecha_venta', today())
@@ -509,10 +503,6 @@ class DashboardController extends Controller
     {
         $alerts = [];
         
-        // Aquí deberías tener un modelo Notificacion si lo necesitas
-        // Por ahora retornar alertas básicas
-        
-        // Alertas de stock bajo
         $productosBajoStock = Producto::whereHas('inventarios', function($query) use ($sucursalId) {
             $query->where('sucursal_id', $sucursalId)
                   ->whereColumn('stock_disponible', '<', 'productos.stock_minimo');

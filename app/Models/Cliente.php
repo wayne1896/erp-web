@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cliente extends Model
 {
+    protected $attributes = [
+        'codigo' => '',
+        'email' => '',
+        'telefono' => '',
+        'direccion' => '',
+    ];
     protected $fillable = [
         'codigo',
         'tipo_cliente',
@@ -40,7 +46,18 @@ class Cliente extends Model
     {
         return $this->hasMany(Venta::class);
     }
+    protected static function boot()
+{
+    parent::boot();
     
+    static::creating(function ($cliente) {
+        if (empty($cliente->codigo)) {
+            $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
+            $numero = $ultimoCliente ? intval(substr($ultimoCliente->codigo, 3)) + 1 : 1;
+            $cliente->codigo = 'CLI' . str_pad($numero, 6, '0', STR_PAD_LEFT);
+        }
+    });
+}
     public function pedidos(): HasMany
     {
         return $this->hasMany(Pedido::class);

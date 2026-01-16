@@ -25,6 +25,10 @@ import {
 import axios from 'axios';
 
 export default function VentasCreate({ caja, clienteDefault, tiposComprobante, condicionesPago, tiposPago }) {
+    // Agrega esto para debug
+    useEffect(() => {
+      
+    }, []);
     const [productos, setProductos] = useState([]);
     const [productoSeleccionado, setProductoSeleccionado] = useState(null);
     const [busqueda, setBusqueda] = useState('');
@@ -67,13 +71,14 @@ export default function VentasCreate({ caja, clienteDefault, tiposComprobante, c
     const buscadorRef = useRef(null);
 
  // CORRECTO: Pasar el componente directamente
-const tiposPagoDefault = tiposPago || [
+ const tiposPagoDefault = tiposPago || [
     { key: 'EFECTIVO', nombre: 'Efectivo', icono: Banknote, color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30' },
     { key: 'TARJETA_DEBITO', nombre: 'Tarjeta Débito', icono: CreditCard, color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
     { key: 'TARJETA_CREDITO', nombre: 'Tarjeta Crédito', icono: CreditCard, color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30' },
     { key: 'TRANSFERENCIA', nombre: 'Transferencia', icono: Landmark, color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
     { key: 'CHEQUE', nombre: 'Cheque', icono: FileCheck, color: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30' },
     { key: 'PAGO_MOVIL', nombre: 'Pago Móvil', icono: Smartphone, color: 'text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-900/30' },
+    { key: 'CREDITO', nombre: 'Crédito', icono: Clock, color: 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30' }, // AÑADIDO
 ];
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -82,7 +87,7 @@ const tiposPagoDefault = tiposPago || [
         condicion_pago: 'CONTADO',
         tipo_pago: 'EFECTIVO',
         dias_credito: 0,
-        fecha_venta: new Date().toISOString().split('T')[0],
+        fecha_venta: new Date().toISOString().slice(0, 16), // Formato: "2024-01-16T14:30"
         productos: [],
         notas: '',
         descuento_global: 0,
@@ -105,15 +110,34 @@ const tiposPagoDefault = tiposPago || [
         }).format(num);
     };
 
-    // Formatear fecha
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
+    // Actualiza la función formatDate existente (si la usas en otros lugares):
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        
+        // Si tiene hora, mostrar ambas
+        if (dateString.includes('T') || dateString.includes(' ')) {
+            return date.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Solo fecha
+        return date.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
-    };
-
+    } catch (error) {
+        return dateString;
+    }
+};
     // Buscar productos
     const buscarProductos = async (query) => {
         if (query.length < 2) {
@@ -461,13 +485,13 @@ const tiposPagoDefault = tiposPago || [
             setProcesando(false);
             return;
         }
-
+    
         if (!caja) {
             alert('❌ Debe tener una caja abierta para realizar ventas');
             setProcesando(false);
             return;
         }
-
+    
         // Validar stock antes de enviar
         for (const producto of data.productos) {
             if (producto.cantidad > producto.stock_disponible) {
@@ -476,70 +500,125 @@ const tiposPagoDefault = tiposPago || [
                 return;
             }
         }
-
-        // Preparar productos para enviar
+    
+        // ⬇️⬇️⬇️ DEFINIR productosParaEnviar AQUÍ ⬇️⬇️⬇️
         const productosParaEnviar = data.productos.map(producto => ({
             producto_id: producto.producto_id,
             cantidad: parseFloat(producto.cantidad) || 0,
             precio_unitario: parseFloat(producto.precio_unitario) || 0,
             descuento: parseFloat(producto.descuento) || 0,
         }));
-
-        // Determinar tipo de pago basado en condición de pago
-        let tipoPagoFinal = data.tipo_pago;
-        if (data.condicion_pago === 'CREDITO') {
-            tipoPagoFinal = 'CREDITO';
-        }
-
-        // Actualizar datos del formulario
-        const formData = {
-            ...data,
-            productos: productosParaEnviar,
+    
+        // Preparar datos del formulario
+        const formDataToSend = {
+            tipo_comprobante: data.tipo_comprobante,
+            cliente_id: data.cliente_id || null,
+            condicion_pago: data.condicion_pago,
+            tipo_pago: data.tipo_pago,
+            dias_credito: data.dias_credito || 0,
+            fecha_venta: data.fecha_venta,
+            productos: productosParaEnviar, // <-- Usar la variable definida arriba
             descuento_global: parseFloat(descuentoGlobal) || 0,
-            tipo_pago: tipoPagoFinal,
-            cliente_id: data.cliente_id || null, // Permitir null para consumidor final
+            notas: data.notas || '',
         };
-
-        console.log('Enviando venta:', formData);
-
+    
+        // Asegurar formato correcto de fecha si es necesario
+        if (formDataToSend.fecha_venta && !formDataToSend.fecha_venta.includes('T')) {
+            const fecha = new Date(formDataToSend.fecha_venta);
+            formDataToSend.fecha_venta = fecha.toISOString().slice(0, 16);
+        }
+    
         try {
-            await post(route('ventas.store'), formData, {
-                onSuccess: () => {
-                    setProcesando(false);
-                    // Resetear formulario
-                    setData({
-                        cliente_id: clienteInfo.id || '',
-                        tipo_comprobante: 'FACTURA',
-                        condicion_pago: 'CONTADO',
-                        tipo_pago: 'EFECTIVO',
-                        dias_credito: 0,
-                        fecha_venta: new Date().toISOString().split('T')[0],
-                        productos: [],
-                        notas: '',
-                        descuento_global: 0,
-                    });
-                    setProductos([]);
-                    setProductoSeleccionado(null);
-                    setDescuentoGlobal(0);
-                    setDescuentoPorProducto({});
-                },
-                onError: (errors) => {
-                    setProcesando(false);
-                    console.error('Errores del formulario:', errors);
-                    if (errors.message) {
-                        setError(errors.message);
-                    } else {
-                        setError('Error al procesar la venta. Por favor, verifica los datos.');
-                    }
+            const response = await axios.post(route('ventas.store'), formDataToSend, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             });
-        } catch (error) {
-            console.error('Error al enviar venta:', error);
-            setError('Error al procesar la venta. Por favor, intente nuevamente.');
+    
+            if (response.data.success) {
+                alert(`✅ ${response.data.message} Factura #${response.data.numero_factura}`);
+                
+                // Resetear formulario
+                reset();
+                setData({
+                    cliente_id: '',
+                    tipo_comprobante: 'FACTURA',
+                    condicion_pago: 'CONTADO',
+                    tipo_pago: 'EFECTIVO',
+                    dias_credito: 0,
+                    fecha_venta: new Date().toISOString().slice(0, 16),
+                    productos: [],
+                    notas: '',
+                    descuento_global: 0,
+                });
+                setProductos([]);
+                setProductoSeleccionado(null);
+                setDescuentoGlobal(0);
+                setDescuentoPorProducto({});
+                setClienteInfo({
+                    id: null,
+                    nombre_completo: 'Consumidor Final',
+                    tipo: 'FISICA',
+                    cedula: '000-0000000-0',
+                    email: '',
+                    telefono: '',
+                    direccion: ''
+                });
+                
+                // Redirigir a la venta creada
+                if (response.data.venta && response.data.venta.id) {
+                    router.visit(route('ventas.show', response.data.venta.id));
+                } else if (response.data.id) {
+                    router.visit(route('ventas.show', response.data.id));
+                } else {
+                    router.visit(route('ventas.index'));
+                }
+            } else {
+                setError(response.data.message || 'Error al procesar la venta');
+                alert(`❌ ${response.data.message || 'Error al procesar la venta'}`);
+            }
+            
             setProcesando(false);
+            
+        } catch (error) {
+            setProcesando(false);
+            
+            if (error.response) {
+                const errorMessage = error.response.data?.message || 
+                                   error.response.data?.error ||
+                                   'Error al procesar la venta';
+                setError(errorMessage);
+                alert(`❌ ${errorMessage}`);
+            } else if (error.request) {
+                setError('No se recibió respuesta del servidor. Verifica tu conexión.');
+                alert('❌ No se recibió respuesta del servidor');
+            } else {
+                setError('Error al configurar la petición: ' + error.message);
+                alert('❌ Error de configuración: ' + error.message);
+            }
         }
     };
-
+    // Agrega esta función en tu Create.jsx:
+const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return '';
+    
+    try {
+        const date = new Date(dateTimeString);
+        
+        // Formato: "16/01/2024, 14:30:00"
+        return date.toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    } catch (error) {
+        return dateTimeString;
+    }
+};
     // Efecto para buscar productos
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
@@ -810,15 +889,15 @@ const tiposPagoDefault = tiposPago || [
                                             </div>
                                         </div>
 
-                                        {/* Fecha de venta */}
+                                        {/* Fecha de venta - actualizar a datetime-local */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                                                 <Calendar className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
-                                                Fecha de Venta
+                                                Fecha y Hora de Venta
                                             </label>
                                             <div className="relative">
                                                 <input
-                                                    type="date"
+                                                    type="datetime-local"
                                                     className="w-full px-4 py-3 pl-11 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition"
                                                     value={data.fecha_venta}
                                                     onChange={(e) => setData('fecha_venta', e.target.value)}
@@ -1431,7 +1510,7 @@ const tiposPagoDefault = tiposPago || [
 
                                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                                         <div className="space-y-3">
-                                            <button
+                                        <button
                                                 type="submit"
                                                 disabled={procesando || data.productos.length === 0 || !caja}
                                                 className="w-full inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition disabled:opacity-50 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
@@ -1533,6 +1612,7 @@ const tiposPagoDefault = tiposPago || [
                                             </div>
                                         </div>
                                     </div>
+                                    
                                 )}
                             </div>
                         </div>

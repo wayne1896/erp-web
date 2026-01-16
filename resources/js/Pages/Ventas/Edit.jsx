@@ -5,7 +5,8 @@ import {
     ArrowLeft, FileText, User, Calendar, Clock, CreditCard,
     Package, DollarSign, Trash2, AlertCircle, Save, X,
     Edit2, CheckCircle, AlertTriangle, Receipt, Shield,
-    RefreshCw, Eye, Printer, Download, Copy, Hash
+    RefreshCw, Eye, Printer, Download, Copy, Hash,
+    MapPin, Phone, Info // <-- IMPORTAR ICONOS FALTANTES
 } from 'lucide-react';
 
 export default function VentasEdit({ venta, tiposComprobante, condicionesPago, estados }) {
@@ -659,7 +660,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                                                     La anulación revertirá el stock de productos
                                                                 </li>
                                                                 <li className="flex items-start">
-                                                                    <span className="inline-block w-1 h-1 rounded-full bg-amber-500 mt-1.5 mr-2"></span>
+                                                                    <span className="inline-block w-1 h-1 rounded-full bg-amber-500 mt=1.5 mr-2"></span>
                                                                     Esta acción no se puede deshacer
                                                                 </li>
                                                             </ul>

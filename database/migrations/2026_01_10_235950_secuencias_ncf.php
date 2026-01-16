@@ -35,7 +35,7 @@ Schema::create('ventas', function (Blueprint $table) {
     $table->foreignId('cliente_id')->constrained('clientes');
     $table->foreignId('sucursal_id')->constrained('sucursales');
     $table->foreignId('user_id')->constrained('users');
-    $table->date('fecha_venta');
+    $table->datetime('fecha_venta');
     $table->foreignId('caja_id')->nullable()->constrained('cajas')->onDelete('set null');
     $table->enum('estado', ['PENDIENTE', 'PROCESADA', 'ANULADA', 'DEVUELTA'])->default('PENDIENTE');
     $table->enum('condicion_pago', ['CONTADO', 'CREDITO'])->default('CONTADO');

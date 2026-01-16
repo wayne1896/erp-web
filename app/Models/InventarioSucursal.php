@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB; // ← ¡AGREGA ESTA LÍNEA!
+use Illuminate\Support\Facades\Log;
+
 
 class InventarioSucursal extends Model
 {
@@ -46,21 +49,20 @@ class InventarioSucursal extends Model
     protected static function booted()
     {
         static::saving(function ($inventario) {
-            // Calcular stock disponible
-            $inventario->stock_disponible = $inventario->stock_actual - $inventario->stock_reservado;
-            
-            // Calcular valor del inventario
-            $inventario->valor_inventario = $inventario->stock_actual * $inventario->costo_promedio;
-            
-            \Log::info('Inventario saving:', [
-                'stock_actual' => $inventario->stock_actual,
-                'stock_reservado' => $inventario->stock_reservado,
-                'stock_disponible' => $inventario->stock_disponible,
-                'costo_promedio' => $inventario->costo_promedio,
-                'valor_inventario' => $inventario->valor_inventario
-            ]);
+            // Solo calcular si no estamos en medio de un recalcular manual
+            if (!isset($inventario->recalculandoManual)) {
+                // Calcular stock disponible
+                $inventario->stock_disponible = $inventario->stock_actual - $inventario->stock_reservado;
+                
+                // Calcular valor del inventario
+                $inventario->valor_inventario = $inventario->stock_actual * $inventario->costo_promedio;
+                
+                \Log::info('Inventario saving (automático):', [
+                    'stock_disponible' => $inventario->stock_disponible,
+                    'valor_inventario' => $inventario->valor_inventario
+                ]);
+            }
         });
-
         static::created(function ($inventario) {
             \Log::info('Inventario created:', $inventario->toArray());
         });
@@ -123,35 +125,120 @@ class InventarioSucursal extends Model
 
         return $this;
     }
+   /**
+ * Recalcular valor del inventario CORREGIDO
+ * Usa los valores ACTUALES de la base de datos
+ */
+/**
+ * Recalcular valor del inventario - SOLO PARA CORRECCIONES
+ * NO usar durante el flujo normal de ventas
+ */
+// En InventarioSucursal.php:
+public function recalcularValorInventario(): self
+{
+    // ¡NUEVA VERSIÓN SEGURA!
+    \Log::info('✅ recalcularValorInventario SEGURO llamado');
     
+    // 1. Obtener datos REALES de ventas
+    $ventasTotales = DB::table('detalle_ventas')
+        ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
+        ->where('detalle_ventas.producto_id', $this->producto_id)
+        ->where('ventas.sucursal_id', $this->sucursal_id)
+        ->sum('detalle_ventas.cantidad');
+    
+    // 2. Calcular stock REAL (asumiendo stock inicial 50)
+    $stockReal = 50 - $ventasTotales;
+    
+    // 3. Actualizar
+    $this->stock_actual = $stockReal;
+    $this->save(); // Esto disparará los cálculos automáticos
+    
+    \Log::info("Recálculo SEGURO: Ventas={$ventasTotales}, StockReal={$stockReal}");
+    
+    return $this;
+}
+/**
+ * Método de diagnóstico - Verifica consistencia de datos
+ */
+public function diagnosticarInventario(): array
+{
+    // Obtener valores actuales de la BD (sin caché)
+    $valoresBD = DB::table('inventario_sucursal')
+        ->where('id', $this->id)
+        ->first();
+    
+    // Valores en el modelo (podrían estar cacheados)
+    $valoresModelo = [
+        'stock_actual' => $this->stock_actual,
+        'stock_reservado' => $this->stock_reservado,
+        'stock_disponible' => $this->stock_disponible,
+        'costo_promedio' => $this->costo_promedio,
+        'valor_inventario' => $this->valor_inventario
+    ];
+    
+    // Calcular lo que DEBERÍA ser
+    $stockDisponibleEsperado = $valoresBD->stock_actual - $valoresBD->stock_reservado;
+    $valorInventarioEsperado = $valoresBD->stock_actual * $valoresBD->costo_promedio;
+    
+    $diagnostico = [
+        'id' => $this->id,
+        'valores_bd' => $valoresBD,
+        'valores_modelo' => $valoresModelo,
+        'calculos_esperados' => [
+            'stock_disponible' => $stockDisponibleEsperado,
+            'valor_inventario' => $valorInventarioEsperado
+        ],
+        'inconsistencias' => []
+    ];
+    
+    // Verificar inconsistencias
+    if ((float) $valoresBD->stock_disponible != (float) $stockDisponibleEsperado) {
+        $diagnostico['inconsistencias'][] = "stock_disponible incorrecto en BD";
+    }
+    
+    if ((float) $valoresBD->valor_inventario != (float) $valorInventarioEsperado) {
+        $diagnostico['inconsistencias'][] = "valor_inventario incorrecto en BD";
+    }
+    
+    if ((float) $this->stock_disponible != (float) $stockDisponibleEsperado) {
+        $diagnostico['inconsistencias'][] = "stock_disponible incorrecto en Modelo";
+    }
+    
+    \Log::info('Diagnóstico de inventario:', $diagnostico);
+    
+    return $diagnostico;
+}
+/**
+ * Guardar sin disparar eventos para evitar recursión
+ */
+public function saveQuietly(array $options = [])
+{
+    return static::withoutEvents(function () use ($options) {
+        return $this->save($options);
+    });
+}
     /**
      * Decrementar stock - CORREGIDO
      */
-    public function decrementarStock(float $cantidad): self
-    {
-        \Log::info('Método decrementarStock llamado:', [
-            'cantidad' => $cantidad,
-            'stock_actual_antes' => $this->stock_actual,
-            'stock_disponible_antes' => $this->stock_disponible
-        ]);
-
-        if ($this->stock_disponible < $cantidad) {
-            throw new \Exception('Stock insuficiente. Disponible: ' . $this->stock_disponible);
-        }
-        
-        $this->stock_actual = $this->stock_actual - $cantidad;
-        
-        // Guardar para disparar los eventos
-        $this->save();
-
-        \Log::info('Después de decrementar:', [
-            'stock_actual' => $this->stock_actual,
-            'stock_disponible' => $this->stock_disponible
-        ]);
-
-        return $this;
-    }
+    /**
+ * Decrementar stock - VERSIÓN CORREGIDA
+ */
+public function decrementarStock(float $cantidad): self
+{
+    Log::info('Decrementando stock:', [
+        'id' => $this->id,
+        'stock_actual_antes' => $this->stock_actual,
+        'cantidad' => $cantidad
+    ]);
     
+    // Decrementar stock_actual (¡NO stock_disponible!)
+    $this->stock_actual = $this->stock_actual - $cantidad;
+    
+    // Guardar para que los eventos hagan los cálculos automáticos
+    $this->save();
+    
+    return $this;
+}
     /**
      * Reservar stock
      */

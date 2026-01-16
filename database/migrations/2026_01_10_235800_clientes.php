@@ -17,7 +17,7 @@ Schema::create('clientes', function (Blueprint $table) {
     $table->string('codigo', 20)->unique();
     $table->enum('tipo_cliente', ['NATURAL', 'JURIDICO'])->default('NATURAL');
     $table->string('nombre_completo');
-    $table->string('cedula_rnc', 11)->nullable()->unique();
+    $table->string('cedula_rnc', 20)->nullable()->unique();
     /* 
     Tipos de identificación RD:
     - Cédula: 001-xxxxxxx-9 (11 dígitos)

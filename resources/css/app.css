@@ -20,3 +20,114 @@
         @apply text-gray-900 dark:text-gray-100;
     }
 }
+/* Agregar después de los estilos base de Tailwind */
+@layer components {
+    /* Mejorar espaciado en formularios */
+    .form-group-spaced {
+        @apply mb-6;
+    }
+    
+    .input-with-icon {
+        @apply pl-11 pr-4 py-3.5;
+    }
+    
+    .form-label-spaced {
+        @apply mb-2.5;
+    }
+    
+    /* Mejorar contenedor principal */
+    .form-container-spaced {
+        @apply p-8 space-y-6;
+    }
+    
+    /* Ajustar checkbox */
+    .checkbox-container-spaced {
+        @apply my-6 p-4;
+    }
+    
+    /* Botón con mejor espaciado */
+    .button-spaced {
+        @apply py-4 mt-4;
+    }
+}
+/* Contenedor principal del formulario */
+.form-container {
+    padding: 30px;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  /* Título del formulario */
+  .form-title {
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    color: #0a1630;
+  }
+  
+  /* Grupo de cada campo */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  /* Etiquetas */
+  .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+  }
+  
+  /* Campos de entrada */
+  .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  
+  /* Placeholder (texto de ejemplo) */
+  .form-input::placeholder {
+    color: #999;
+  }
+  
+  /* Contenedor del checkbox */
+  .checkbox-container {
+    margin: 25px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  /* Texto del checkbox */
+  .checkbox-text {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+  }
+  
+  /* Botón principal */
+  .submit-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #0056d6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  /* Enlace "Inicia sesión aquí" */
+  .login-link {
+    text-align: center;
+    display: block;
+    margin-top: 20px;
+    color: #0056d6;
+    text-decoration: none;
+  }
