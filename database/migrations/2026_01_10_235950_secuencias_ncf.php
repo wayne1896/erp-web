@@ -39,7 +39,7 @@ Schema::create('ventas', function (Blueprint $table) {
     $table->foreignId('caja_id')->nullable()->constrained('cajas')->onDelete('set null');
     $table->enum('estado', ['PENDIENTE', 'PROCESADA', 'ANULADA', 'DEVUELTA'])->default('PENDIENTE');
     $table->enum('condicion_pago', ['CONTADO', 'CREDITO'])->default('CONTADO');
-    $table->enum('tipo_pago', ['EFECTIVO', 'TARJETA_DEBITO', 'TARJETA_CREDITO', 'TRANSFERENCIA', 'CHEQUE', 'OTRO'])
+    $table->enum('tipo_pago', ['EFECTIVO', 'TARJETA_DEBITO', 'TARJETA_CREDITO', 'TRANSFERENCIA', 'CHEQUE', 'CREDITO'])
     ->default('EFECTIVO');
     $table->integer('dias_credito')->default(0);
     $table->date('fecha_vencimiento')->nullable();

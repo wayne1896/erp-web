@@ -151,60 +151,40 @@ class DashboardController extends Controller
             });
         
         // Productos más vendidos del mes
+
         try {
-            if (Schema::hasTable('detalle_ventas')) {
-                $topProducts = DB::table('detalle_ventas')
-                    ->join('productos', 'detalle_ventas.producto_id', '=', 'productos.id')
-                    ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
-                    ->select(
-                        'productos.id',
-                        'productos.nombre',
-                        'productos.codigo',
-                        DB::raw('SUM(detalle_ventas.cantidad) as total_vendido'),
-                        DB::raw('SUM(detalle_ventas.total) as total_ingresos')
-                    )
-                    ->where('ventas.sucursal_id', $sucursalId)
-                    ->where('ventas.estado', 'PROCESADA')
-                    ->whereBetween('ventas.fecha_venta', [$inicioMes, $hoy])
-                    ->groupBy('productos.id', 'productos.nombre', 'productos.codigo')
-                    ->orderByDesc('total_vendido')
-                    ->limit(5)
-                    ->get()
-                    ->map(function($product) {
-                        return [
-                            'id' => $product->id,
-                            'nombre' => $product->nombre,
-                            'codigo' => $product->codigo,
-                            'total_vendido' => (float) $product->total_vendido,
-                            'total_ingresos' => (float) $product->total_ingresos,
-                        ];
-                    });
-            } else {
-                $topProducts = collect([
-                    [
-                        'id' => 1,
-                        'nombre' => 'Producto Ejemplo 1',
-                        'codigo' => 'PROD001',
-                        'total_vendido' => 25,
-                        'total_ingresos' => 1250.00,
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Producto Ejemplo 2',
-                        'codigo' => 'PROD002',
-                        'total_vendido' => 18,
-                        'total_ingresos' => 900.00,
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Producto Ejemplo 3',
-                        'codigo' => 'PROD003',
-                        'total_vendido' => 12,
-                        'total_ingresos' => 600.00,
-                    ],
-                ]);
-            }
+        // Usando Eloquent con relaciones
+        $topProducts = DetalleVenta::query()
+            ->select([
+                'producto_id',
+                DB::raw('SUM(cantidad) as total_vendido'),
+                DB::raw('SUM(total) as total_ingresos')
+            ])
+            ->with(['producto:id,nombre,codigo']) // Carga la relación
+            ->whereHas('venta', function($query) use ($sucursalId, $inicioMes, $hoy) {
+                $query->where('sucursal_id', $sucursalId)
+                    ->where('estado', 'PROCESADA')
+                    ->whereBetween('fecha_venta', [
+                        $inicioMes->format('Y-m-d 00:00:00'),
+                        $hoy->format('Y-m-d 23:59:59')
+                    ]);
+            })
+            ->groupBy('producto_id')
+            ->orderByDesc('total_vendido')
+            ->limit(5)
+            ->get()
+            ->map(function($detalle) {
+                return [
+                    'id' => $detalle->producto_id,
+                    'nombre' => $detalle->producto->nombre ?? 'Producto eliminado',
+                    'codigo' => $detalle->producto->codigo ?? 'N/A',
+                    'total_vendido' => (float) $detalle->total_vendido,
+                    'total_ingresos' => (float) $detalle->total_ingresos,
+                ];
+            });
+        
         } catch (\Exception $e) {
+            \Log::error('Error al obtener topProducts: ' . $e->getMessage());
             $topProducts = collect([]);
         }
         

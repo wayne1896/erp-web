@@ -66,11 +66,13 @@ class Cliente extends Model
     /**
      * Scope para clientes activos
      */
+   
     public function scopeActivos($query)
     {
-        return $query->where('activo', true);
+        return $query->where('estado', 'activo'); // Ajusta según tu campo de estado
+        // O si no tienes campo estado:
+        // return $query;
     }
-    
     /**
      * Scope por tipo de cliente
      */

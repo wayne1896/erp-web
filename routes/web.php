@@ -8,10 +8,13 @@ use App\Http\Controllers\Web\ProductoController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\CajaController;
 use App\Http\Controllers\Web\VentaController;
+use App\Http\Controllers\Web\PedidoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Models\Cliente;
+use App\Models\InventarioSucursal;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -28,7 +31,7 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
-    Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
+Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // ==================== PROFILE ====================
@@ -116,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{caja}', [CajaController::class, 'update'])->name('caja.update');
         Route::get('/{caja}/movimientos', [CajaController::class, 'movimientos'])->name('caja.movimientos');
         Route::post('/{caja}/ingreso', [CajaController::class, 'registrarIngreso'])->name('caja.ingreso');
-        Route::post('/{caja}/egreso', [CajaController::class, 'registrarEgreso'])->name('caja.egreso');
+        Route::post('/{caja}/egreso', [CajaController::class, 'registrarEgresso'])->name('caja.egreso');
         
         // Ver caja actual
         Route::get('/actual', [CajaController::class, 'cajaActual'])->name('caja.actual');
@@ -152,6 +155,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reportes/mensual', [VentaController::class, 'reporteMensual'])->name('ventas.reporte-mensual');
         Route::get('/reportes/productos', [VentaController::class, 'reporteProductos'])->name('ventas.reporte-productos');
         Route::get('/reportes/general', [VentaController::class, 'reporteVentas'])->name('ventas.reporte-general');
+    });
+
+    // ==================== PEDIDOS ====================
+    Route::prefix('pedidos')->group(function () {
+        // CRUD Básico
+        Route::get('/', [PedidoController::class, 'index'])->name('pedidos.index');
+        Route::get('/crear', [PedidoController::class, 'create'])->name('pedidos.create');
+        Route::post('/', [PedidoController::class, 'store'])->name('pedidos.store');
+        Route::get('/{pedido}', [PedidoController::class, 'show'])->name('pedidos.show'); // <-- AGREGADA
+        Route::get('/{pedido}/editar', [PedidoController::class, 'edit'])->name('pedidos.edit');
+        Route::put('/{pedido}', [PedidoController::class, 'update'])->name('pedidos.update');
+        Route::delete('/{pedido}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
+        
+        // Rutas adicionales específicas
+        Route::post('/{pedido}/procesar', [PedidoController::class, 'procesar'])->name('pedidos.procesar');
+        Route::post('/{pedido}/entregar', [PedidoController::class, 'entregar'])->name('pedidos.entregar');
+        Route::post('/{pedido}/cancelar', [PedidoController::class, 'cancelar'])->name('pedidos.cancelar');
+        Route::get('/{pedido}/detalles', [PedidoController::class, 'detalles'])->name('pedidos.detalles');
+        
+        // Para conversión a venta
+        Route::post('/{pedido}/convertir-venta', [PedidoController::class, 'convertirAVenta'])->name('pedidos.convertir-venta');
     });
 
     // ==================== REPORTES GENERALES ====================
@@ -193,120 +217,99 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return Inertia::render('Configuracion/Backup');
         })->name('configuracion.backup');
     });
-});
 
-// ==================== RUTAS PÚBLICAS ====================
-Route::get('/status', function () {
-    return response()->json([
-        'status' => 'online',
-        'timestamp' => now(),
-        'version' => Application::VERSION,
-        'app_name' => config('app.name'),
-        'environment' => app()->environment(),
-    ]);
-})->name('status');
-
-Route::get('/health', function () {
-    return response()->json([
-        'healthy' => true,
-        'database' => DB::connection()->getPdo() ? 'connected' : 'disconnected',
-        'timestamp' => now()->toDateTimeString(),
-    ]);
-})->name('health');
-
-// ==================== RUTAS TEMPORALES (ELIMINAR DESPUÉS) ====================
-Route::get('/crear-cliente-generico', function() {
-    try {
-        // Verificar si ya existe
-        $cliente = Cliente::where('cedula_rnc', '000-0000000-0')->first();
-        
-        if (!$cliente) {
-            // Generar código
-            $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
-            $codigo = $ultimoCliente ? 'CLI' . str_pad($ultimoCliente->id + 1, 6, '0', STR_PAD_LEFT) : 'CLI000001';
+    // ==================== RUTAS TEMPORALES (ELIMINAR DESPUÉS) ====================
+    Route::get('/crear-cliente-generico', function() {
+        try {
+            // Verificar si ya existe
+            $cliente = Cliente::where('cedula_rnc', '000-0000000-0')->first();
             
-            $cliente = Cliente::create([
-                'codigo' => $codigo,
-                'tipo_cliente' => 'NATURAL',
-                'cedula_rnc' => '000-0000000-0',
-                'nombre_completo' => 'CONSUMIDOR FINAL',
-                'email' => '',
-                'telefono' => '',
-                'direccion' => 'No especificada',
-                // --- CAMPOS FALTANTES ---
-                'provincia' => 'Distrito Nacional', // O el valor que necesites
-                'municipio' => 'Santo Domingo', // O 'No especificado'
-                'sector' => 'Centro', // O 'No especificado'
-                'tipo_contribuyente' => 'CONSUMIDOR_FINAL',
-                'dias_credito' => 0,
-                'descuento' => 0.00,
-                // --- FIN CAMPOS FALTANTES ---
-                'activo' => true,
-                'limite_credito' => 0,
-                'saldo_pendiente' => 0,
-            ]);
-            
-            $mensaje = 'Cliente genérico creado exitosamente';
-        } else {
-            // Si existe pero no tiene código, asignarle uno
-            if (empty($cliente->codigo)) {
+            if (!$cliente) {
+                // Generar código
                 $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
                 $codigo = $ultimoCliente ? 'CLI' . str_pad($ultimoCliente->id + 1, 6, '0', STR_PAD_LEFT) : 'CLI000001';
-                $cliente->codigo = $codigo;
-                $cliente->save();
+                
+                $cliente = Cliente::create([
+                    'codigo' => $codigo,
+                    'tipo_cliente' => 'NATURAL',
+                    'cedula_rnc' => '000-0000000-0',
+                    'nombre_completo' => 'CONSUMIDOR FINAL',
+                    'email' => '',
+                    'telefono' => '',
+                    'direccion' => 'No especificada',
+                    'provincia' => 'Distrito Nacional',
+                    'municipio' => 'Santo Domingo',
+                    'sector' => 'Centro',
+                    'tipo_contribuyente' => 'CONSUMIDOR_FINAL',
+                    'dias_credito' => 0,
+                    'descuento' => 0.00,
+                    'activo' => true,
+                    'limite_credito' => 0,
+                    'saldo_pendiente' => 0,
+                ]);
+                
+                $mensaje = 'Cliente genérico creado exitosamente';
+            } else {
+                // Si existe pero no tiene código, asignarle uno
+                if (empty($cliente->codigo)) {
+                    $ultimoCliente = Cliente::orderBy('id', 'desc')->first();
+                    $codigo = $ultimoCliente ? 'CLI' . str_pad($ultimoCliente->id + 1, 6, '0', STR_PAD_LEFT) : 'CLI000001';
+                    $cliente->codigo = $codigo;
+                    $cliente->save();
+                }
+                
+                $mensaje = 'Cliente genérico ya existía';
             }
             
-            $mensaje = 'Cliente genérico ya existía';
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje,
+                'cliente' => $cliente
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => true,
-            'message' => $mensaje,
-            'cliente' => $cliente
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-});
+    });
 
-// Ruta para probar conexión y mostrar datos de prueba
-Route::get('/debug/ventas', function() {
-    try {
-        $user = auth()->user();
-        $sucursalId = $user->sucursal_id;
-        
-        $data = [
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'sucursal_id' => $sucursalId,
-            ],
-            'caja_abierta' => \App\Models\Caja::where('sucursal_id', $sucursalId)
-                ->where('user_id', $user->id)
-                ->where('estado', 'abierta')
-                ->whereNull('fecha_cierre')
-                ->exists(),
-            'cliente_generico' => \App\Models\Cliente::where('cedula_rnc', '000-0000000-0')->first(),
-            'productos_disponibles' => \App\Models\Producto::count(),
-            'inventario_sucursal' => \App\Models\InventarioSucursal::where('sucursal_id', $sucursalId)->count(),
-        ];
-        
-        return response()->json([
-            'success' => true,
-            'data' => $data
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
+    Route::get('/debug/ventas', function() {
+        try {
+            $user = auth()->user();
+            $sucursalId = $user->sucursal_id;
+            
+            $data = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'sucursal_id' => $sucursalId,
+                ],
+                'caja_abierta' => \App\Models\Caja::where('sucursal_id', $sucursalId)
+                    ->where('user_id', $user->id)
+                    ->where('estado', 'abierta')
+                    ->whereNull('fecha_cierre')
+                    ->exists(),
+                'cliente_generico' => Cliente::where('cedula_rnc', '000-0000000-0')->first(),
+                'productos_disponibles' => \App\Models\Producto::count(),
+                'inventario_sucursal' => \App\Models\InventarioSucursal::where('sucursal_id', $sucursalId)->count(),
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+
     Route::get('/corregir-inventario-definitivo', function() {
         $productoId = 1;
         
@@ -317,20 +320,20 @@ Route::get('/debug/ventas', function() {
             ->where('ventas.sucursal_id', 1)
             ->sum('detalle_ventas.cantidad');
         
-        Log::info("Ventas totales del producto {$productoId}: {$ventasTotales}");
+        \Log::info("Ventas totales del producto {$productoId}: {$ventasTotales}");
         
         // Stock inicial: 50
         $stockCorrecto = 50 - $ventasTotales;
         
-        Log::info("Stock CORRECTO: {$stockCorrecto}");
+        \Log::info("Stock CORRECTO: {$stockCorrecto}");
         
         // Actualizar inventario
-        $inventario = \App\Models\InventarioSucursal::where('producto_id', $productoId)
+        $inventario = InventarioSucursal::where('producto_id', $productoId)
             ->where('sucursal_id', 1)
             ->first();
         
         if ($inventario) {
-            Log::info("Stock actual en BD: {$inventario->stock_actual}");
+            \Log::info("Stock actual en BD: {$inventario->stock_actual}");
             
             if ($inventario->stock_actual != $stockCorrecto) {
                 // Actualizar directamente
@@ -341,9 +344,9 @@ Route::get('/debug/ventas', function() {
                         'updated_at' => now()
                     ]);
                 
-                Log::info("✓ Inventario corregido a {$stockCorrecto}");
+                \Log::info("✓ Inventario corregido a {$stockCorrecto}");
             } else {
-                Log::info("✓ Inventario ya está correcto");
+                \Log::info("✓ Inventario ya está correcto");
             }
         }
         
@@ -353,6 +356,7 @@ Route::get('/debug/ventas', function() {
             'stock_anterior' => $inventario->stock_actual ?? null
         ]);
     });
+
     Route::get('/verificar-ventas', function() {
         $ventas = DB::table('detalle_ventas')
             ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
@@ -383,6 +387,25 @@ Route::get('/debug/ventas', function() {
                 ->value('stock_actual')
         ]);
     });
-})->middleware(['auth', 'verified']);
+});
+
+// ==================== RUTAS PÚBLICAS ====================
+Route::get('/status', function () {
+    return response()->json([
+        'status' => 'online',
+        'timestamp' => now(),
+        'version' => Application::VERSION,
+        'app_name' => config('app.name'),
+        'environment' => app()->environment(),
+    ]);
+})->name('status');
+
+Route::get('/health', function () {
+    return response()->json([
+        'healthy' => true,
+        'database' => DB::connection()->getPdo() ? 'connected' : 'disconnected',
+        'timestamp' => now()->toDateTimeString(),
+    ]);
+})->name('health');
 
 require __DIR__ . '/auth.php';

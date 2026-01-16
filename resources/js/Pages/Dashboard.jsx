@@ -19,6 +19,7 @@ export default function Dashboard({
     performance = {},
     user 
 }) {
+    
     const [time, setTime] = useState(new Date());
     const [activeTab, setActiveTab] = useState('overview');
     const [isLoading, setIsLoading] = useState(false);
@@ -221,7 +222,7 @@ export default function Dashboard({
                         </div>
                     )}
 
-                    {/* Navegación por pestañas */}
+                    {/* Navegación por pestañas 
                     <div className="mb-8">
                         <div className="flex space-x-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl max-w-max">
                             {tabs.map((tab) => {
@@ -244,7 +245,7 @@ export default function Dashboard({
                                 );
                             })}
                         </div>
-                    </div>
+                    </div>*/}
 
                     {/* Métricas principales */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -578,10 +579,16 @@ export default function Dashboard({
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Productos Destacados</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">Top productos del mes</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {topProducts.length > 0 ? 'Top productos del mes' : 'No hay datos de ventas este mes'}
+                                        </p>
                                     </div>
                                     <div className="flex items-center">
-                                        <span className="text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full">
+                                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                                            topProducts.length > 0 
+                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                                                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                        }`}>
                                             {topProducts.length} productos
                                         </span>
                                     </div>
@@ -589,9 +596,9 @@ export default function Dashboard({
                             </div>
                             
                             <div className="p-6">
-                                <div className="space-y-4">
-                                    {topProducts.length > 0 ? (
-                                        topProducts.slice(0, 4).map((product, index) => (
+                                {topProducts.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {topProducts.map((product, index) => (
                                             <div key={product.id} className="group">
                                                 <div className="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300">
                                                     <div className="flex-shrink-0 relative">
@@ -606,7 +613,7 @@ export default function Dashboard({
                                                     </div>
                                                     <div className="ml-4 flex-1 min-w-0">
                                                         <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                                            {product.nombre}
+                                                            {product.nombre || 'Producto sin nombre'}
                                                         </h4>
                                                         <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                                                             {product.codigo || 'Sin código'}
@@ -614,26 +621,35 @@ export default function Dashboard({
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="font-bold text-gray-900 dark:text-gray-100">
-                                                            {formatNumber(product.total_vendido)} uds
+                                                            {formatNumber(product.total_vendido || 0)} uds
                                                         </div>
                                                         <div className="text-sm font-semibold text-purple-600 dark:text-purple-400">
-                                                            {formatCurrency(product.total_ingresos)}
+                                                            {formatCurrency(product.total_ingresos || 0)}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-8">
-                                            <Package className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                                            <p className="text-gray-500 dark:text-gray-400">No hay datos de productos vendidos</p>
-                                        </div>
-                                    )}
-                                </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <Package className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                        <p className="text-gray-500 dark:text-gray-400 mb-3">No hay datos de productos vendidos este mes</p>
+                                        <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+                                            Realiza ventas para ver los productos más populares
+                                        </p>
+                                        <Link
+                                            href="/ventas/crear"
+                                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                                        >
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Realizar primera venta
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
-
                     {/* Estado del sistema */}
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 mb-8">
                         <div className="flex items-center justify-between mb-6">
