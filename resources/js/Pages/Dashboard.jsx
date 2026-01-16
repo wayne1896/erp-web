@@ -549,7 +549,7 @@ export default function Dashboard({
                                                             {formatCurrency(sale.total)}
                                                         </div>
                                                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                            {formatTime(sale.fecha_venta)}
+                                                            {formatTime(sale.created_at)}
                                                         </div>
                                                     </div>
                                                 </div>

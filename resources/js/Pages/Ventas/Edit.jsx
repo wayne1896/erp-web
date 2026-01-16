@@ -40,12 +40,15 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
     };
 
     const formatDateTime = (dateString) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
+        if (!dateString) return 'No disponible';
+        const date = new Date(dateString);
+        return date.toLocaleString('es-ES', {
             day: '2-digit',
-            month: 'short',
+            month: '2-digit',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            second: '2-digit'
         });
     };
 
@@ -103,7 +106,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
 
     const calcularFechaVencimiento = () => {
         if (venta.condicion_pago === 'CREDITO' && venta.dias_credito > 0) {
-            const fecha = new Date(venta.fecha_venta);
+            const fecha = new Date(venta.created_at);
             fecha.setDate(fecha.getDate() + venta.dias_credito);
             return formatDate(fecha);
         }
@@ -132,7 +135,7 @@ export default function VentasEdit({ venta, tiposComprobante, condicionesPago, e
                                 <span className="text-gray-400 dark:text-gray-600">•</span>
                                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                                     <Calendar className="w-4 h-4 mr-1" />
-                                    {formatDate(venta.fecha_venta)}
+                                    {formatDateTime(venta.created_at)}
                                 </div>
                                 <span className="text-gray-400 dark:text-gray-600">•</span>
                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getEstadoColor(venta.estado)}`}>

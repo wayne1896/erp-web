@@ -125,6 +125,19 @@ export default function VentasShow({ venta }) {
         });
     };
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'No disponible';
+        const date = new Date(dateString);
+        return date.toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    };
+
     // Estado de la venta para colores del badge
     const getStatusClasses = (estado) => {
         switch(estado?.toUpperCase()) {
@@ -520,8 +533,7 @@ export default function VentasShow({ venta }) {
                         <div class="company-info" style="text-align: right;">
                             <div><strong>FACTURA COMERCIAL</strong></div>
                             <div><strong>N°:</strong> ${venta.numero_factura}</div>
-                            <div><strong>Fecha:</strong> ${formatDateShort(venta.fecha_venta)}</div>
-                            <div><strong>Hora:</strong> ${formatTime(venta.fecha_venta)}</div>
+                            <div><strong>Fecha de Factura:</strong> ${formatDateTime(venta.created_at)}</div>
                             <div><strong>NCF:</strong> ${venta.ncf || 'No aplica'}</div>
                             <div>
                                 <strong>Estado:</strong> 
@@ -579,7 +591,7 @@ export default function VentasShow({ venta }) {
                             ` : ''}
                             <div class="info-row">
                                 <span class="info-label">Fecha de emisión:</span>
-                                <span class="info-value">${formatDate(venta.fecha_venta)}</span>
+                                <span class="info-value">${formatDateTime(venta.created_at)}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Tipo de comprobante:</span>
@@ -811,7 +823,7 @@ export default function VentasShow({ venta }) {
                                     </span>
                                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                         <Calendar className="w-4 h-4 mr-1.5" />
-                                        {formatDate(venta.fecha_venta)}
+                                        {formatDateTime(venta.created_at)}
                                     </div>
                                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                         <PaymentIcon className="w-4 h-4 mr-1.5" />
@@ -1139,19 +1151,11 @@ export default function VentasShow({ venta }) {
                                                 </p>
                                             </div>
                                             
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha</p>
-                                                    <p className="font-medium text-gray-900 dark:text-white">
-                                                        {formatDateShort(venta.fecha_venta)}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Hora</p>
-                                                    <p className="font-medium text-gray-900 dark:text-white">
-                                                        {formatTime(venta.fecha_venta)}
-                                                    </p>
-                                                </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha de Factura</p>
+                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                    {formatDateTime(venta.created_at)}
+                                                </p>
                                             </div>
                                             
                                             <div>

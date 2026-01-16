@@ -544,3 +544,4 @@ export default function Show({ auth, categoria, productos, estadisticas }) {
         </AuthenticatedLayout>
     );
 }
+}
