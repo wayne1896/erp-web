@@ -13,11 +13,11 @@ class PagoVenta extends Model
     protected $fillable = [
         'venta_id',
         'monto',
+        'fecha_pago',
         'metodo_pago',
         'referencia',
-        'observaciones',
-        'fecha_pago',
-        'user_id',
+        'notas',
+        'user_id'
     ];
     
     protected $casts = [
@@ -53,7 +53,16 @@ class PagoVenta extends Model
     {
         return $query->where('metodo_pago', $metodo);
     }
-    
+    public static function getMetodosPago()
+    {
+        return [
+            'EFECTIVO' => 'Efectivo',
+            'TARJETA_DEBITO' => 'Tarjeta Débito',
+            'TARJETA_CREDITO' => 'Tarjeta Crédito',
+            'TRANSFERENCIA' => 'Transferencia',
+            'CHEQUE' => 'Cheque',
+        ];
+    }
     /**
      * Referencia formateada
      */

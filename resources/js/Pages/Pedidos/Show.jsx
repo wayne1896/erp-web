@@ -47,8 +47,27 @@ import {
     CheckSquare,
     XSquare,
     Send,
-    MessageCircle
+    MessageCircle,
+    Plus
 } from 'lucide-react';
+
+const convertirAVenta = (pedidoId) => {
+    if (confirm('¿Está seguro de generar la factura para este pedido?\n\nEsta acción creará una venta/factura y actualizará el inventario. No se podrá deshacer.')) {
+        router.post(route('pedidos.convertir-venta', pedidoId), {}, {
+            onStart: () => {
+                console.log('Generando factura...');
+            },
+            onSuccess: (page) => {
+                console.log('Factura generada exitosamente');
+                alert('¡Factura generada exitosamente! Redirigiendo a la venta...');
+            },
+            onError: (errors) => {
+                console.error('Error al generar factura:', errors);
+                alert('Error al generar factura: ' + (errors.error || errors.message || 'Error desconocido'));
+            }
+        });
+    }
+};
 
 export default function PedidosShow({ pedido, productos, canEdit = true, canDelete = true }) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -101,6 +120,7 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
         
         switch(estado?.toUpperCase()) {
             case 'PROCESADO':
+            case 'APROBADO':
                 return (
                     <span className={`${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300`}>
                         <PackageCheck className="w-4 h-4 mr-2" />
@@ -125,6 +145,13 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                 return (
                     <span className={`${baseClasses} bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300`}>
                         <XCircle className="w-4 h-4 mr-2" />
+                        {estado}
+                    </span>
+                );
+            case 'FACTURADO':
+                return (
+                    <span className={`${baseClasses} bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300`}>
+                        <Receipt className="w-4 h-4 mr-2" />
                         {estado}
                     </span>
                 );
@@ -183,6 +210,23 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
     const getAvailableActions = () => {
         const actions = [];
         
+        // Verificar si el pedido ya tiene venta asociada
+        const tieneVenta = pedido.venta_id || pedido.venta;
+        
+        // Si ya tiene venta, mostrar enlace a la venta
+        if (tieneVenta) {
+            actions.push({
+                label: 'Ver Factura',
+                icon: Receipt,
+                color: 'text-purple-600 dark:text-purple-400',
+                bg: 'bg-purple-50 dark:bg-purple-900/20',
+                href: route('ventas.show', pedido.venta_id || pedido.venta?.id),
+                disabled: false
+            });
+            return actions;
+        }
+        
+        // Si no tiene venta, mostrar acciones según estado
         switch(pedido.estado?.toUpperCase()) {
             case 'PENDIENTE':
                 actions.push({
@@ -190,8 +234,11 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                     icon: PackageCheck,
                     color: 'text-blue-600 dark:text-blue-400',
                     bg: 'bg-blue-50 dark:bg-blue-900/20',
-                    action: () => router.post(route('pedidos.procesar', pedido.id)),
-                    confirm: '¿Está seguro de procesar este pedido?'
+                    action: () => {
+                        if (confirm('¿Está seguro de procesar este pedido?')) {
+                            router.post(route('pedidos.procesar', pedido.id));
+                        }
+                    }
                 });
                 if (canEdit) {
                     actions.push({
@@ -217,13 +264,17 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                 break;
                 
             case 'PROCESADO':
+            case 'APROBADO':
                 actions.push({
                     label: 'Marcar como Entregado',
                     icon: CheckSquare,
                     color: 'text-green-600 dark:text-green-400',
                     bg: 'bg-green-50 dark:bg-green-900/20',
-                    action: () => router.post(route('pedidos.entregar', pedido.id)),
-                    confirm: '¿Marcar como entregado?'
+                    action: () => {
+                        if (confirm('¿Marcar como entregado?')) {
+                            router.post(route('pedidos.entregar', pedido.id));
+                        }
+                    }
                 });
                 actions.push({
                     label: 'Cancelar Pedido',
@@ -240,12 +291,13 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                 break;
                 
             case 'ENTREGADO':
+                // Solo mostrar opción de generar factura si está entregado y no tiene venta
                 actions.push({
                     label: 'Generar Factura',
                     icon: Receipt,
                     color: 'text-purple-600 dark:text-purple-400',
                     bg: 'bg-purple-50 dark:bg-purple-900/20',
-                    action: () => alert('Funcionalidad en desarrollo'),
+                    action: () => convertirAVenta(pedido.id)
                 });
                 break;
         }
@@ -301,8 +353,8 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
 
         pedido.detalles?.forEach(detalle => {
             subtotal += parseFloat(detalle.subtotal) || 0;
-            descuentoTotal += parseFloat(detalle.descuento_monto) || 0;
-            itbisTotal += parseFloat(detalle.itbis_monto) || 0;
+            descuentoTotal += parseFloat(detalle.descuento) || 0;
+            itbisTotal += parseFloat(detalle.itbis) || 0;
             total += parseFloat(detalle.total) || 0;
         });
 
@@ -466,13 +518,13 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                                     <div>
                                         <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
-                                            {pedido.cliente?.nombre_completo || 'Cliente no disponible'}
+                                            {pedido.cliente?.nombre_completo || pedido.cliente?.nombre || 'Cliente no disponible'}
                                         </h3>
                                         <div className="flex items-center space-x-4">
                                             <div className="flex items-center text-sm">
                                                 <CreditCard className="w-4 h-4 text-gray-400 mr-2" />
                                                 <span className="text-gray-600 dark:text-gray-400">
-                                                    {pedido.cliente?.cedula_rnc || 'Sin cédula/RNC'}
+                                                    {pedido.cliente?.cedula_rnc || pedido.cliente?.cedula || 'Sin cédula/RNC'}
                                                 </span>
                                             </div>
                                             <div className="flex items-center text-sm">
@@ -665,16 +717,9 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                                             ) : (
                                                 <button
                                                     key={index}
-                                                    onClick={() => {
-                                                        if (action.confirm) {
-                                                            if (window.confirm(action.confirm)) {
-                                                                action.action();
-                                                            }
-                                                        } else {
-                                                            action.action();
-                                                        }
-                                                    }}
+                                                    onClick={action.action}
                                                     className={`flex items-center w-full px-4 py-3 rounded-lg transition-colors ${action.bg} ${action.color} hover:opacity-90`}
+                                                    disabled={action.disabled}
                                                 >
                                                     <action.icon className="w-5 h-5 mr-3" />
                                                     {action.label}
@@ -745,7 +790,6 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                                                     <th className="py-3 px-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Subtotal</th>
                                                     <th className="py-3 px-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">ITBIS</th>
                                                     <th className="py-3 px-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Total</th>
-                                                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Estado</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -754,60 +798,34 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                                                         <td className="py-3 px-4">
                                                             <div>
                                                                 <p className="font-medium text-gray-900 dark:text-white">
-                                                                    {detalle.producto?.nombre || detalle.producto_nombre}
+                                                                    {detalle.producto?.nombre || 'Producto no disponible'}
                                                                 </p>
                                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                    Código: {detalle.producto?.codigo || detalle.producto_codigo}
+                                                                    Código: {detalle.producto?.codigo || 'N/A'}
                                                                 </p>
                                                             </div>
                                                         </td>
                                                         <td className="py-3 px-4">
-                                                            <div className="flex items-center">
-                                                                <span className="font-medium">{detalle.cantidad_solicitada}</span>
-                                                                {detalle.cantidad_entregada > 0 && (
-                                                                    <span className="ml-2 text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded">
-                                                                        Entregado: {detalle.cantidad_entregada}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                                            <span className="font-medium">{detalle.cantidad || 0}</span>
                                                         </td>
                                                         <td className="py-3 px-4 font-medium">
-                                                            {formatCurrency(detalle.precio_unitario)}
+                                                            {formatCurrency(detalle.precio_unitario || 0)}
                                                         </td>
                                                         <td className="py-3 px-4">
                                                             <div className="text-red-600 dark:text-red-400">
-                                                                {detalle.descuento}%
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {formatCurrency(detalle.descuento_monto)}
+                                                                {formatCurrency(detalle.descuento || 0)}
                                                             </div>
                                                         </td>
                                                         <td className="py-3 px-4 font-medium">
-                                                            {formatCurrency(detalle.subtotal)}
+                                                            {formatCurrency(detalle.subtotal || 0)}
                                                         </td>
                                                         <td className="py-3 px-4">
                                                             <div className="text-amber-600 dark:text-amber-400">
-                                                                {detalle.itbis_porcentaje}%
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {formatCurrency(detalle.itbis_monto)}
+                                                                {formatCurrency(detalle.itbis || 0)}
                                                             </div>
                                                         </td>
                                                         <td className="py-3 px-4 font-bold text-green-600 dark:text-green-400">
-                                                            {formatCurrency(detalle.total)}
-                                                        </td>
-                                                        <td className="py-3 px-4">
-                                                            {detalle.reservado_stock ? (
-                                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                                                    Reservado
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                                                                    <Clock className="w-3 h-3 mr-1" />
-                                                                    Pendiente
-                                                                </span>
-                                                            )}
+                                                            {formatCurrency(detalle.total || 0)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -823,71 +841,6 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                             </div>
                         )}
                     </div>
-                    
-                    {/* Dirección de entrega */}
-                    {pedido.direccion_entrega && (
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div 
-                                className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/30"
-                                onClick={() => toggleSection('direccion')}
-                            >
-                                <div className="flex items-center">
-                                    <MapPin className="w-5 h-5 mr-3 text-blue-600 dark:text-blue-400" />
-                                    <h3 className="font-bold text-gray-900 dark:text-white">
-                                        Dirección de Entrega
-                                    </h3>
-                                </div>
-                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    {expandedSections.direccion ? (
-                                        <ChevronUp className="w-5 h-5 text-gray-500" />
-                                    ) : (
-                                        <ChevronDown className="w-5 h-5 text-gray-500" />
-                                    )}
-                                </button>
-                            </div>
-                            
-                            {expandedSections.direccion && (
-                                <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Contacto</p>
-                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                    {pedido.direccion_entrega.nombre_contacto}
-                                                </p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    {pedido.direccion_entrega.telefono_contacto}
-                                                </p>
-                                            </div>
-                                            
-                                            <div>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Dirección</p>
-                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                    {pedido.direccion_entrega.direccion}
-                                                </p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    {pedido.direccion_entrega.ciudad}, {pedido.direccion_entrega.provincia}
-                                                    {pedido.direccion_entrega.sector && `, ${pedido.direccion_entrega.sector}`}
-                                                    {pedido.direccion_entrega.codigo_postal && ` • C.P. ${pedido.direccion_entrega.codigo_postal}`}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        
-                                        {pedido.direccion_entrega.instrucciones_entrega && (
-                                            <div className="md:col-span-2">
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Instrucciones Especiales</p>
-                                                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                                                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                                                        {pedido.direccion_entrega.instrucciones_entrega}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
                     
                     {/* Historial del pedido */}
                     {pedido.log && pedido.log.length > 0 && (
@@ -958,25 +911,5 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                 </div>
             </div>
         </AuthenticatedLayout>
-    );
-}
-
-// Agregar ícono Plus que falta
-function Plus(props) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M12 5v14M5 12h14" />
-        </svg>
     );
 }

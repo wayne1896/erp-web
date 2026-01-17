@@ -143,6 +143,13 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
                         {estado}
                     </span>
                 );
+            case 'FACTURADO':
+                return (
+                    <span className={`${baseClasses} bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300`}>
+                        <FileText className="w-3 h-3 mr-1" />
+                        {estado}
+                    </span>
+                );
             default:
                 return (
                     <span className={`${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300`}>
@@ -204,6 +211,7 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
                 procesados: 0,
                 entregados: 0,
                 cancelados: 0,
+                facturados: 0,
                 totalPedidos: 0,
                 urgentes: 0,
                 anticipoTotal: 0
@@ -233,6 +241,10 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
             p.estado?.toUpperCase() === 'CANCELADO'
         ).length;
         
+        const facturados = pedidos.data.filter(p => 
+            p.estado?.toUpperCase() === 'FACTURADO'
+        ).length;
+        
         const urgentes = pedidos.data.filter(p => 
             p.prioridad?.toUpperCase() === 'URGENTE'
         ).length;
@@ -251,6 +263,7 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
             procesados: procesados,
             entregados: entregados,
             cancelados: cancelados,
+            facturados: facturados,
             totalPedidos: pedidos.data.length,
             urgentes: urgentes,
             anticipoTotal: anticipoTotal
@@ -420,7 +433,7 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
             <div className="py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                     {/* Estadísticas */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl shadow-lg overflow-hidden">
                             <div className="p-5">
                                 <div className="flex items-center justify-between">
@@ -488,8 +501,26 @@ export default function PedidosIndex({ pedidos, filtros, estados, prioridades, t
                                 </div>
                             </div>
                         </div>
+
+                        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg overflow-hidden">
+                            <div className="p-5">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-indigo-100 text-sm font-medium mb-1">Facturados</p>
+                                        <p className="text-xl font-bold text-white">
+                                            {estadisticas.facturados}
+                                        </p>
+                                    </div>
+                                    <FileText className="w-8 h-8 text-indigo-200" />
+                                </div>
+                                <div className="mt-3 text-xs text-indigo-200">
+                                    <span>{Math.round((estadisticas.facturados / estadisticas.totalPedidos) * 100) || 0}%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    {/* Resto del código permanece igual... */}
                     {/* Filtros */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
                         <div className="flex items-center justify-between mb-4">

@@ -4,14 +4,21 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pedido;
-use App\Models\Cliente;
+use App\Models\DetallePedido;
+use App\Models\Pago;
+use App\Models\DireccionEntrega;
+use App\Models\Venta;
+use App\Models\DetalleVenta;
 use App\Models\Producto;
+use App\Models\Cliente;
 use App\Models\Sucursal;
-use App\Models\DireccionEntrega; 
+use App\Models\Caja;
+use App\Models\LogPedido;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class PedidoController extends Controller
 {
@@ -128,13 +135,7 @@ class PedidoController extends Controller
         
         // Obtener información de la sucursal
         $sucursal = Sucursal::find($sucursalId);
-        \Log::info('Datos para crear pedido:', [
-            'clientes' => $clientes->count(),
-            'productos' => $productos->count(),
-            'sucursal' => $sucursal ? $sucursal->nombre : 'No encontrada',
-            'usuario' => $user->name,
-            'sucursal_id' => $sucursalId
-        ]);
+        
         return Inertia::render('Pedidos/Create', [
             'clientes' => $clientes,
             'productos' => $productos,
@@ -602,6 +603,158 @@ class PedidoController extends Controller
     }
 
     /**
+     * Convertir pedido a venta
+     */
+    public function convertirAVenta(Pedido $pedido)
+    {
+        // Validar que el pedido no esté ya convertido
+        if ($pedido->venta_id) {
+            return back()->withErrors(['error' => 'Este pedido ya fue convertido a venta. No se puede facturar nuevamente.']);
+        }
+        
+        // Validar que el pedido esté en un estado que permita conversión
+        $estadosPermitidos = ['APROBADO', 'ENTREGADO'];
+        
+        if (!in_array($pedido->estado, $estadosPermitidos)) {
+            return back()->withErrors([
+                'error' => 'Solo se pueden convertir a venta pedidos aprobados o entregados. Estado actual: ' . $pedido->estado
+            ]);
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            // Obtener la caja activa del usuario
+            $cajaActiva = Caja::where('user_id', auth()->id())
+                ->where('estado', Caja::ESTADO_ABIERTA)
+                ->first();
+            
+            if (!$cajaActiva) {
+                return back()->withErrors([
+                    'error' => 'No tienes una caja abierta. Debes abrir una caja primero para procesar ventas.'
+                ]);
+            }
+            
+            $cajaId = $cajaActiva->id;
+            
+            // Generar número de factura
+            $numeroFactura = $this->generarNumeroFactura();
+            
+            // Generar NCF
+            $ncf = $this->generarNcf('FACTURA');
+            
+            // Calcular totales si no existen en el pedido
+            $subtotal = $pedido->subtotal ?? 0;
+            $descuento = $pedido->descuento ?? 0;
+            $itbis = $pedido->itbis ?? 0;
+            $total = $pedido->total ?? 0;
+            
+            // Si los totales son 0, calcularlos desde los detalles
+            if ($total == 0 && $pedido->detalles->count() > 0) {
+                $subtotal = $pedido->detalles->sum('subtotal');
+                $descuento = $pedido->detalles->sum('descuento');
+                $itbis = $pedido->detalles->sum('itbis');
+                $total = $pedido->detalles->sum('total');
+            }
+            
+            // Ajustar condición de pago si es MIXTO (convertir a CONTADO)
+            $condicionPago = $pedido->condicion_pago;
+            if ($condicionPago === 'MIXTO') {
+                // Convertir MIXTO a CONTADO para la venta
+                $condicionPago = 'CONTADO';
+            }
+            
+            // Crear la venta
+            $venta = Venta::create([
+                'numero_factura' => $numeroFactura,
+                'ncf' => $ncf,
+                'tipo_comprobante' => Venta::TIPO_FACTURA,
+                'cliente_id' => $pedido->cliente_id,
+                'sucursal_id' => $pedido->sucursal_id,
+                'user_id' => auth()->id(),
+                'caja_id' => $cajaId,
+                'fecha_venta' => now(),
+                'estado' => Venta::ESTADO_PROCESADA,
+                'condicion_pago' => $condicionPago,
+                'tipo_pago' => $pedido->tipo_pago ?? Venta::TIPO_PAGO_EFECTIVO,
+                'dias_credito' => $pedido->dias_credito ?? 0,
+                'fecha_vencimiento' => $pedido->fecha_vencimiento ?? now()->addDays($pedido->dias_credito ?? 0),
+                'subtotal' => $subtotal,
+                'descuento' => $descuento,
+                'itbis' => $itbis,
+                'total' => $total,
+                'notas' => 'Factura generada desde pedido #' . $pedido->numero_pedido,
+            ]);
+            
+            // Copiar los detalles del pedido a la venta
+            foreach ($pedido->detalles as $detallePedido) {
+                // Calcular porcentaje de ITBIS si no existe
+                $itbisPorcentaje = 18.00; // Porcentaje por defecto en RD
+                if ($detallePedido->itbis > 0 && $detallePedido->subtotal > 0) {
+                    $itbisPorcentaje = ($detallePedido->itbis / $detallePedido->subtotal) * 100;
+                }
+                
+                DetalleVenta::create([
+                    'venta_id' => $venta->id,
+                    'producto_id' => $detallePedido->producto_id,
+                    'cantidad' => $detallePedido->cantidad ?? 1,
+                    'precio_unitario' => $detallePedido->precio_unitario ?? 0,
+                    'descuento' => $detallePedido->descuento ?? 0,
+                    'subtotal' => $detallePedido->subtotal ?? 0,
+                    'itbis_porcentaje' => $itbisPorcentaje,
+                    'itbis_monto' => $detallePedido->itbis ?? 0,
+                    'total' => $detallePedido->total ?? 0,
+                ]);
+            }
+            
+            // Actualizar el pedido con la referencia a la venta y cambiar estado
+            $pedido->update([
+                'venta_id' => $venta->id,
+                'estado' => 'FACTURADO',
+                'fecha_facturado' => now(),
+            ]);
+            
+            // Si es pago de contado (o MIXTO convertido a CONTADO), registrar el pago y actualizar caja
+            if ($condicionPago === 'CONTADO') {
+                // Crear registro de pago
+                Pago::create([
+                    'venta_id' => $venta->id,
+                    'monto' => $venta->total,
+                    'fecha_pago' => now(),
+                    'metodo_pago' => $pedido->tipo_pago ?? 'EFECTIVO',
+                    'referencia' => 'PAGO-' . $venta->numero_factura,
+                    'observaciones' => 'Pago completo por pedido #' . $pedido->numero_pedido,
+                    'user_id' => auth()->id(),
+                ]);
+                
+                // Actualizar caja - usar el mismo campo que VentaController (efectivo)
+                $cajaActiva->increment('efectivo', $venta->total);
+                \Log::info('Caja actualizada desde pedido', [
+                    'caja_id' => $cajaActiva->id,
+                    'monto_agregado' => $venta->total,
+                    'campo_actualizado' => 'efectivo'
+                ]);
+            }
+            
+            DB::commit();
+            
+            // Redireccionar con mensaje de éxito
+            return redirect()->route('ventas.show', $venta->id)
+                ->with('success', 'Pedido convertido a venta exitosamente. Factura #' . $venta->numero_factura);
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Error al convertir pedido a venta: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
+            return back()->withErrors([
+                'error' => 'No se pudo generar la venta: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Pedido $pedido)
@@ -787,6 +940,89 @@ class PedidoController extends Controller
     }
 
     /**
+     * Generar número de factura único
+     */
+    private function generarNumeroFactura()
+    {
+        $year = date('y');
+        $month = date('m');
+        $day = date('d');
+        
+        $ultimaVenta = Venta::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->latest()
+            ->first();
+            
+        $secuencia = $ultimaVenta && $ultimaVenta->numero_factura
+            ? intval(substr($ultimaVenta->numero_factura, -4)) + 1
+            : 1;
+            
+        return sprintf('FAC%s%s%s%04d', $year, $month, $day, $secuencia);
+    }
+
+    /** 
+     * Generar NCF
+     */
+    private function generarNcf($tipoComprobante = 'FACTURA')
+    {
+        // Mapeo de tipos de comprobante a códigos NCF
+        $tiposNcf = [
+            'FACTURA' => 'B02',           // Factura de Crédito Fiscal
+            'COMPROBANTE_FISCAL' => 'B01', // Comprobante Fiscal
+            'NOTA_CREDITO' => 'B04',      // Nota de Crédito
+            'NOTA_DEBITO' => 'B03',       // Nota de Débito
+        ];
+        
+        $tipoNcf = $tiposNcf[$tipoComprobante] ?? 'B02';
+        $serie = 'E'; // Serie del NCF (E para empresa)
+        
+        // Obtener la última secuencia
+        $ultimoNcf = Venta::where('ncf', 'like', $tipoNcf . $serie . '%')
+            ->orderBy('ncf', 'desc')
+            ->first();
+        
+        if ($ultimoNcf && $ultimoNcf->ncf) {
+            // Extraer los 8 dígitos de secuencia (posiciones 4 a 11)
+            $ultimaSecuencia = intval(substr($ultimoNcf->ncf, 4, 8));
+            $nuevaSecuencia = str_pad($ultimaSecuencia + 1, 8, '0', STR_PAD_LEFT);
+        } else {
+            $nuevaSecuencia = '00000001';
+        }
+        
+        // Crear NCF base
+        $ncfBase = $tipoNcf . $serie . $nuevaSecuencia;
+        
+        // Para desarrollo, usar dígito verificador simple
+        // En producción, implementar algoritmo oficial de DGII
+        $digitoVerificador = '1'; // Dígito por defecto para desarrollo
+        
+        return $ncfBase . $digitoVerificador;
+    }
+
+    private function calcularDigitoVerificador($base)
+    {
+        // Algoritmo simple para calcular dígito verificador del NCF
+        // Nota: Este es un ejemplo básico. Para producción, usar el algoritmo oficial de DGII
+        $sum = 0;
+        $pesos = [7, 9, 8, 6, 5, 4, 3, 2];
+        
+        // Tomar los últimos 8 dígitos (la secuencia)
+        $secuencia = substr($base, -8);
+        
+        for ($i = 0; $i < 8; $i++) {
+            $sum += intval($secuencia[$i]) * $pesos[$i];
+        }
+        
+        $modulo = $sum % 11;
+        $digito = 11 - $modulo;
+        
+        if ($digito == 11) return 0;
+        if ($digito == 10) return 1;
+        
+        return $digito;
+    }
+
+    /**
      * Métodos auxiliares para obtener arrays de opciones
      */
     private function getEstados()
@@ -795,7 +1031,8 @@ class PedidoController extends Controller
             ['PENDIENTE', 'Pendiente'],
             ['PROCESADO', 'Procesado'], 
             ['ENTREGADO', 'Entregado'],
-            ['CANCELADO', 'Cancelado']
+            ['CANCELADO', 'Cancelado'],
+            ['FACTURADO', 'Facturado']
         ];
     }
 

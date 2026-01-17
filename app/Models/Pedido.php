@@ -11,40 +11,65 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Pedido extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'numero_pedido',
-        'cliente_id',
-        'sucursal_id',
-        'user_id',
-        'fecha_pedido',
-        'fecha_entrega',
-        'estado',
-        'total',
-        'notas',
-        'prioridad',
-        'tipo_pedido',
-        'condicion_pago',
-        'anticipo',
-        'saldo_pendiente',
-        'vendedor_id',
-        'repartidor_id',
-        'codigo_seguimiento',
-        'motivo_cancelacion',
-        'cancelado_por'
-    ];
-
-    protected $casts = [
-        'fecha_pedido' => 'date',
-        'fecha_entrega' => 'date',
-        'fecha_procesado' => 'datetime',
-        'fecha_entregado' => 'datetime',
-        'fecha_cancelado' => 'datetime',
-        'total' => 'decimal:2',
-        'anticipo' => 'decimal:2',
-        'saldo_pendiente' => 'decimal:2',
-    ];
+   // Constantes de estado
+   const ESTADO_PENDIENTE = 'PENDIENTE';
+   const ESTADO_APROBADO = 'APROBADO'; // ← Asegúrate de que esta constante exista
+   const ESTADO_EN_PROCESO = 'EN_PROCESO';
+   const ESTADO_ENTREGADO = 'ENTREGADO';
+   const ESTADO_FACTURADO = 'FACTURADO';
+   const ESTADO_CANCELADO = 'CANCELADO';
+   
+   // Constantes de condición de pago
+   const CONDICION_CONTADO = 'CONTADO';
+   const CONDICION_CREDITO = 'CREDITO';
+   
+   // Constantes de tipo de pedido
+   const TIPO_DOMICILIO = 'DOMICILIO';
+   const TIPO_SUCURSAL = 'SUCURSAL';
+   
+   // Constantes de prioridad
+   const PRIORIDAD_BAJA = 'BAJA';
+   const PRIORIDAD_MEDIA = 'MEDIA';
+   const PRIORIDAD_ALTA = 'ALTA';
+   
+   protected $fillable = [
+    'numero_pedido',
+    'cliente_id',
+    'sucursal_id',
+    'user_id',
+    'vendedor_id',
+    'repartidor_id',
+    'fecha_pedido',
+    'fecha_entrega',
+    'estado',
+    'total',
+    'notas',
+    'prioridad',
+    'tipo_pedido',
+    'condicion_pago',
+    'tipo_pago',
+    'anticipo',
+    'saldo_pendiente',
+    'codigo_seguimiento',
+    'fecha_procesado',
+    'fecha_entregado',
+    'fecha_cancelado',
+    'motivo_cancelacion',
+    'cancelado_por',
+    'venta_id', // ← Agregar esta línea
+    'fecha_facturado', // ← Agregar esta línea si agregaste la columna
+];
+   
+   protected $casts = [
+       'fecha_pedido' => 'date',
+       'fecha_entrega' => 'date',
+       'fecha_procesado' => 'datetime',
+       'fecha_entregado' => 'datetime',
+       'fecha_cancelado' => 'datetime',
+       'total' => 'decimal:2',
+       'anticipo' => 'decimal:2',
+       'saldo_pendiente' => 'decimal:2',
+   ];
 
     public function cliente(): BelongsTo
     {
@@ -94,7 +119,7 @@ class Pedido extends Model
     public function ventas(): BelongsToMany
     {
         return $this->belongsToMany(Venta::class, 'pedido_venta')
-            ->withPivot('tipo_conversion', 'porcentaje_convertido')
+            ->withPivot(['tipo_conversion', 'porcentaje_convertido'])
             ->withTimestamps();
     }
 

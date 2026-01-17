@@ -309,7 +309,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ], 500);
         }
     });
-
+    Route::prefix('mobile')->group(function () {
+        Route::post('sync-inicial', [SyncController::class, 'syncInicial'])->middleware(['auth:sanctum', 'mobile.api']);
+        Route::post('sync-incremental', [SyncController::class, 'syncIncremental'])->middleware(['auth:sanctum', 'mobile.api']);
+        Route::get('sync-status', [SyncController::class, 'status'])->middleware(['auth:sanctum', 'mobile.api']);
+    });
+    
+    // Ruta para login
+    Route::post('login', [AuthController::class, 'login']);
     Route::get('/corregir-inventario-definitivo', function() {
         $productoId = 1;
         

@@ -18,6 +18,7 @@ class Venta extends Model
     // Constantes de condición de pago
     const CONDICION_CONTADO = 'CONTADO';
     const CONDICION_CREDITO = 'CREDITO';
+    const CONDICION_MIXTO = 'MIXTO'; // ← Agregar esta línea
     
     // Constantes de tipo de comprobante
     const TIPO_FACTURA = 'FACTURA';
