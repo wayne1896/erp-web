@@ -1,21 +1,36 @@
 <?php
-// routes/api.php
 
-// ... otras rutas ...
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProductoController;
+use App\Http\Controllers\Api\ClienteController; // ← Agregar
 
-Route::prefix('mobile')->middleware(['auth:sanctum', 'mobile.api'])->group(function () {
-    
-    // Rutas de productos para móvil
-    Route::prefix('productos')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'index']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'show']);
-        Route::get('/buscar/rapido', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'buscarRapido']);
-        Route::post('/escanear', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'escanearCodigoBarras']);
-        Route::get('/categorias', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'categorias']);
-        Route::post('/actualizar-stock', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'actualizarStock']);
-        Route::get('/reporte/bajo-stock', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'reporteBajoStock']);
-        Route::post('/sincronizar', [\App\Http\Controllers\Api\Mobile\ProductoController::class, 'sincronizar']);
-    });
-    
-    // ... otras rutas móviles ...
+// ==================== RUTAS API PARA ANDROID ====================
+
+// Grupo de rutas de productos
+Route::prefix('productos')->group(function () {
+    Route::get('/', [ProductoController::class, 'index']);
+    Route::get('/{id}', [ProductoController::class, 'show']);
+    Route::get('/categorias/list', [ProductoController::class, 'categorias']);
+});
+
+// Grupo de rutas de clientes - CORREGIDO
+Route::prefix('clientes')->group(function () {
+    Route::get('/', [ClienteController::class, 'index']);
+    Route::get('/{id}', [ClienteController::class, 'show']);
+    Route::post('/', [ClienteController::class, 'store']);
+    Route::get('/buscar/buscar', [ClienteController::class, 'buscar']);
+    Route::get('/estadisticas/estadisticas', [ClienteController::class, 'estadisticas']);
+});
+
+// Rutas de prueba
+Route::get('/test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API funcionando',
+        'timestamp' => now()->toDateTimeString()
+    ]);
+});
+
+Route::get('/ping', function () {
+    return response()->json(['status' => 'success', 'message' => 'pong']);
 });
