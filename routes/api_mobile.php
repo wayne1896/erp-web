@@ -2,12 +2,14 @@
 // routes/api_mobile.php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Api\Mobile\AuthController;
 use App\Http\Controllers\Api\Mobile\SyncController;
 use App\Http\Controllers\Api\Mobile\ProductoController;
 use App\Http\Controllers\Api\Mobile\ClienteController;
 use App\Http\Controllers\Api\Mobile\VentaController;
-use App\Http\Controllers\Api\Mobile\PedidoController;
+use App\Http\Controllers\Api\PedidoController;
+use App\Http\Controllers\Api\Mobile\SincronizacionController;
 
 /*
 |--------------------------------------------------------------------------

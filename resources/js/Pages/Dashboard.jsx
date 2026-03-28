@@ -6,7 +6,7 @@ import {
     ShoppingCart, BarChart3, AlertCircle, Clock, CheckCircle,
     Calendar, CreditCard, Truck, RefreshCw, MoreVertical,
     ArrowRight, Eye, Plus, Download, Filter, Activity,
-    Target, Zap, ChevronRight, Globe, Shield, Database
+    Target, Zap, ChevronRight, Globe, Shield, Database, FileText, Monitor
 } from 'lucide-react';
 
 export default function Dashboard({ 
@@ -450,48 +450,99 @@ export default function Dashboard({
                             </div>
 
                             {/* Acciones rápidas */}
-                            <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">Acciones Rápidas</h3>
+                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Acciones Rápidas</h3>
                                 <div className="space-y-3">
                                     <Link
                                         href="/ventas/crear"
-                                        className="flex items-center justify-between p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 group"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
                                     >
                                         <div className="flex items-center">
                                             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
                                                 <Plus className="w-4 h-4 text-white" />
                                             </div>
-                                            <span className="font-medium text-white">Nueva Venta</span>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Nueva Venta</span>
                                         </div>
-                                        <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                                     </Link>
                                     
                                     <Link
                                         href="/caja/abrir"
-                                        className="flex items-center justify-between p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 group"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
                                     >
                                         <div className="flex items-center">
                                             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center mr-3">
                                                 <DollarSign className="w-4 h-4 text-white" />
                                             </div>
-                                            <span className="font-medium text-white">
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">
                                                 {metrics.caja?.abierta ? 'Ver Caja' : 'Abrir Caja'}
                                             </span>
                                         </div>
-                                        <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/auditoria"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                                <FileText className="w-4 h-4 text-white" />
+                                            </div>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Auditoría de Caja</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/auditoria-sistema"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                                                <Monitor className="w-4 h-4 text-white" />
+                                            </div>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Auditoría del Sistema</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                                     </Link>
                                     
                                     <Link
                                         href="/productos"
-                                        className="flex items-center justify-between p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 group"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
                                     >
                                         <div className="flex items-center">
                                             <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
                                                 <Package className="w-4 h-4 text-white" />
                                             </div>
-                                            <span className="font-medium text-white">Gestión Inventario</span>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Gestión Inventario</span>
                                         </div>
-                                        <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                                    </Link>
+                                    <Link
+                                        href="/users"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                                <Users className="w-4 h-4 text-white" />
+                                            </div>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Gestión de Usuarios</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/roles"
+                                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all duration-300 group border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
+                                                <Shield className="w-4 h-4 text-white" />
+                                            </div>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Roles y Permisos</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                                     </Link>
                                 </div>
                             </div>
@@ -562,13 +613,12 @@ export default function Dashboard({
                                             <p className="text-gray-500 dark:text-gray-400 mb-2">No hay ventas recientes</p>
                                             <Link
                                                 href="/ventas/crear"
-                                                className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                                             >
-                                                <Plus className="w-4 h-4 mr-2" />
-                                                Realizar primera venta
+                                                Crear Venta
                                             </Link>
                                         </div>
-                                    )}
+                                    )}        
                                 </div>
                             </div>
                         </div>
@@ -595,7 +645,7 @@ export default function Dashboard({
                                 </div>
                             </div>
                             
-                            <div className="p-6">
+                            <div className="p-6">Roles y Permisos
                                 {topProducts.length > 0 ? (
                                     <div className="space-y-4">
                                         {topProducts.map((product, index) => (

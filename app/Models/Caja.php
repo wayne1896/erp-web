@@ -73,6 +73,11 @@ class Caja extends Model
         return $this->hasMany(MovimientoCaja::class);
     }
 
+    public function auditorias(): HasMany
+    {
+        return $this->hasMany(AuditoriaCaja::class);
+    }
+
     /**
      * Scopes
      */
@@ -268,6 +273,16 @@ class Caja extends Model
                 'monto' => abs($this->diferencia),
                 'descripcion' => $this->diferencia > 0 ? 'Sobrante en cierre' : 'Faltante en cierre',
                 'user_id' => auth()->id(),
+            ]);
+        }
+
+        // Realizar auditoría automática al cerrar
+        try {
+            AuditoriaCaja::auditarCaja($this, AuditoriaCaja::TIPO_AUTOMATICA);
+        } catch (\Exception $e) {
+            // Log error pero no interrumpir el cierre
+            \Log::error("Error en auditoría automática al cerrar caja #{$this->id}", [
+                'error' => $e->getMessage()
             ]);
         }
     }

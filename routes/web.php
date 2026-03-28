@@ -9,6 +9,13 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\CajaController;
 use App\Http\Controllers\Web\VentaController;
 use App\Http\Controllers\Web\PedidoController;
+use App\Http\Controllers\Web\AuditoriaController;
+use App\Http\Controllers\Web\VentaPDFController; // CORREGIDO: PDFVentaController → VentaPDFController
+use App\Http\Controllers\Web\AuditoriaSistemaController;
+use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Web\RoleController;
+use App\Http\Controllers\Web\PermissionController;
+use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -142,7 +149,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Acciones específicas
         Route::post('/{venta}/anular', [VentaController::class, 'anular'])->name('ventas.anular');
         Route::get('/{venta}/imprimir', [VentaController::class, 'imprimir'])->name('ventas.imprimir');
-        Route::get('/{venta}/pdf', [VentaController::class, 'generarPDF'])->name('ventas.pdf');
+        
+        // Rutas PDF - CORREGIDAS: PDFVentaController → VentaPDFController
+        Route::get('/{venta}/pdf', [VentaPDFController::class, 'generarPDF'])->name('ventas.pdf');
+        Route::get('/{venta}/pdf/descargar', [VentaPDFController::class, 'generarPDF'])->name('ventas.pdf.descargar');
+        Route::get('/{venta}/pdf/vista', [VentaPDFController::class, 'vistaPrevia'])->name('ventas.pdf.vista');
+        Route::get('/{venta}/pdf/imprimir', [VentaPDFController::class, 'imprimir'])->name('ventas.pdf.imprimir');
         
         // API para ventas
         Route::get('/api/buscar-productos', [VentaController::class, 'buscarProductos'])->name('ventas.buscar-productos');
@@ -163,7 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [PedidoController::class, 'index'])->name('pedidos.index');
         Route::get('/crear', [PedidoController::class, 'create'])->name('pedidos.create');
         Route::post('/', [PedidoController::class, 'store'])->name('pedidos.store');
-        Route::get('/{pedido}', [PedidoController::class, 'show'])->name('pedidos.show'); // <-- AGREGADA
+        Route::get('/{pedido}', [PedidoController::class, 'show'])->name('pedidos.show');
         Route::get('/{pedido}/editar', [PedidoController::class, 'edit'])->name('pedidos.edit');
         Route::put('/{pedido}', [PedidoController::class, 'update'])->name('pedidos.update');
         Route::delete('/{pedido}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
@@ -176,6 +188,48 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // Para conversión a venta
         Route::post('/{pedido}/convertir-venta', [PedidoController::class, 'convertirAVenta'])->name('pedidos.convertir-venta');
+    });
+
+    // ==================== AUDITORÍA ====================
+    Route::prefix('auditoria')->group(function () {
+        Route::get('/', [AuditoriaController::class, 'index'])->name('auditoria.index');
+        Route::get('/crear', [AuditoriaController::class, 'create'])->name('auditoria.create');
+        Route::post('/', [AuditoriaController::class, 'store'])->name('auditoria.store');
+        Route::get('/{auditoria}', [AuditoriaController::class, 'show'])->name('auditoria.show');
+        Route::get('/{auditoria}/editar', [AuditoriaController::class, 'edit'])->name('auditoria.edit');
+        Route::put('/{auditoria}', [AuditoriaController::class, 'update'])->name('auditoria.update');
+        Route::delete('/{auditoria}', [AuditoriaController::class, 'destroy'])->name('auditoria.destroy');
+        
+        // Acciones específicas
+        Route::post('/{auditoria}/aprobar', [AuditoriaController::class, 'aprobar'])->name('auditoria.aprobar');
+        Route::post('/{auditoria}/rechazar', [AuditoriaController::class, 'rechazar'])->name('auditoria.rechazar');
+        Route::post('/{auditoria}/exportar', [AuditoriaController::class, 'exportar'])->name('auditoria.exportar');
+        
+        // API Routes
+        Route::get('/api/buscar', [AuditoriaController::class, 'buscar'])->name('auditoria.buscar');
+        Route::get('/api/estadisticas', [AuditoriaController::class, 'estadisticas'])->name('auditoria.estadisticas');
+        Route::post('/api/ejecutar', [AuditoriaController::class, 'ejecutar'])->name('auditoria.ejecutar');
+    });
+
+    // ==================== AUDITORÍA DE SISTEMA ====================
+    Route::prefix('auditoria-sistema')->group(function () {
+        Route::get('/', [AuditoriaSistemaController::class, 'index'])->name('auditoria-sistema.index');
+        Route::get('/crear', [AuditoriaSistemaController::class, 'create'])->name('auditoria-sistema.create');
+        Route::post('/', [AuditoriaSistemaController::class, 'store'])->name('auditoria-sistema.store');
+        Route::get('/{auditoriaSistema}', [AuditoriaSistemaController::class, 'show'])->name('auditoria-sistema.show');
+        Route::get('/{auditoriaSistema}/editar', [AuditoriaSistemaController::class, 'edit'])->name('auditoria-sistema.edit');
+        Route::put('/{auditoriaSistema}', [AuditoriaSistemaController::class, 'update'])->name('auditoria-sistema.update');
+        Route::delete('/{auditoriaSistema}', [AuditoriaSistemaController::class, 'destroy'])->name('auditoria-sistema.destroy');
+        
+        // Acciones específicas
+        Route::post('/limpiar', [AuditoriaSistemaController::class, 'limpiar'])->name('auditoria-sistema.limpiar');
+        Route::get('/exportar', [AuditoriaSistemaController::class, 'exportar'])->name('auditoria-sistema.exportar');
+        Route::get('/dashboard', [AuditoriaSistemaController::class, 'dashboard'])->name('auditoria-sistema.dashboard');
+        
+        // API Routes
+        Route::get('/api/estadisticas', [AuditoriaSistemaController::class, 'estadisticas'])->name('auditoria-sistema.estadisticas');
+        Route::get('/api/actividades-recientes', [AuditoriaSistemaController::class, 'actividadesRecientes'])->name('auditoria-sistema.actividades-recientes');
+        Route::get('/api/buscar', [AuditoriaSistemaController::class, 'buscar'])->name('auditoria-sistema.buscar');
     });
 
     // ==================== REPORTES GENERALES ====================
@@ -309,14 +363,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ], 500);
         }
     });
-    Route::prefix('mobile')->group(function () {
-        Route::post('sync-inicial', [SyncController::class, 'syncInicial'])->middleware(['auth:sanctum', 'mobile.api']);
-        Route::post('sync-incremental', [SyncController::class, 'syncIncremental'])->middleware(['auth:sanctum', 'mobile.api']);
-        Route::get('sync-status', [SyncController::class, 'status'])->middleware(['auth:sanctum', 'mobile.api']);
-    });
     
     // Ruta para login
     Route::post('login', [AuthController::class, 'login']);
+    
     Route::get('/corregir-inventario-definitivo', function() {
         $productoId = 1;
         
@@ -395,6 +445,61 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     });
 });
+
+// ==================== RUTAS DE GESTIÓN DE USUARIOS ====================
+Route::resource('users', UserController::class)
+    ->middleware(['auth', 'verified'])
+    ->names([
+        'index' => 'users.index',
+        'create' => 'users.create',
+        'store' => 'users.store',
+        'show' => 'users.show',
+        'edit' => 'users.edit',
+        'update' => 'users.update',
+        'destroy' => 'users.destroy'
+    ]);
+
+Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])
+    ->middleware(['auth', 'verified'])
+    ->name('users.toggle-status');
+
+// ==================== RUTAS DE GESTIÓN DE ROLES ====================
+Route::resource('roles', RoleController::class)
+    ->middleware(['auth', 'verified'])
+    ->names([
+        'index' => 'roles.index',
+        'create' => 'roles.create',
+        'store' => 'roles.store',
+        'show' => 'roles.show',
+        'edit' => 'roles.edit',
+        'update' => 'roles.update',
+        'destroy' => 'roles.destroy'
+    ]);
+
+Route::get('roles/statistics', [RoleController::class, 'statistics'])
+    ->middleware(['auth', 'verified'])
+    ->name('roles.statistics');
+
+// ==================== RUTAS DE GESTIÓN DE PERMISOS ====================
+Route::resource('permissions', PermissionController::class)
+    ->middleware(['auth', 'verified'])
+    ->names([
+        'index' => 'permissions.index',
+        'create' => 'permissions.create',
+        'store' => 'permissions.store',
+        'show' => 'permissions.show',
+        'edit' => 'permissions.edit',
+        'update' => 'permissions.update',
+        'destroy' => 'permissions.destroy'
+    ]);
+
+Route::get('permissions/statistics', [PermissionController::class, 'statistics'])
+    ->middleware(['auth', 'verified'])
+    ->name('permissions.statistics');
+
+Route::post('permissions/sync-roles', [PermissionController::class, 'syncWithRoles'])
+    ->middleware(['auth', 'verified'])
+    ->name('permissions.sync-roles');
 
 // ==================== RUTAS PÚBLICAS ====================
 Route::get('/status', function () {

@@ -352,16 +352,88 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
         let total = 0;
 
         pedido.detalles?.forEach(detalle => {
-            subtotal += parseFloat(detalle.subtotal) || 0;
-            descuentoTotal += parseFloat(detalle.descuento) || 0;
-            itbisTotal += parseFloat(detalle.itbis) || 0;
-            total += parseFloat(detalle.total) || 0;
+            // Recalcular valores para asegurar consistencia
+            const cantidad = parseFloat(detalle.cantidad_solicitada) || 0;
+            const precioUnitario = parseFloat(detalle.precio_unitario) || 0;
+            const descuentoPorcentaje = parseFloat(detalle.descuento) || 0;
+            const descuentoMonto = parseFloat(detalle.descuento_monto) || 0;
+            
+            // Calcular subtotal basado en cantidad y precio
+            let subtotalDetalle = cantidad * precioUnitario;
+            
+            // Si no hay cantidad pero hay subtotal, usar el subtotal existente
+            if (cantidad === 0 && parseFloat(detalle.subtotal) > 0) {
+                subtotalDetalle = parseFloat(detalle.subtotal) || 0;
+            }
+            
+            // Usar el descuento_monto si está disponible, sino calcularlo
+            let descuentoDetalle = descuentoMonto;
+            if (descuentoPorcentaje > 0 && !descuentoMonto) {
+                descuentoDetalle = subtotalDetalle * (descuentoPorcentaje / 100);
+            }
+            
+            // Calcular subtotal con descuento
+            const subtotalConDescuento = subtotalDetalle - descuentoDetalle;
+            
+            // Calcular ITBIS (18%)
+            const itbisDetalle = subtotalConDescuento * 0.18;
+            
+            // Calcular total
+            const totalDetalle = subtotalConDescuento + itbisDetalle;
+            
+            subtotal += subtotalDetalle;
+            descuentoTotal += descuentoDetalle;
+            itbisTotal += itbisDetalle;
+            total += totalDetalle;
         });
 
-        return { subtotal, descuentoTotal, itbisTotal, total };
+        return { 
+            subtotal, 
+            descuentoTotal, 
+            itbisTotal, 
+            total 
+        };
     };
 
     const totales = calcularTotales();
+
+    // Función para calcular valores de un detalle individual
+    const calcularValoresDetalle = (detalle) => {
+        const cantidad = parseFloat(detalle.cantidad_solicitada) || 0;
+        const precioUnitario = parseFloat(detalle.precio_unitario) || 0;
+        const descuentoPorcentaje = parseFloat(detalle.descuento) || 0;
+        const descuentoMonto = parseFloat(detalle.descuento_monto) || 0;
+        
+        // Calcular subtotal basado en cantidad y precio
+        let subtotalDetalle = cantidad * precioUnitario;
+        
+        // Si no hay cantidad pero hay subtotal, usar el subtotal existente
+        if (cantidad === 0 && parseFloat(detalle.subtotal) > 0) {
+            subtotalDetalle = parseFloat(detalle.subtotal) || 0;
+        }
+        
+        // Usar el descuento_monto si está disponible, sino calcularlo
+        let descuentoDetalle = descuentoMonto;
+        if (descuentoPorcentaje > 0 && !descuentoMonto) {
+            descuentoDetalle = subtotalDetalle * (descuentoPorcentaje / 100);
+        }
+        
+        // Calcular subtotal con descuento
+        const subtotalConDescuento = subtotalDetalle - descuentoDetalle;
+        
+        // Calcular ITBIS (18%)
+        const itbisDetalle = subtotalConDescuento * 0.18;
+        
+        // Calcular total
+        const totalDetalle = subtotalConDescuento + itbisDetalle;
+        
+        return {
+            subtotal: subtotalDetalle,
+            descuento: descuentoDetalle,
+            itbis: itbisDetalle,
+            total: totalDetalle
+        };
+    };
 
     // Toggle secciones
     const toggleSection = (section) => {
@@ -793,42 +865,45 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                                {pedido.detalles.map((detalle, index) => (
-                                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-900/30">
-                                                        <td className="py-3 px-4">
-                                                            <div>
-                                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                                    {detalle.producto?.nombre || 'Producto no disponible'}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                    Código: {detalle.producto?.codigo || 'N/A'}
-                                                                </p>
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-3 px-4">
-                                                            <span className="font-medium">{detalle.cantidad || 0}</span>
-                                                        </td>
-                                                        <td className="py-3 px-4 font-medium">
-                                                            {formatCurrency(detalle.precio_unitario || 0)}
-                                                        </td>
-                                                        <td className="py-3 px-4">
-                                                            <div className="text-red-600 dark:text-red-400">
-                                                                {formatCurrency(detalle.descuento || 0)}
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-3 px-4 font-medium">
-                                                            {formatCurrency(detalle.subtotal || 0)}
-                                                        </td>
-                                                        <td className="py-3 px-4">
-                                                            <div className="text-amber-600 dark:text-amber-400">
-                                                                {formatCurrency(detalle.itbis || 0)}
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-3 px-4 font-bold text-green-600 dark:text-green-400">
-                                                            {formatCurrency(detalle.total || 0)}
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {pedido.detalles.map((detalle, index) => {
+                                                    const valores = calcularValoresDetalle(detalle);
+                                                    return (
+                                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-900/30">
+                                                            <td className="py-3 px-4">
+                                                                <div>
+                                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                                        {detalle.producto?.nombre || 'Producto no disponible'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                        Código: {detalle.producto?.codigo || 'N/A'}
+                                                                    </p>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 px-4">
+                                                                <span className="font-medium">{detalle.cantidad_solicitada || 0}</span>
+                                                            </td>
+                                                            <td className="py-3 px-4 font-medium">
+                                                                {formatCurrency(detalle.precio_unitario || 0)}
+                                                            </td>
+                                                            <td className="py-3 px-4">
+                                                                <div className="text-red-600 dark:text-red-400">
+                                                                    {formatCurrency(valores.descuento)}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 px-4 font-medium">
+                                                                {formatCurrency(valores.subtotal)}
+                                                            </td>
+                                                            <td className="py-3 px-4">
+                                                                <div className="text-amber-600 dark:text-amber-400">
+                                                                    {formatCurrency(valores.itbis)}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 px-4 font-bold text-green-600 dark:text-green-400">
+                                                                {formatCurrency(valores.total)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>

@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Permisos y roles del sistema
+        $this->call(PermissionsAndRolesSeeder::class);
+        
         // Provincias de RD
         // $this->call(ProvinciasDominicanasSeeder::class);
         

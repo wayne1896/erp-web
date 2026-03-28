@@ -15,8 +15,7 @@ import {
     Shield,
     Key,
     ArrowRight,
-    RefreshCw,
-    LucideIcon
+    RefreshCw
 } from 'lucide-react';
 
 export default function ResetPassword({ token, email }) {

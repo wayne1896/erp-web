@@ -231,6 +231,15 @@ export default function CajaIndex({ cajaActual, cajasHoy, sucursal }) {
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <div className="flex items-center space-x-2">
+                                                        {caja.estado === 'abierta' && (
+                                                            <Link
+                                                                href={route('caja.edit', caja.id)}
+                                                                className="p-1 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded transition"
+                                                                title="Cerrar caja"
+                                                            >
+                                                                <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                                            </Link>
+                                                        )}
                                                         <Link
                                                             href={route('caja.movimientos', caja.id)}
                                                             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
