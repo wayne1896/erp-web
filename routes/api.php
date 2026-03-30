@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\Mobile\AuthController; // ← Agregar para autentic
 
 // ==================== RUTAS API PARA ANDROID ====================
 
+// ==================== RUTAS API PARA ANDROID ====================
+
 // ==================== AUTENTICACIÓN ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -28,6 +30,19 @@ Route::prefix('clientes')->group(function () {
     Route::get('/buscar/buscar', [ClienteController::class, 'buscar']);
     Route::get('/estadisticas/estadisticas', [ClienteController::class, 'estadisticas']);
 });
+
+// ==================== RUTAS DE PEDIDOS ====================
+Route::prefix('pedidos')->group(function () {
+    Route::get('/', [PedidoController::class, 'index'])->middleware('auth:sanctum');
+    Route::get('/{id}', [PedidoController::class, 'show'])->middleware('auth:sanctum');
+    Route::post('/', [PedidoController::class, 'store'])->middleware('auth:sanctum');
+    Route::put('/{id}', [PedidoController::class, 'update'])->middleware('auth:sanctum');
+    Route::post('/{id}/procesar', [PedidoController::class, 'procesar'])->middleware('auth:sanctum');
+    Route::delete('/{id}', [PedidoController::class, 'destroy'])->middleware('auth:sanctum');
+});
+
+// ==================== RUTAS DE PRUEBA (SIN NINGÚN MIDDLEWARE) ====================
+require_once __DIR__ . '/api_puras.php';
 
 // Rutas de prueba
 Route::get('/test', function () {

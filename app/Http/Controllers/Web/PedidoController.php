@@ -337,15 +337,20 @@ class PedidoController extends Controller
             'direccionEntrega',
         ]);
         
+        // Forzar serialización de direcciónEntrega
+        $pedidoData = $pedido->toArray();
+        $pedidoData['direccionEntrega'] = $pedido->direccionEntrega;
+        
         // Intentar cargar log si existe la relación
         if (method_exists($pedido, 'log')) {
             $pedido->load(['log' => function($query) {
                 $query->with(['user:id,name'])->latest();
             }]);
+            $pedidoData['log'] = $pedido->log;
         }
         
         return Inertia::render('Pedidos/Show', [
-            'pedido' => $pedido,
+            'pedido' => $pedidoData,
             'canEdit' => $pedido->estado === 'PENDIENTE',
             'canDelete' => $pedido->estado === 'PENDIENTE'
         ]);

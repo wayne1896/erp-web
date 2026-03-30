@@ -39,8 +39,8 @@ class PedidoResource extends JsonResource
                     'municipio' => $this->direccionEntrega->municipio ?? '',
                     'provincia' => $this->direccionEntrega->provincia ?? '',
                     'referencia' => $this->direccionEntrega->referencia ?? '',
-                    'contacto_nombre' => $this->direccionEntrega->contacto_nombre ?? '',
-                    'contacto_telefono' => $this->direccionEntrega->contacto_telefono ?? '',
+                    'nombre_contacto' => $this->direccionEntrega->nombre_contacto ?? '',
+                    'telefono_contacto' => $this->direccionEntrega->telefono_contacto ?? '',
                 ];
             }),
             'fechas' => [

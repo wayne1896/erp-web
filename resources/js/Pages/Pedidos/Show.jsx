@@ -74,7 +74,7 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [expandedSections, setExpandedSections] = useState({
         productos: true,
-        direccion: false,
+        direccion: pedido.tipo_pedido === 'DOMICILIO', // Auto-expand para DOMICILIO
         pagos: false,
         historial: false
     });
@@ -916,6 +916,123 @@ export default function PedidosShow({ pedido, productos, canEdit = true, canDele
                             </div>
                         )}
                     </div>
+                    
+                    {/* Dirección de Entrega - Solo para DOMICILIO */}
+                    {pedido.tipo_pedido === 'DOMICILIO' && (
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div 
+                                className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/30"
+                                onClick={() => toggleSection('direccion')}
+                            >
+                                <div className="flex items-center">
+                                    <MapPin className="w-5 h-5 mr-3 text-green-600 dark:text-green-400" />
+                                    <h3 className="font-bold text-gray-900 dark:text-white">
+                                        Dirección de Entrega
+                                    </h3>
+                                </div>
+                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    {expandedSections.direccion ? (
+                                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                                    ) : (
+                                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                                    )}
+                                </button>
+                            </div>
+                            
+                            {expandedSections.direccion && (
+                                <div className="p-6">
+                                    {pedido.direccionEntrega ? (
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Contacto</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {pedido.direccionEntrega.nombre_contacto || 'No especificado'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Teléfono</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {pedido.direccionEntrega.telefono_contacto || 'No especificado'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Dirección</p>
+                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                    {pedido.direccionEntrega.direccion || 'No especificada'}
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {(pedido.direccionEntrega.sector || pedido.direccionEntrega.ciudad || pedido.direccionEntrega.provincia) ? (
+                                                    <>
+                                                        {pedido.direccionEntrega.sector && (
+                                                            <div>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Sector</p>
+                                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                                    {pedido.direccionEntrega.sector}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        {pedido.direccionEntrega.ciudad && (
+                                                            <div>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Ciudad</p>
+                                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                                    {pedido.direccionEntrega.ciudad}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        {pedido.direccionEntrega.provincia && (
+                                                            <div>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Provincia</p>
+                                                                <p className="font-medium text-gray-900 dark:text-white">
+                                                                    {pedido.direccionEntrega.provincia}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                            
+                                            {pedido.direccionEntrega.codigo_postal && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Código Postal</p>
+                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                        {pedido.direccionEntrega.codigo_postal}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            
+                                            {pedido.direccionEntrega.instrucciones_entrega && (
+                                                <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Instrucciones de Entrega</p>
+                                                    <p className="text-gray-700 dark:text-gray-300">
+                                                        {pedido.direccionEntrega.instrucciones_entrega}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            
+                                            {(pedido.direccionEntrega.latitud && pedido.direccionEntrega.longitud) && (
+                                                <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Coordenadas GPS</p>
+                                                    <p className="font-mono text-sm text-gray-700 dark:text-gray-300">
+                                                        Lat: {pedido.direccionEntrega.latitud}, Lng: {pedido.direccionEntrega.longitud}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <MapPin className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                                            <p className="text-gray-500 dark:text-gray-400">No hay dirección de entrega registrada</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     
                     {/* Historial del pedido */}
                     {pedido.log && pedido.log.length > 0 && (

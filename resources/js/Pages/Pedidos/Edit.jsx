@@ -47,9 +47,16 @@ export default function PedidosEdit({
     condiciones_pago = [],
     canEdit = true 
 }) {
+    // Formateadores - declarar antes de useForm
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
+
     const { data, setData, put, processing, errors, reset } = useForm({
         cliente_id: pedido.cliente_id || '',
-        fecha_entrega: pedido.fecha_entrega || '',
+        fecha_entrega: formatDate(pedido.fecha_entrega),
         prioridad: pedido.prioridad || 'MEDIA',
         tipo_pedido: pedido.tipo_pedido || 'LOCAL',
         condicion_pago: pedido.condicion_pago || 'CONTADO',
@@ -97,12 +104,6 @@ export default function PedidosEdit({
         }).format(num);
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0];
-    };
-
     // Filtrar productos
     useEffect(() => {
         if (!productos) return;
@@ -136,7 +137,7 @@ export default function PedidosEdit({
         });
         
         setProductoData({
-            cantidad_solicitada: 1,
+            cantidad_solicitada: Math.max(1, Math.floor(productoData.cantidad_solicitada)) || 1,
             precio_unitario: producto.precio_venta || 0,
             descuento: 0
         });
@@ -151,14 +152,18 @@ export default function PedidosEdit({
         const producto = productos.find(p => p.id == detalle.producto_id);
         
         if (producto) {
+            const stockSucursal = producto.inventarios && producto.inventarios[0] 
+                ? producto.inventarios[0].stock_disponible 
+                : 0;
+            
             setSelectedProduct({
                 ...producto,
-                stock_disponible: detalle.producto_stock || 0
+                stock_disponible: stockSucursal
             });
             
             setProductoData({
-                cantidad_solicitada: detalle.cantidad_solicitada,
-                precio_unitario: detalle.precio_unitario,
+                cantidad_solicitada: Math.max(1, Math.floor(detalle.cantidad_solicitada)) || 1,
+                precio_unitario: producto.precio_venta || 0,
                 descuento: detalle.descuento
             });
             
@@ -680,7 +685,7 @@ export default function PedidosEdit({
                                                                     value={productoData.cantidad_solicitada}
                                                                     onChange={(e) => setProductoData({
                                                                         ...productoData,
-                                                                        cantidad_solicitada: parseFloat(e.target.value) || 1
+                                                                        cantidad_solicitada: Math.max(1, Math.floor(parseFloat(e.target.value)) || 1)
                                                                     })}
                                                                     className="w-full px-3 py-2 border-y border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center"
                                                                 />
@@ -713,11 +718,8 @@ export default function PedidosEdit({
                                                                     min="0"
                                                                     step="0.01"
                                                                     value={productoData.precio_unitario}
-                                                                    onChange={(e) => setProductoData({
-                                                                        ...productoData,
-                                                                        precio_unitario: parseFloat(e.target.value) || 0
-                                                                    })}
-                                                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                                                                    disabled
+                                                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                                                                     required
                                                                 />
                                                             </div>
@@ -733,11 +735,11 @@ export default function PedidosEdit({
                                                                     type="number"
                                                                     min="0"
                                                                     max="100"
-                                                                    step="0.01"
+                                                                    step="1"
                                                                     value={productoData.descuento}
                                                                     onChange={(e) => setProductoData({
                                                                         ...productoData,
-                                                                        descuento: parseFloat(e.target.value) || 0
+                                                                        descuento: Math.max(0, Math.min(100, Math.floor(parseFloat(e.target.value)) || 0))
                                                                     })}
                                                                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                                                                 />
@@ -813,6 +815,8 @@ export default function PedidosEdit({
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                                     {data.detalles.map((detalle, index) => {
+                                                        const producto = productos.find(p => p.id == detalle.producto_id);
+                                                        const stockActual = producto?.inventarios?.[0]?.stock_disponible || 0;
                                                         const tieneStock = validarStock(detalle.producto_id, detalle.cantidad_solicitada);
                                                         return (
                                                             <tr key={detalle.temporal_id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30">
@@ -835,15 +839,13 @@ export default function PedidosEdit({
                                                                 <td className="py-3 px-4">
                                                                     <div className="flex items-center">
                                                                         <span className="font-medium">{detalle.cantidad_solicitada}</span>
-                                                                        {detalle.producto_stock !== null && (
-                                                                            <span className={`ml-2 text-xs px-2 py-1 rounded ${
-                                                                                detalle.cantidad_solicitada > detalle.producto_stock
-                                                                                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                                                                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                                            }`}>
-                                                                                Stock: {detalle.producto_stock}
-                                                                            </span>
-                                                                        )}
+                                                                        <span className={`ml-2 text-xs px-2 py-1 rounded ${
+                                                                            detalle.cantidad_solicitada > stockActual
+                                                                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                                                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                                        }`}>
+                                                                            Stock: {stockActual}
+                                                                        </span>
                                                                     </div>
                                                                 </td>
                                                                 <td className="py-3 px-4 font-medium">
