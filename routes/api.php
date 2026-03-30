@@ -3,8 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\ClienteController; // ← Agregar
+use App\Http\Controllers\Api\PedidoController; // ← Agregar para pedidos
+use App\Http\Controllers\Api\Mobile\AuthController; // ← Agregar para autenticación
 
 // ==================== RUTAS API PARA ANDROID ====================
+
+// ==================== AUTENTICACIÓN ====================
+Route::post('login', [AuthController::class, 'login']);
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
 // Grupo de rutas de productos
 Route::prefix('productos')->group(function () {
@@ -33,4 +40,14 @@ Route::get('/test', function () {
 
 Route::get('/ping', function () {
     return response()->json(['status' => 'success', 'message' => 'pong']);
+});
+
+// ==================== RUTAS DE PEDIDOS ====================
+// Grupo de rutas de pedidos para la app móvil (con autenticación)
+Route::middleware('auth:sanctum')->prefix('pedidos')->group(function () {
+    Route::get('/', [PedidoController::class, 'index']);
+    Route::get('/{id}', [PedidoController::class, 'show']);
+    Route::post('/', [PedidoController::class, 'store']);
+    Route::post('/{id}/procesar', [PedidoController::class, 'procesar']);
+    Route::delete('/{id}', [PedidoController::class, 'destroy']);
 });

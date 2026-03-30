@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\VentaController;
 use App\Http\Controllers\Web\PedidoController;
 use App\Http\Controllers\Web\AuditoriaController;
 use App\Http\Controllers\Web\VentaPDFController; // CORREGIDO: PDFVentaController → VentaPDFController
+use App\Http\Controllers\Web\CompanyProfileController;
 use App\Http\Controllers\Web\AuditoriaSistemaController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\RoleController;
@@ -519,5 +520,31 @@ Route::get('/health', function () {
         'timestamp' => now()->toDateTimeString(),
     ]);
 })->name('health');
+
+// ==================== RUTAS PÚBLICAS DE FACTURAS ====================
+Route::prefix('facturas')->group(function () {
+    Route::get('/verify/{venta}', [VentaPDFController::class, 'verificarFactura'])->name('facturas.verify');
+});
+
+// ==================== RUTAS DE PERFIL DE EMPRESA ====================
+Route::prefix('configuracion')->group(function () {
+    Route::get('/general', function () {
+        return Inertia::render('Configuracion/General');
+    })->name('configuracion.general');
+    
+    Route::get('/empresa', [CompanyProfileController::class, 'index'])->name('company-profile.index');
+    Route::get('/empresa/editar', [CompanyProfileController::class, 'edit'])->name('company-profile.edit');
+    Route::post('/empresa', [CompanyProfileController::class, 'store'])->name('company-profile.store');
+    Route::post('/empresa/{id}', [CompanyProfileController::class, 'update'])->name('company-profile.update');
+    Route::get('/empresa/api', [CompanyProfileController::class, 'getProfileData'])->name('company-profile.api');
+    
+    Route::get('/usuarios', function () {
+        return Inertia::render('Configuracion/Usuarios');
+    })->name('configuracion.usuarios');
+    
+    Route::get('/backup', function () {
+        return Inertia::render('Configuracion/Backup');
+    })->name('configuracion.backup');
+});
 
 require __DIR__ . '/auth.php';

@@ -21,8 +21,10 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'device_name' => 'required',
         ]);
+        
+        // Generar device_name automáticamente si no se proporciona
+        $deviceName = $request->device_name ?? 'Mobile App - ' . now()->format('Y-m-d H:i:s');
         
         // Buscar usuario activo
         $user = User::where('email', $request->email)
@@ -44,7 +46,7 @@ class AuthController extends Controller
         }
         
         // Crear token de acceso
-        $token = $user->createToken($request->device_name)->plainTextToken;
+        $token = $user->createToken($deviceName)->plainTextToken;
         
         // Obtener información de la sucursal
         $sucursal = $user->sucursal;

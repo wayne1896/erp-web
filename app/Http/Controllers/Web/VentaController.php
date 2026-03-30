@@ -285,7 +285,9 @@ class VentaController extends Controller
             $descuentoGlobalPorcentaje = floatval($request->descuento_global);
             $descuentoGlobalMonto = $subtotalDespuesDescuentosProductos * ($descuentoGlobalPorcentaje / 100);
             
-            $total = ($subtotal - $descuentoProductos - $descuentoGlobalMonto) + $itbisTotal;
+            // Corregir cálculo: subtotalGravado es el subtotal después de descuentos pero antes de ITBIS
+            $subtotalGravado = $subtotal - $descuentoProductos - $descuentoGlobalMonto;
+            $total = $subtotalGravado + $itbisTotal;
             $descuentoTotal = $descuentoProductos + $descuentoGlobalMonto;
             
             // Crear venta con datetime
@@ -305,7 +307,7 @@ class VentaController extends Controller
                 'fecha_vencimiento' => $request->condicion_pago === 'CREDITO' 
                     ? $fechaVenta->copy()->addDays($request->dias_credito)
                     : null,
-                'subtotal' => $subtotal,
+                'subtotal' => $subtotalGravado,
                 'descuento' => $descuentoTotal,
                 'itbis' => $itbisTotal,
                 'total' => $total,
@@ -812,6 +814,9 @@ class VentaController extends Controller
             $itbis = $baseImponible * 0.18;
             $total = $baseImponible + $itbis;
             
+            // Corregir: el subtotal guardado debe ser la base imponible (después de descuentos)
+            $subtotalGravado = $baseImponible;
+            
             \Log::info('Totales calculados:', [
                 'subtotal' => $subtotal,
                 'descuento' => $descuentoTotal,
@@ -829,7 +834,7 @@ class VentaController extends Controller
                 'tipo_comprobante' => 'FACTURA',
                 'condicion_pago' => 'CONTADO',
                 'tipo_pago' => 'EFECTIVO',
-                'subtotal' => $subtotal,
+                'subtotal' => $subtotalGravado,
                 'descuento' => $descuentoTotal,
                 'itbis' => $itbis,
                 'total' => $total,

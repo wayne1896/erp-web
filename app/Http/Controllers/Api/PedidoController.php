@@ -15,7 +15,14 @@ class PedidoController extends Controller
     public function index(Request $request)
     {
         // Filtra pedidos del usuario actual
-        $pedidos = Pedido::with(['cliente', 'items.producto'])
+        $pedidos = Pedido::with([
+            'cliente', 
+            'detalles.producto.categoria',
+            'usuario',
+            'sucursal',
+            'direccionEntrega',
+            'repartidor'
+        ])
             ->where('user_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -64,7 +71,60 @@ class PedidoController extends Controller
             // Actualizar total
             $pedido->update(['total' => $total]);
             
-            return new PedidoResource($pedido->load(['cliente', 'items.producto']));
+            return new PedidoResource($pedido->load(['cliente', 'detalles.producto']));
         });
+    }
+    
+    // GET /api/pedidos/{id}
+    public function show($id)
+    {
+        $pedido = Pedido::with([
+            'cliente', 
+            'detalles.producto.categoria',
+            'usuario',
+            'sucursal',
+            'direccionEntrega',
+            'repartidor'
+        ])
+            ->where('id', $id)
+            ->firstOrFail();
+            
+        return new PedidoResource($pedido);
+    }
+    
+    // POST /api/pedidos/{id}/procesar
+    public function procesar(Request $request, $id)
+    {
+        $pedido = Pedido::findOrFail($id);
+        
+        $pedido->update([
+            'estado' => 'procesado',
+            'notas' => $request->notas,
+            'fecha_procesado' => now(),
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Pedido procesado correctamente',
+            'pedido' => new PedidoResource($pedido->load(['cliente', 'detalles.producto']))
+        ]);
+    }
+    
+    // DELETE /api/pedidos/{id}
+    public function destroy($id)
+    {
+        $pedido = Pedido::findOrFail($id);
+        
+        // Restaurar inventario
+        foreach ($pedido->detalles as $detalle) {
+            Producto::where('id', $detalle->producto_id)->increment('stock', $detalle->cantidad_solicitada);
+        }
+        
+        $pedido->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Pedido eliminado correctamente'
+        ]);
     }
 }
